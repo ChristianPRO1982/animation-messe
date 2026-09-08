@@ -1,6 +1,5 @@
 import json
 
-
 HOME_CARD_ICON_SLUGS = (
     "account",
     "animations",

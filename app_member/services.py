@@ -10,7 +10,6 @@ from django.utils.translation import gettext_lazy as _
 from app_main.models import DirectoryUserRecord, SiteParams
 from app_member.models import MemberRole
 
-
 MAIN_PAGE_NAMES = {
     "homepage",
     "groups",

@@ -10,3 +10,21 @@ dependencies = [
     "psycopg[binary]>=3.2.6",
     "whitenoise>=6.9.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-django>=4.11.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+extend-exclude = ["chris"]
+
+[tool.ruff.lint]
+ignore = ["BLE001", "FLY002", "RUF012"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+norecursedirs = ["chris"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]

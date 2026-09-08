@@ -5,38 +5,42 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import FileResponse, Http404, HttpResponseForbidden
-from django.templatetags.static import static
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import get_language
-from django.http import HttpRequest, HttpResponse
+from django.http import (
+    FileResponse,
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseForbidden,
+)
 from django.shortcuts import redirect, render
+from django.templatetags.static import static
 from django.urls import reverse
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 
 from app_main.auth import (
-    DisabledUserError,
     HOME_PROVISION_TARGET_SESSION_KEY,
     KEYCLOAK_DIAGNOSTIC_SESSION_KEY,
+    DisabledUserError,
     HomeProvisioningError,
     InvalidCallbackError,
     KeycloakAuthError,
     UnknownUserError,
-    build_keycloak_diagnostic,
     build_home_provision_start_url,
+    build_keycloak_diagnostic,
     build_keycloak_login_url,
     build_keycloak_logout_url,
     clear_pending_provision_state,
     clear_session_user,
-    get_pending_provision_state,
     get_directory_user,
+    get_pending_provision_state,
     get_session_user,
     store_pending_provision_state,
     store_session_user,
     validate_callback_payload,
     validate_keycloak_callback,
 )
-from app_main.home_cards import parse_home_cards
-from app_main.home_cards import filter_display_home_cards
+from app_main.home_cards import filter_display_home_cards, parse_home_cards
 from app_main.homepage_markdown import render_homepage_markdown
 from app_main.models import SiteParams
 from app_member.forms import (

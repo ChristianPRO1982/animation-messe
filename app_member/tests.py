@@ -5,7 +5,11 @@ from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 
 from app_member.forms import SiteParamsAdminForm
-from app_member.models import MemberPreferences, default_song_search, validate_song_search
+from app_member.models import (
+    MemberPreferences,
+    default_song_search,
+    validate_song_search,
+)
 from app_member.services import (
     can_manage_moderator_popup,
     can_manage_site_members,

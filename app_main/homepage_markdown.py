@@ -3,7 +3,6 @@ import re
 from django.utils.html import escape
 from django.utils.safestring import SafeString, mark_safe
 
-
 _STRONG_RE = re.compile(r"\*\*(.+?)\*\*")
 _EM_RE = re.compile(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)")
 

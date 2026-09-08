@@ -6,7 +6,6 @@ from app_main.mock_accounts import DEV_MOCK_ACCOUNTS
 from app_main.models import DirectoryUserRecord
 from app_member.models import MemberRole
 
-
 ACCOUNT_ROLE_BY_USERNAME = {
     "testmock": {"is_moderator": True, "is_admin": True},
     "testmock_moderateur": {"is_moderator": True, "is_admin": False},

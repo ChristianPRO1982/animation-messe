@@ -6,14 +6,14 @@ import os
 import re
 import secrets
 import time
-from datetime import datetime, timezone as datetime_timezone
-from dataclasses import dataclass, replace
-from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit, urlunsplit, urlencode
-from urllib.request import Request, urlopen
 import uuid
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode, urlsplit, urlunsplit
+from urllib.request import Request, urlopen
 
 from django.conf import settings
 from django.db import connection
@@ -712,7 +712,7 @@ def get_pending_provision_state(
     try:
         created_at = datetime.fromisoformat(created_at_raw)
         if timezone.is_naive(created_at):
-            created_at = timezone.make_aware(created_at, datetime_timezone.utc)
+            created_at = timezone.make_aware(created_at, UTC)
     except ValueError:
         if clear_expired:
             clear_pending_provision_state(session)

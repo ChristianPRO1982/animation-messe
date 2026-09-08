@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 
-
 DEV_MOCK_ACCOUNTS: list[dict[str, str]] = [
     {
         "label": "testmock (Admin)",
