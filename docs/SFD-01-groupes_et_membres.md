@@ -14,6 +14,10 @@
 >
 > Il ne décrit ni l’UI, ni le backend, ni les modèles de données, ni l’architecture technique.
 
+> **Format pour la conception technique**
+> Les règles stables de ce document sont identifiées avec le préfixe `GRP-*`.
+> Ces identifiants servent de points d’ancrage pour les modèles, permissions, workflows et tests techniques.
+
 ---
 
 # 1. Principes généraux
@@ -1023,7 +1027,62 @@ Le groupe ouvert constitue le point d’entrée de cet usage libre.
 
 ---
 
-# 39. Principe final
+# 39. Règles fonctionnelles essentielles
+
+**GRP-ROLE-01** — Les rôles globaux et de groupe restent limités à Administrateur, Responsable, Membre et Membre AM.
+
+**GRP-ROLE-02** — Il n’existe aucun rôle de modérateur.
+
+**GRP-ADMIN-01** — Un Administrateur est un rôle global distinct du Responsable de groupe.
+
+**GRP-ADMIN-02** — Un Administrateur peut se nommer Responsable d’un groupe pour intervenir dans son fonctionnement.
+
+**GRP-ADMIN-03** — Les interventions sensibles d’un Administrateur doivent être traçables.
+
+**GRP-RESP-01** — Un Responsable est un Membre disposant de pouvoirs administratifs supplémentaires sur son groupe.
+
+**GRP-GARDE-01** — Un groupe doit toujours conserver au moins un Responsable.
+
+**GRP-AM-01** — Un Membre AM représente une personne physique sans compte CARThographie.
+
+**GRP-AM-02** — Un Membre AM ne peut pas se connecter, ne peut pas être Responsable et ne possède pas de droits applicatifs.
+
+**GRP-AM-03** — La création d’un Membre AM nécessite une demande initiée par un Responsable et un consentement explicite.
+
+**GRP-AM-04** — Une demande de création de Membre AM expire après 14 jours.
+
+**GRP-AM-05** — Un refus de création ne crée aucun Membre AM et ne conserve qu’un indicateur temporaire visible des Responsables pendant 14 jours.
+
+**GRP-AM-06** — Le Membre AM dispose d’un lien personnel lui permettant de gérer ou retirer son consentement sans créer de compte.
+
+**GRP-AM-07** — Le secret personnel d’un Membre AM ne doit jamais être stocké ou exposé en clair.
+
+**GRP-AM-08** — La fusion d’un Membre AM avec un compte CARThographie doit être déclenchée explicitement par un Responsable.
+
+**GRP-PERM-01** — La vie courante relève des Membres et Responsables.
+
+**GRP-PERM-02** — Les engagements administratifs et validations engageantes relèvent des Responsables.
+
+**GRP-PUBLIC-01** — Un groupe ouvert peut exposer certaines fonctions sans compte sans exposer les données internes du groupe.
+
+**GRP-PUBLIC-02** — Une animation publique anonyme ne doit exposer que les données nécessaires à la préparation de la célébration.
+
+**GRP-RGPD-01** — Les données personnelles doivent suivre les principes de minimisation, transparence, consentement et suppression des données devenues inutiles.
+
+---
+
+# 40. Points encore à spécifier
+
+Les points suivants doivent rester visibles pour la conception technique :
+
+1. effets précis du retrait de consentement d’un Membre AM sur les affectations historiques dans le planning et les célébrations ;
+2. comportement exact des notifications et rappels liés aux demandes d’accès ou de consentement ;
+3. modèle de preuve et de conservation associé aux consentements, refus et retraits ;
+4. périmètre exact des données publiques autorisées pour chaque mode d’animation anonyme.
+
+---
+
+# 41. Principe final
 
 La philosophie fonctionnelle de cette partie peut se résumer ainsi :
 

@@ -2,6 +2,10 @@
 
 ## Partie Planning
 
+> **Format pour la conception technique**
+> Les règles stables de ce document sont identifiées avec le préfixe `PLAN-*`.
+> Ces identifiants servent de points d’ancrage pour les modèles, permissions, workflows et tests techniques.
+
 ## 0. Objet du document
 
 Ce document décrit les spécifications fonctionnelles détaillées de la partie **Planning** d’Animation Messe.
@@ -9,15 +13,15 @@ Ce document décrit les spécifications fonctionnelles détaillées de la partie
 Il couvre :
 
 - le calendrier du groupe ;
-- le paramétrage des animations régulières ;
+- le paramétrage des célébrations régulières ;
 - les dates particulières ;
 - la génération automatique du planning ;
 - la structure du tableau de planning ;
 - les états de disponibilité ;
 - les fonctions d’animation ;
 - la validation du planning ;
-- la création de l’équipe réelle d’une animation ;
-- le lien entre animations principales et animations liées ;
+- la création de l’équipe réelle d’une célébration ;
+- le lien entre célébrations principales et célébrations liées ;
 - les règles d’historisation associées.
 
 Ce document ne décrit pas en détail :
@@ -33,11 +37,11 @@ Ce document ne décrit pas en détail :
 
 # 1. Terminologie
 
-## 1.1 Animation
+## 1.1 Célébration
 
-Le terme métier générique utilisé dans Animation Messe est **animation**.
+Le terme métier canonique de l’application est **célébration**.
 
-Une animation représente une célébration ou un événement que le groupe doit organiser ou animer.
+Une célébration représente une messe ou un événement que le groupe doit organiser ou animer.
 
 Il peut notamment s’agir :
 
@@ -48,6 +52,14 @@ Il peut notamment s’agir :
 - d’un autre événement paroissial.
 
 Le produit reste principalement orienté vers l’organisation des messes, mais le modèle métier ne doit pas imposer qu’une animation soit nécessairement une messe.
+
+Dans cette SFD, le mot **animation** peut encore apparaître comme terme d’usage lié au planning ou aux fonctions exercées.
+
+Il ne désigne pas une entité métier distincte de la célébration.
+
+La règle transversale est :
+
+> **une ligne de planning correspond à une célébration.**
 
 ---
 
@@ -135,7 +147,7 @@ Cette préférence :
 
 ---
 
-# 4. Paramétrage des animations dominicales
+# 4. Paramétrage des célébrations dominicales
 
 ## 4.1 Principe
 
@@ -156,13 +168,15 @@ Ces célébrations ont chacune :
 
 Cependant, elles partagent très souvent une même préparation liturgique et une même feuille de messe.
 
-Le système doit donc permettre de relier plusieurs animations entre elles.
+Le système doit donc permettre de relier plusieurs célébrations entre elles.
 
 ---
 
-# 5. Animation principale
+# 5. Célébration principale
 
 Pour un ensemble dominical habituel, le groupe configure d’abord une **animation principale**.
+
+Cette animation principale est une célébration utilisée comme référence de préparation.
 
 Elle possède au minimum :
 
@@ -182,15 +196,15 @@ Le terme « principale » ne signifie pas :
 - qu’elle doit être la première chronologiquement ;
 - qu’elle possède davantage de participants.
 
-Elle constitue uniquement la **référence de préparation** pour les animations liées.
+Elle constitue uniquement la **référence de préparation** pour les célébrations liées.
 
 ---
 
-# 6. Animations liées
+# 6. Célébrations liées
 
 Le groupe peut ajouter à une animation principale autant d’animations liées que nécessaire.
 
-Chaque animation liée possède également :
+Chaque animation liée est une célébration à part entière et possède également :
 
 - un jour ;
 - une heure ;
@@ -207,7 +221,7 @@ Exemple :
 > Samedi — 18 h 30 — Saint-Paul  
 > Dimanche — 18 h 00 — Saint-Pierre
 
-Chaque animation liée reste une animation à part entière.
+Chaque célébration liée reste une célébration à part entière.
 
 Elle possède notamment :
 
@@ -220,9 +234,9 @@ Le lien avec l’animation principale concerne principalement la préparation co
 
 ---
 
-# 7. Unicité des animations régulières
+# 7. Unicité des célébrations régulières
 
-Dans le paramétrage du groupe, deux animations régulières ne peuvent pas posséder simultanément le même triplet :
+Dans le paramétrage du groupe, deux célébrations régulières ne peuvent pas posséder simultanément le même triplet :
 
 > **jour + heure + lieu**
 
@@ -247,13 +261,13 @@ Cette règle participe ensuite au mécanisme anti-doublon lors de la génératio
 
 ---
 
-# 8. Héritage de la préparation entre animations
+# 8. Héritage de la préparation entre célébrations
 
 ## 8.1 Principe
 
-Toutes les animations restent indépendantes.
+Toutes les célébrations restent indépendantes.
 
-Cependant, une animation liée suit **par défaut** la préparation de son animation principale.
+Cependant, une célébration liée suit **par défaut** la préparation de sa célébration principale.
 
 Il ne s’agit pas d’une copie figée.
 
@@ -263,7 +277,7 @@ Il s’agit d’un héritage dynamique pouvant être remplacé localement.
 
 ## 8.2 Exemple sur le choix d’un chant
 
-Pour une animation principale, un sélecteur de chant peut proposer :
+Pour une célébration principale, un sélecteur de chant peut proposer :
 
 1. Non défini ;
 2. Chant A ;
@@ -271,7 +285,7 @@ Pour une animation principale, un sélecteur de chant peut proposer :
 4. Chant C ;
 5. etc.
 
-Pour une animation liée, il propose par défaut :
+Pour une célébration liée, il propose par défaut :
 
 1. Reprendre l’animation principale ;
 2. Non défini ;
@@ -286,23 +300,23 @@ Le libellé exact pourra être ajusté dans l’interface, mais il doit exprimer
 
 ## 8.3 Comportement de l’héritage
 
-Si l’animation principale utilise :
+Si la célébration principale utilise :
 
 > Chant A
 
-et que l’animation liée reste sur :
+et que la célébration liée reste sur :
 
 > Reprendre l’animation principale
 
-alors l’animation liée utilise également Chant A.
+alors la célébration liée utilise également Chant A.
 
-Si le chant de l’animation principale est ensuite remplacé par Chant B, l’animation liée suit automatiquement ce changement.
+Si le chant de la célébration principale est ensuite remplacé par Chant B, la célébration liée suit automatiquement ce changement.
 
 ---
 
 ## 8.4 Dérogation locale
 
-Une animation liée peut s’écarter de l’animation principale pour un élément donné.
+Une célébration liée peut s’écarter de la célébration principale pour un élément donné.
 
 Exemple :
 
@@ -314,7 +328,7 @@ Exemple :
 
 > Chant d’entrée : Chant B
 
-Seul ce choix devient propre à l’animation liée.
+Seul ce choix devient propre à la célébration liée.
 
 Les autres éléments qui restent configurés sur « Reprendre l’animation principale » continuent de suivre la préparation principale.
 
@@ -389,12 +403,12 @@ Le Responsable peut demander une génération :
 
 ---
 
-## 10.3 Calcul des animations
+## 10.3 Calcul des célébrations
 
-Le système calcule toutes les animations comprises dans la période demandée à partir :
+Le système calcule toutes les célébrations comprises dans la période demandée à partir :
 
-- des animations dominicales principales ;
-- des animations dominicales liées ;
+- des célébrations dominicales principales ;
+- des célébrations dominicales liées ;
 - des dates particulières configurées.
 
 ---
@@ -715,7 +729,7 @@ sur la même animation.
 
 ---
 
-## 19.5 Fonction différente selon les animations
+## 19.5 Fonction différente selon les célébrations
 
 Les fonctions sélectionnées peuvent varier d’une animation à l’autre.
 
@@ -828,7 +842,7 @@ Avant validation :
 
 Après validation :
 
-### Équipe de l’animation
+### Équipe de la célébration
 
 - Marie — Chantre + Maître de chœur ;
 - Paul — Organiste.
@@ -982,9 +996,9 @@ Une nouvelle validation ne doit pas supprimer implicitement une personne ajouté
 
 ---
 
-# 32. Animations passées
+# 32. Célébrations passées
 
-Une animation passée ne peut plus être dévalidée.
+Une célébration passée ne peut plus être dévalidée côté planning.
 
 Le planning devient alors une donnée historique.
 
@@ -1093,7 +1107,7 @@ Le système :
 
 ---
 
-## Étape 6 — Organisation réelle de l’animation
+## Étape 6 — Organisation réelle de la célébration
 
 Après validation, le Responsable peut encore modifier directement l’équipe de l’animation.
 
@@ -1138,29 +1152,33 @@ Une fois l’animation passée :
 
 ---
 
-## Animations
+## Célébrations
 
-**PLAN-ANI-01** — Le terme métier générique est « animation ».
+**PLAN-CELEB-01** — Le terme métier canonique est « célébration ».
 
-**PLAN-ANI-02** — Une animation peut représenter une messe ou un autre type de célébration.
+**PLAN-CELEB-02** — Le terme « animation » ne désigne pas une entité métier distincte de la célébration.
 
-**PLAN-ANI-03** — Chaque animation possède sa propre organisation humaine.
+**PLAN-CELEB-03** — Une célébration peut représenter une messe ou un autre événement paroissial.
+
+**PLAN-CELEB-04** — Chaque ligne de planning correspond à une célébration.
+
+**PLAN-CELEB-05** — Chaque célébration possède sa propre organisation humaine.
 
 ---
 
 ## Ensembles dominicaux
 
-**PLAN-DOM-01** — Un ensemble dominical peut contenir une animation principale et plusieurs animations liées.
+**PLAN-DOM-01** — Un ensemble dominical peut contenir une célébration principale et plusieurs célébrations liées.
 
-**PLAN-DOM-02** — L’animation principale sert de référence de préparation.
+**PLAN-DOM-02** — La célébration principale sert de référence de préparation.
 
-**PLAN-DOM-03** — Les animations liées possèdent leur propre ligne de planning et leur propre équipe.
+**PLAN-DOM-03** — Les célébrations liées possèdent leur propre ligne de planning et leur propre équipe.
 
-**PLAN-DOM-04** — Les animations liées héritent par défaut des éléments de préparation de l’animation principale.
+**PLAN-DOM-04** — Les célébrations liées héritent par défaut des éléments de préparation de la célébration principale.
 
-**PLAN-DOM-05** — Une animation liée peut surcharger localement un élément hérité.
+**PLAN-DOM-05** — Une célébration liée peut surcharger localement un élément hérité.
 
-**PLAN-DOM-06** — Le triplet jour + heure + lieu doit être unique dans la configuration des animations régulières du groupe.
+**PLAN-DOM-06** — Le triplet jour + heure + lieu doit être unique dans la configuration des célébrations régulières du groupe.
 
 ---
 
@@ -1176,7 +1194,7 @@ Une fois l’animation passée :
 
 **PLAN-GEN-05** — Une génération répétée ne doit pas créer de doublons.
 
-**PLAN-GEN-06** — Plusieurs animations peuvent exister le même jour.
+**PLAN-GEN-06** — Plusieurs célébrations peuvent exister le même jour.
 
 **PLAN-GEN-07** — Date + heure + lieu constituent une information essentielle d’identification d’une occurrence générée.
 
@@ -1184,7 +1202,7 @@ Une fois l’animation passée :
 
 ## Tableau
 
-**PLAN-TAB-01** — Une ligne correspond à une animation.
+**PLAN-TAB-01** — Une ligne correspond à une célébration.
 
 **PLAN-TAB-02** — Une colonne correspond à un membre ou Membre AM.
 
@@ -1230,13 +1248,13 @@ Une fois l’animation passée :
 
 **PLAN-FCT-09** — Plusieurs fonctions peuvent être sélectionnées simultanément.
 
-**PLAN-FCT-10** — La sélection des fonctions est propre à chaque animation.
+**PLAN-FCT-10** — La sélection des fonctions est propre à chaque célébration.
 
 **PLAN-FCT-11** — Une personne ne peut sélectionner que parmi ses fonctions possibles.
 
 **PLAN-FCT-12** — L’état et les fonctions sélectionnées sont indépendants.
 
-**PLAN-FCT-13** — Une personne peut exercer plusieurs fonctions dans une même animation.
+**PLAN-FCT-13** — Une personne peut exercer plusieurs fonctions dans une même célébration.
 
 ---
 
@@ -1256,17 +1274,17 @@ Une fois l’animation passée :
 
 **PLAN-VAL-01** — Seul un Responsable peut valider une ligne.
 
-**PLAN-VAL-02** — La validation verrouille le planning, pas l’animation.
+**PLAN-VAL-02** — La validation du planning verrouille les cellules de planning, pas le déroulé de la célébration.
 
-**PLAN-VAL-03** — Lors de la validation, toutes les personnes en état 1 sont ajoutées à l’équipe de l’animation.
+**PLAN-VAL-03** — Lors de la validation du planning, toutes les personnes en état 1 sont ajoutées à l’équipe réelle de la célébration.
 
 **PLAN-VAL-04** — Les fonctions attribuées lors de la validation sont celles sélectionnées dans la cellule.
 
 **PLAN-VAL-05** — Une personne peut être ajoutée avec plusieurs fonctions.
 
-**PLAN-VAL-06** — L’équipe de l’animation peut être modifiée après validation.
+**PLAN-VAL-06** — L’équipe réelle de la célébration peut être modifiée après validation du planning.
 
-**PLAN-VAL-07** — Une coche indique l’appartenance actuelle à l’équipe de l’animation.
+**PLAN-VAL-07** — Une coche indique l’appartenance actuelle à l’équipe réelle de la célébration.
 
 **PLAN-VAL-08** — La coche est indépendante de l’état du planning.
 
@@ -1280,9 +1298,11 @@ Une fois l’animation passée :
 
 **PLAN-VAL-13** — La dévalidation rouvre le planning sans supprimer automatiquement l’équipe existante.
 
-**PLAN-VAL-14** — Une nouvelle validation doit être non destructive vis-à-vis des ajouts manuels déjà effectués dans l’animation.
+**PLAN-VAL-14** — Une nouvelle validation doit être non destructive vis-à-vis des ajouts manuels déjà effectués dans la célébration.
 
-**PLAN-VAL-15** — Une animation passée ne peut plus être dévalidée.
+**PLAN-VAL-15** — Une célébration passée ne peut plus être dévalidée côté planning.
+
+**PLAN-VAL-16** — La validation du planning est distincte de la validation de célébration définie dans `SFD-04-celebrations`.
 
 ---
 
@@ -1292,7 +1312,7 @@ Une fois l’animation passée :
 
 **PLAN-HIST-02** — Les fonctions planifiées sont conservées comme historique.
 
-**PLAN-HIST-03** — L’équipe réelle de l’animation reste distincte de l’historique du planning.
+**PLAN-HIST-03** — L’équipe réelle de la célébration reste distincte de l’historique du planning.
 
 **PLAN-HIST-04** — Modifier les fonctions possibles d’un membre ne réécrit pas l’historique.
 
@@ -1304,7 +1324,7 @@ Une fois l’animation passée :
 
 Les points suivants ont été identifiés mais ne sont pas encore totalement tranchés.
 
-## 36.1 Collision entre date particulière et animations dominicales
+## 36.1 Collision entre date particulière et célébrations dominicales
 
 Exemple :
 
@@ -1316,15 +1336,15 @@ Il reste à déterminer précisément si une date particulière :
 - remplace les animations dominicales habituelles ;
 - ou peut être configurée au cas par cas pour faire l’un ou l’autre.
 
-Aucune règle implicite ne doit considérer que deux animations à la même date constituent forcément un doublon.
+Aucune règle implicite ne doit considérer que deux célébrations à la même date constituent forcément un doublon.
 
 ---
 
-## 36.2 Suppression ou modification d’une règle ayant déjà généré des animations
+## 36.2 Suppression ou modification d’une règle ayant déjà généré des célébrations
 
-Il reste à définir ce qu’il se passe lorsqu’un Responsable modifie ou supprime une règle de calendrier après que des animations ont déjà été générées.
+Il reste à définir ce qu’il se passe lorsqu’un Responsable modifie ou supprime une règle de calendrier après que des célébrations ont déjà été générées.
 
-Le principe général devrait éviter toute suppression silencieuse d’animations déjà organisées.
+Le principe général devrait éviter toute suppression silencieuse de célébrations déjà organisées.
 
 ---
 
@@ -1336,7 +1356,7 @@ Le principe est fixé :
 - une nouvelle validation ajoute les personnes en état 1 ;
 - les modifications directes réalisées dans l’animation ne doivent pas être écrasées silencieusement.
 
-Il restera à préciser les règles exactes de fusion lors d’une revalidation.
+Ce point bloque la conception technique détaillée de la revalidation du planning et doit être tranché avant implémentation.
 
 ---
 
@@ -1348,7 +1368,7 @@ Il reste à déterminer si le planning doit également afficher directement :
 
 - les fonctions réellement exercées ;
 - un indicateur de divergence entre fonctions planifiées et fonctions réelles ;
-- ou uniquement ces informations dans le détail de l’animation.
+- ou uniquement ces informations dans le détail de la célébration.
 
 ---
 
@@ -1366,13 +1386,13 @@ Exemple :
 
 ### 2. Sa proposition dans le planning
 
-> Ce qu’elle propose de faire pour cette animation.
+> Ce qu’elle propose de faire pour cette célébration.
 
 Exemple :
 
 > Disponible — Maître de chœur
 
-### 3. L’équipe réelle de l’animation
+### 3. L’équipe réelle de la célébration
 
 > Ce qu’elle fera effectivement.
 
@@ -1381,3 +1401,7 @@ Exemple :
 > Chantre + Maître de chœur
 
 Cette séparation permet de conserver un planning souple, compréhensible et historiquement fidèle sans imposer artificiellement que la situation réelle reste identique à la proposition initiale.
+
+Le planning n’est donc jamais la source autonome d’une célébration.
+
+Il est une vue et un outil de préparation construit à partir des célébrations et de leurs équipes.

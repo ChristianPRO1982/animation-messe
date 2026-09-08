@@ -4,6 +4,10 @@
 
 Cette spécification décrit la gestion fonctionnelle des **chants dans Animation Messe (AM)**.
 
+> **Format pour la conception technique**
+> Les règles stables de ce document sont identifiées avec le préfixe `CHANT-*`.
+> Les anciens identifiants `R-*` restent lisibles comme repères historiques, mais les nouveaux documents techniques doivent référencer les règles `CHANT-*`.
+
 Le principe général repose sur une séparation claire entre :
 
 - **Lyrics Slide Show (LSS)**, qui porte le référentiel officiel des chants ;
@@ -30,7 +34,7 @@ Cette SFD couvre :
 - la copie structurelle d'un chant dans AM lors de son ajout au recueil ;
 - la qualification d'un chant et de ses blocs par les tags du groupe ;
 - la sélection par défaut des blocs d'un chant selon un tag ;
-- la surcharge de cette sélection dans une messe ;
+- la surcharge de cette sélection dans une célébration ;
 - la synchronisation fonctionnelle entre LSS et AM ;
 - les règles de suppression.
 
@@ -41,7 +45,7 @@ Cette SFD ne décrit pas :
 - la projection des chants ;
 - les partitions, audios ou liens associés ;
 - le planning des animateurs et musiciens ;
-- les permissions générales d'édition d'une animation ;
+- les permissions générales d'édition d'une célébration ;
 - le mécanisme technique de synchronisation entre les applications.
 
 ---
@@ -297,7 +301,7 @@ AM conserve cet ordre dans sa représentation structurelle.
 
 **R-STRUCT-001** — La structure fondamentale du chant reste celle de LSS.
 
-Si, dans une messe particulière, l'utilisateur choisit certains blocs ou les utilise dans un ordre spécifique, cela relève de l'occurrence de la messe et non d'une modification du chant dans le recueil.
+Si, dans une célébration particulière, l'utilisateur choisit certains blocs ou les utilise dans un ordre spécifique, cela relève de l'occurrence de la célébration et non d'une modification du chant dans le recueil.
 
 ---
 
@@ -375,9 +379,9 @@ Il ne signifie jamais que le bloc est interdit.
 
 ---
 
-# 15. Utilisation d'un chant dans une messe
+# 15. Utilisation d'un chant dans une célébration
 
-Un bloc chant d'une animation peut correspondre à un moment liturgique donné.
+Un bloc chant d'une célébration peut correspondre à un moment liturgique donné.
 
 Exemple :
 
@@ -417,7 +421,7 @@ Sélection initiale :
 
 ---
 
-# 17. Surcharge dans une messe
+# 17. Surcharge dans une célébration
 
 La configuration du recueil n'est qu'une valeur par défaut.
 
@@ -442,7 +446,7 @@ Pour une messe particulière, le préparateur peut finalement choisir :
 
 Cette surcharge est locale à l'occurrence de la messe.
 
-**R-MESSE-002** — Une surcharge dans une messe ne modifie jamais :
+**R-MESSE-002** — Une surcharge dans une célébration ne modifie jamais :
 
 - LSS ;
 - le recueil du groupe ;
@@ -484,7 +488,7 @@ Il s'agit toujours du même chant LSS.
 
 Les occurrences sont indépendantes.
 
-**R-MULTI-001** — AM ne doit pas imposer l'unicité d'un chant dans une messe.
+**R-MULTI-001** — AM ne doit pas imposer l'unicité d'un chant dans une célébration.
 
 **R-MULTI-002** — Chaque occurrence peut utiliser une sélection de blocs différente.
 
@@ -693,24 +697,30 @@ La suppression d'un chant dans LSS est une suppression réelle de la donnée sou
 
 Le chant n'existe alors plus fonctionnellement pour AM.
 
-Comme AM ne copie jamais son contenu, conserver des références orphelines ne présente pas d'intérêt fonctionnel.
+Comme AM ne copie jamais son contenu comme donnée métier officielle, le chant ne doit plus être proposé pour les usages futurs.
 
-La suppression peut donc être propagée en cascade.
+La suppression est cependant traitée différemment selon le type de dépendance AM.
 
-**R-DEL-001** — La suppression d'un chant dans LSS entraîne la suppression de ses références dans AM.
+**CHANT-DEL-001** — La suppression d'un chant LSS retire le chant des usages courants AM.
 
-Cela peut notamment supprimer :
+Cela supprime ou rend inutilisables pour les sélections futures :
 
 - sa présence dans les recueils ;
 - sa structure copiée ;
 - les références à ses blocs ;
 - les tags de groupe associés ;
-- les configurations TRUE/FALSE ;
-- les utilisations dépendantes dans les animations.
+- les configurations TRUE/FALSE.
 
-La perte de données historiques résultante est assumée.
+**CHANT-DEL-002** — Les occurrences déjà présentes dans des célébrations ne sont pas supprimées automatiquement.
 
-AM ne garantit donc pas qu'une ancienne animation reste intégralement exploitable si le chant source a été supprimé de LSS.
+Dans ces célébrations :
+
+- la référence au chant devient cassée ;
+- l'interface doit signaler que le chant source n'existe plus ;
+- les choix historiques de couplets restent conservés lorsque le modèle AM les possède ;
+- les feuilles de messe déjà générées restent exploitables si elles contiennent leur propre texte final.
+
+**CHANT-DEL-003** — La suppression LSS peut donc produire une référence historique cassée, mais ne doit pas détruire silencieusement la préparation d'une célébration existante.
 
 ---
 
@@ -765,7 +775,11 @@ Les règles de suppression doivent rester simples et cohérentes.
 
 ## Suppression d'un chant dans LSS
 
-> disparition de l'objet source et suppression en cascade de ses dépendances AM.
+> disparition de l'objet source pour les usages courants AM, avec conservation signalée des références historiques présentes dans les célébrations.
+
+La suppression retire le chant des usages courants et des enrichissements du recueil.
+
+Elle ne supprime pas silencieusement les blocs déjà présents dans des célébrations existantes, qui deviennent des références cassées signalées.
 
 ## Retrait d'un chant du recueil
 
@@ -880,11 +894,11 @@ La frontière fonctionnelle doit rester stricte :
 
 **R-13** — FALSE signifie « non sélectionné par défaut », jamais « interdit ».
 
-**R-14** — Un même chant peut être utilisé plusieurs fois dans une messe.
+**R-14** — Un même chant peut être utilisé plusieurs fois dans une célébration.
 
-**R-15** — Chaque occurrence dans une messe peut avoir sa propre sélection de blocs.
+**R-15** — Chaque occurrence dans une célébration peut avoir sa propre sélection de blocs.
 
-**R-16** — Les surcharges effectuées dans une messe ne modifient jamais le recueil.
+**R-16** — Les surcharges effectuées dans une célébration ne modifient jamais le recueil.
 
 **R-17** — Une modification de texte dans LSS est automatiquement visible dans AM.
 
@@ -894,13 +908,45 @@ La frontière fonctionnelle doit rester stricte :
 
 **R-20** — La qualification automatique d'un nouveau bloc vis-à-vis des tags existants reste un point à préciser.
 
-**R-21** — La suppression d'un chant LSS entraîne la suppression en cascade de ses dépendances AM.
+**R-21 / CHANT-DEL-001** — La suppression d'un chant LSS retire le chant des recueils, tags et sélections futures.
 
 **R-22** — Retirer un chant du recueil ne supprime jamais le chant LSS.
 
 **R-23** — Supprimer un tag de groupe supprime ses associations et paramètres, mais jamais les chants concernés.
 
-**R-24** — La perte historique liée à une suppression réelle de la donnée source est assumée.
+**R-24 / CHANT-DEL-002** — Les occurrences déjà présentes dans des célébrations sont conservées comme références cassées et signalées.
+
+## Identifiants canoniques `CHANT-*`
+
+**CHANT-LSS-001** — LSS est la source de vérité des chants.
+
+**CHANT-LSS-002** — AM ne copie jamais les textes, titres ou descriptions comme contenu métier officiel.
+
+**CHANT-REC-001** — Le recueil d’un groupe représente le sous-ensemble de chants LSS réellement utilisés par ce groupe.
+
+**CHANT-REC-002** — Un chant ne doit jamais être dupliqué fonctionnellement entre le recueil et l’espace d’échange.
+
+**CHANT-TAG-001** — Les tags communs sont gérés par LSS et visibles pour tous les groupes.
+
+**CHANT-TAG-002** — Les tags de groupe sont gérés dans AM et appartiennent à un seul groupe.
+
+**CHANT-TAG-003** — Les tags de plusieurs groupes ne sont jamais mélangés dans un même contexte AM.
+
+**CHANT-BLOC-001** — AM copie uniquement la structure nécessaire au fonctionnement du recueil, basée sur les identifiants LSS.
+
+**CHANT-BLOC-002** — Un bloc possède un booléen distinct pour chaque tag du groupe appliqué au chant.
+
+**CHANT-USAGE-001** — Un même chant peut être utilisé plusieurs fois dans une célébration.
+
+**CHANT-USAGE-002** — Chaque occurrence dans une célébration peut avoir sa propre sélection de blocs.
+
+**CHANT-USAGE-003** — Les surcharges effectuées dans une célébration ne modifient jamais le recueil.
+
+**CHANT-SYNC-001** — Une modification de texte dans LSS est automatiquement visible dans AM lorsque la source existe toujours.
+
+**CHANT-SYNC-002** — L’ajout d’un bloc LSS doit être détecté et synchronisé.
+
+**CHANT-SYNC-003** — La qualification automatique d’un nouveau bloc vis-à-vis des tags existants reste un point ouvert.
 
 ---
 
@@ -914,7 +960,7 @@ Le projet étant encore au début et aucune implémentation n'étant figée, cer
 - éventuel indicateur de « bloc nouvellement ajouté à qualifier » ;
 - présentation graphique des tags communs et des tags de groupe ;
 - stratégie de recherche précise entre recueil et espace d'échange ;
-- comportement détaillé des anciennes animations après suppression d'une donnée source.
+- rendu exact d’une référence cassée dans une célébration après suppression d’une donnée source LSS.
 
 Ces points pourront être précisés lorsque les modèles et premiers usages réels du projet existeront.
 
@@ -926,7 +972,7 @@ Le fonctionnement global peut être résumé ainsi :
 
 > **LSS définit ce qu'est le chant.  
 > AM définit comment un groupe l'utilise.  
-> Une messe définit ce qui sera réellement utilisé cette fois-ci.**
+> Une célébration définit ce qui sera réellement utilisé cette fois-ci.**
 
 Cette séparation permet :
 

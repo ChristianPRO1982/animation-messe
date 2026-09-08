@@ -1,4 +1,4 @@
-lis et prends en conscience du document docs/general_overview.md, ainsi que docs/app_song/functional_requirements.md.
+lis et prends conscience du document docs/general_overview.md, ainsi que docs/app_song/functional_requirements.md.
 Documents universel au site :
 - rien pour l'instant
 
