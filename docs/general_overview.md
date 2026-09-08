@@ -27,6 +27,13 @@ Les exigences fonctionnelles par app Django sont :
 - `docs/app_celebration/functional_requirements.md` — célébrations, déroulé, AELF, validation, feuilles.
 - `docs/app_planning/functional_requirements.md` — planning dérivé des célébrations, cellules, fonctions, validation planning.
 
+Les contrats techniques transverses déjà disponibles sont :
+
+- `docs/keycloak_connexion.md` — authentification Keycloak, session AM, provisioning, diagnostics.
+- `docs/popup_messagebox.md` — API popup globale `window.LSSMessageBox` utilisée dans AM.
+- `docs/wiki_help_mapping.md` — mapping entre routes Django et pages du wiki Animation Messe.
+- `docs/pj_codex_block_naming.md` — vocabulaire stable pour désigner les blocs de page dans les échanges Codex.
+
 ---
 
 # 2. Ordre de lecture recommandé

@@ -239,7 +239,7 @@
     {% include "includes/footer.html" %}
     </div>
     <div id="lss-messagebox-root" hidden></div>
-    <script id="am-site-popup-config" type="application/json">{{ am_site_popup_json|default:"{}"|safe }}</script>
+    <script id="lss-site-popup-config" type="application/json">{{ lss_site_popup_json|default:"{}"|safe }}</script>
     <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'js/message_box.js' %}"></script>
     {% block page_scripts %}{% endblock %}

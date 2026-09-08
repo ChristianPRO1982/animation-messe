@@ -3,7 +3,7 @@
     const themeConfig = window.LSS_THEME_CONFIG || null;
     const messageBoxI18n = window.LSS_MESSAGE_BOX_CONFIG?.i18n || {};
     const floatingHelpConfig = window.LSS_FLOATING_HELP_CONFIG || {};
-    const sitePopupConfigElement = document.getElementById("am-site-popup-config");
+    const sitePopupConfigElement = document.getElementById("lss-site-popup-config");
     const themeStylesheet = document.querySelector("#site-theme-stylesheet");
     const themeButtons = document.querySelectorAll("[data-theme-select]");
     let sitePopupConfig = {};
@@ -180,7 +180,7 @@
                 return false;
             }
 
-            const storageKey = `am-site-popup:${section.id}:${section.version}`;
+            const storageKey = `lss-site-popup:${section.id}:${section.version}`;
             const cooldownMs = Math.max(Number(section.cooldownMinutes) || 0, 0) * 60 * 1000;
 
             try {
@@ -201,7 +201,7 @@
 
         sections.forEach((section) => {
             try {
-                window.localStorage.setItem(`am-site-popup:${section.id}:${section.version}`, storedAt);
+                window.localStorage.setItem(`lss-site-popup:${section.id}:${section.version}`, storedAt);
             } catch (error) {
                 // Ignore localStorage errors to preserve the popup interaction.
             }
