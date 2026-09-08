@@ -1,9 +1,0 @@
-[project]
-name = "animation-messe"
-version = "0.1.0"
-description = "Site web pour créer et gérer les animations de célébrations en particulier les messes."
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "django>=5.2.8",
-]
