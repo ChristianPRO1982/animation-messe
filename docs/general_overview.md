@@ -19,6 +19,14 @@ Les documents actuels sont :
 
 Ces SFD constituent la base fonctionnelle à partir de laquelle les documents techniques doivent être produits.
 
+Les exigences fonctionnelles par app Django sont :
+
+- `docs/app_main/functional_requirements.md` — socle partagé, authentification, session, paramètres globaux.
+- `docs/app_member/functional_requirements.md` — membre authentifié, préférences faibles, rôles globaux.
+- `docs/app_group/functional_requirements.md` — groupes, rôles de groupe, Membres AM, recueil et tags.
+- `docs/app_celebration/functional_requirements.md` — célébrations, déroulé, AELF, validation, feuilles.
+- `docs/app_planning/functional_requirements.md` — planning dérivé des célébrations, cellules, fonctions, validation planning.
+
 ---
 
 # 2. Ordre de lecture recommandé
@@ -33,6 +41,7 @@ Pour comprendre le modèle global :
 Pour concevoir une fonctionnalité technique :
 
 - commencer par la SFD du module concerné ;
+- lire ensuite le `functional_requirements.md` de l’app Django concernée ;
 - vérifier ensuite les SFD transverses impactées ;
 - chercher les règles identifiées par préfixe ;
 - vérifier les points encore à spécifier avant d’inventer une règle.

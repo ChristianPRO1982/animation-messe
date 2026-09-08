@@ -95,6 +95,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "app_main",
     "app_member",
+    "app_group",
+    "app_planning",
+    "app_celebration",
 ]
 
 MIDDLEWARE = [
