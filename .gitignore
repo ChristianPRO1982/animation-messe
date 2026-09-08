@@ -1,4 +1,6 @@
 chris/
+.uv-cache/
+staticfiles/
 
 
 
