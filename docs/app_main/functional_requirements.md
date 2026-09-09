@@ -93,8 +93,7 @@ Ces paramètres couvrent :
 - contenus de page d’accueil ;
 - URL d’inscription ou de provisioning ;
 - messages administrateur et modérateur ;
-- délais de réaffichage des messages ;
-- contraintes globales utiles aux sorties documentaires ou au shell partagé.
+- délais de réaffichage des messages.
 
 La recherche d’un `SiteParams` doit :
 
@@ -163,6 +162,6 @@ La page compte est le point d’entrée partagé pour :
 # 7. Points encore à spécifier
 
 1. contenu final de la page d’accueil AM ;
-2. liste définitive des champs `SiteParams` réellement conservés après retrait des besoins propres à LSS ;
+2. éventuels nouveaux champs `SiteParams` réellement utiles à AM hors besoins propres à LSS ;
 3. présence ou non d’une page d’administration globale séparée de `/account/` ;
 4. comportement exact des messages globaux sur les futures pages `app_group`, `app_planning` et `app_celebration`.

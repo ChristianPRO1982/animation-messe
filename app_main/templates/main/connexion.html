@@ -164,8 +164,6 @@
 
 {% block page_summary %}
     {% if page_mode == "account" %}
-        <p><strong>{{ account_heading }}</strong></p>
-        <p><strong>{{ request.user.username }}</strong></p>
         <p>{{ request.user.first_name }} {{ request.user.last_name }}</p>
     {% else %}
         <p>{% trans "La connexion passe par la structure mère cARThographie, qui fournit l'identité utilisée ensuite dans l'application avec simplicité et continuité." %}</p>
@@ -204,7 +202,6 @@
                         <h2>{% trans "Rôles du site" %}</h2>
                     </div>
                 </header>
-                <p><code>{{ request.user.external_id }}</code></p>
                 {% if is_admin %}
                     <p>{% trans "Vous êtes administrateur du site. Vous disposez aussi automatiquement des droits de modération." %}</p>
                 {% elif is_moderator %}
@@ -329,7 +326,6 @@
                                     <p><strong>{{ member.username|default:"-" }}</strong></p>
                                     <p>{{ member.first_name|default:"" }} {{ member.last_name|default:"" }}</p>
                                     <p>{{ member.email|default:"" }}</p>
-                                    <p><code>{{ member.member_id }}</code></p>
                                     <p>
                                         {% if member.is_admin %}
                                             {% trans "Rôle actuel : administrateur" %}

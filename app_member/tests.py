@@ -87,22 +87,8 @@ class SiteParamsAdminFormTests(SimpleTestCase):
                 "home_text": "",
                 "bloc1_text": "Bloc 1",
                 "bloc2_text": "Bloc 2",
-                "verse_max_lines": "4",
-                "verse_max_characters_for_a_line": "42",
-                "chorus_prefix": "  R.  ",
-                "verse_prefix1": "  C",
-                "verse_prefix2": ".  ",
                 "admin_message_cooldown_minutes": "5",
                 "moderator_message_cooldown_minutes": "60",
-                "bg_img_max_bytes": "2097152",
-                "bg_img_min_w": "800",
-                "bg_img_min_h": "600",
-                "bg_img_max_w": "4096",
-                "bg_img_max_h": "3072",
-                "bg_img_ratio_min": "1.3",
-                "bg_img_ratio_max": "2.0",
-                "bg_img_allowed_ext": ".jpg,.jpeg,.png",
-                "bg_img_allowed_mime": "image/jpeg,image/png",
                 "home_card_1_title": " Accueil ",
                 "home_card_1_text": " Préparer une animation ",
                 "home_card_1_image": "home",
@@ -119,6 +105,3 @@ class SiteParamsAdminFormTests(SimpleTestCase):
                 "image": "home",
             },
         )
-        self.assertEqual(form.cleaned_data["chorus_prefix"], "  R.  ")
-        self.assertEqual(form.cleaned_data["verse_prefix1"], "  C")
-        self.assertEqual(form.cleaned_data["verse_prefix2"], ".  ")

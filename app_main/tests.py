@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.conf import settings
 from django.test import SimpleTestCase
 
@@ -25,7 +27,9 @@ class ProjectSettingsTests(SimpleTestCase):
 
     def test_home_provision_defaults_target_animation_messe(self):
         self.assertEqual(settings.HOME_PROVISION_APP_ID, "am")
-        self.assertIn("redirect_am_secret.txt", settings.HOME_PROVISION_SHARED_SECRET_DEFAULT_FILE)
+        self.assertIn(
+            "redirect_am_secret.txt", settings.HOME_PROVISION_SHARED_SECRET_DEFAULT_FILE
+        )
 
 
 class SessionNamespaceTests(SimpleTestCase):
@@ -56,3 +60,36 @@ class PublicPageTests(SimpleTestCase):
             [theme["slug"] for theme in AVAILABLE_THEMES],
             ["normal", "scout", "taize", "me†al"],
         )
+
+
+class AccountPageTemplateTests(SimpleTestCase):
+    def test_account_page_does_not_render_technical_user_ids(self):
+        template = (
+            Path(settings.BASE_DIR)
+            / "app_main"
+            / "templates"
+            / "main"
+            / "connexion.html"
+        ).read_text()
+
+        self.assertNotIn("<p><code>{{ request.user.external_id }}</code></p>", template)
+        self.assertNotIn("<p><code>{{ member.member_id }}</code></p>", template)
+        self.assertIn('name="member_id" value="{{ member.member_id }}"', template)
+
+    def test_account_summary_only_renders_first_and_last_name(self):
+        template = (
+            Path(settings.BASE_DIR)
+            / "app_main"
+            / "templates"
+            / "main"
+            / "connexion.html"
+        ).read_text()
+        summary_block = template.split("{% block page_summary %}", 1)[1].split(
+            "{% endblock %}", 1
+        )[0]
+
+        self.assertIn(
+            "{{ request.user.first_name }} {{ request.user.last_name }}", summary_block
+        )
+        self.assertNotIn("{{ account_heading }}", summary_block)
+        self.assertNotIn("{{ request.user.username }}", summary_block)

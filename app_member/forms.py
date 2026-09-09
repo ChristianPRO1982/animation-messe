@@ -160,22 +160,8 @@ class SiteParamsAdminForm(forms.ModelForm):
             "home_text",
             "bloc1_text",
             "bloc2_text",
-            "verse_max_lines",
-            "verse_max_characters_for_a_line",
-            "chorus_prefix",
-            "verse_prefix1",
-            "verse_prefix2",
             "admin_message_cooldown_minutes",
             "moderator_message_cooldown_minutes",
-            "bg_img_max_bytes",
-            "bg_img_min_w",
-            "bg_img_min_h",
-            "bg_img_max_w",
-            "bg_img_max_h",
-            "bg_img_ratio_min",
-            "bg_img_ratio_max",
-            "bg_img_allowed_ext",
-            "bg_img_allowed_mime",
         ]
         labels = {
             "title": _("Titre du site"),
@@ -184,28 +170,12 @@ class SiteParamsAdminForm(forms.ModelForm):
             "home_text": _("Texte d'accueil"),
             "bloc1_text": _("Texte du bloc 1"),
             "bloc2_text": _("Texte du bloc 2"),
-            "verse_max_lines": _("Nombre maximal de lignes par couplet"),
-            "verse_max_characters_for_a_line": _(
-                "Nombre maximal de caractères par ligne"
-            ),
-            "chorus_prefix": _("Préfixe du refrain"),
-            "verse_prefix1": _("Préfixe de couplet"),
-            "verse_prefix2": _("Suffixe de couplet"),
             "admin_message_cooldown_minutes": _(
                 "Délai de réaffichage du message administrateur (minutes)"
             ),
             "moderator_message_cooldown_minutes": _(
                 "Délai de réaffichage du message modérateur (minutes)"
             ),
-            "bg_img_max_bytes": _("Taille maximale des images de fond (octets)"),
-            "bg_img_min_w": _("Largeur minimale des images de fond"),
-            "bg_img_min_h": _("Hauteur minimale des images de fond"),
-            "bg_img_max_w": _("Largeur maximale des images de fond"),
-            "bg_img_max_h": _("Hauteur maximale des images de fond"),
-            "bg_img_ratio_min": _("Ratio minimal des images de fond"),
-            "bg_img_ratio_max": _("Ratio maximal des images de fond"),
-            "bg_img_allowed_ext": _("Extensions d'images autorisées"),
-            "bg_img_allowed_mime": _("Types MIME d'images autorisés"),
         }
         widgets = {
             "signup_url": forms.URLInput(attrs={"placeholder": "https://..."}),
@@ -218,11 +188,6 @@ class SiteParamsAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         cards = parse_home_cards(getattr(self.instance, "home_text", "") or "")
         self.fields["home_text"].required = False
-        # These three site-level rendering labels are exceptions: leading/trailing
-        # spaces are meaningful and must survive form cleaning unchanged.
-        self.fields["chorus_prefix"].strip = False
-        self.fields["verse_prefix1"].strip = False
-        self.fields["verse_prefix2"].strip = False
         for index in range(6):
             card = (
                 cards[index]

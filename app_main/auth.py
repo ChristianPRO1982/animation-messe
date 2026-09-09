@@ -204,9 +204,7 @@ def build_home_provision_start_url() -> str:
 
     if not shared_secret:
         raise HomeProvisioningError(
-            _(
-                "Le secret de provisioning Home est absent côté serveur Animation Messe."
-            )
+            _("Le secret de provisioning Home est absent côté serveur Animation Messe.")
         )
 
     if not start_url or not app_id or not return_url:
