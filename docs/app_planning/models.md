@@ -2,12 +2,12 @@
 
 Ce document est le contrat BDD canonique de `app_planning` pour la V1.
 
-`app_planning` est une app de services, vues, permissions et selectors. Elle ne possede pas de tables persistantes en V1.
+`app_planning` est une app de services, vues, permissions et selectors. Elle ne
+possede pas de tables persistantes en V1.
 
 Sources consolidees :
 
 - `docs/SFD-02-planning.md`
-- `docs/TABLES/tables_planning.md`
 - `docs/app_group/models.md`
 - `docs/app_celebration/models.md`
 
@@ -27,7 +27,9 @@ Sont explicitement exclus :
 - aucune table miroir des celebrations ;
 - aucune table miroir des cellules de planning.
 
-La responsabilite de `app_planning` est de construire, afficher, modifier sous permission et valider une vue de planning a partir des tables possedees par `app_group` et `app_celebration`.
+La responsabilite de `app_planning` est de construire, afficher, modifier sous
+permission et valider une vue de planning a partir des tables possedees par
+`app_group` et `app_celebration`.
 
 ---
 
@@ -61,7 +63,8 @@ Le rattachement d'une celebration a un groupe est porte par :
 
 ## 2.3 Cellule de planning
 
-Une cellule de planning correspond a la participation d'un membre ou Membre AM a une celebration pour un groupe donne.
+Une cellule de planning correspond a la participation d'un membre ou Membre AM a
+une celebration pour un groupe donne.
 
 Table proprietaire :
 
@@ -75,7 +78,8 @@ Champs contractuels utiles a `app_planning` :
 
 - `ccg_id` : FK vers `am.c_celebration_group.ccg_id`, suppression `CASCADE` ;
 - `ggm_id` : FK vers `am.g_group_member.ggm_id`, suppression `CASCADE` ;
-- `gps_id` : FK vers `am.g_planning_state.gps_id`, suppression protegee par desactivation fonctionnelle cote `app_group` ;
+- `gps_id` : FK vers `am.g_planning_state.gps_id`, suppression protegee par
+  desactivation fonctionnelle cote `app_group` ;
 - `can_edit` : booleen de controle fin cote planning ;
 - `created_at` ;
 - `updated_at`.
@@ -92,7 +96,8 @@ Les fonctions choisies pour une cellule sont portees par :
 - alias Django cible : `CelebrationMemberFunction`
 - PK : `ccmf_id`
 - FK principale : `ccm_id -> am.c_celebration_member.ccm_id`, suppression `CASCADE` ;
-- FK principale : `gf_id -> am.g_function.gf_id`, suppression protegee par desactivation fonctionnelle cote `app_group`.
+- FK principale : `gf_id -> am.g_function.gf_id`, suppression protegee par
+  desactivation fonctionnelle cote `app_group`.
 
 ## 2.5 Etats de planning
 
@@ -120,7 +125,8 @@ Tables proprietaires :
 
 - `am.g_celebration_rule` : regles regulieres ;
 - `am.g_special_date_rule` : dates particulieres ;
-- `am.g_special_date_celebration` : celebrations creees par une date particuliere ;
+- `am.g_special_date_celebration` : celebrations creees par une date
+  particuliere ;
 - `am.g_location` : lieux.
 
 `app_planning` consomme ces tables pour creer des `am.c_celebration` et `am.c_celebration_group`.
@@ -142,8 +148,10 @@ Le service de generation :
 
 Pour les dates particulieres, `collision_mode` est explicite :
 
-- `add` : les celebrations de la date particuliere s'ajoutent aux occurrences regulieres ;
-- `replace` : les celebrations de la date particuliere remplacent les occurrences regulieres du meme groupe sur la date concernee.
+- `add` : les celebrations de la date particuliere s'ajoutent aux occurrences
+  regulieres ;
+- `replace` : les celebrations de la date particuliere remplacent les
+  occurrences regulieres du meme groupe sur la date concernee.
 
 ## 3.2 Construction du tableau planning
 
@@ -160,11 +168,13 @@ Le selector de tableau :
 
 Le selector calendrier lit les celebrations depuis `app_celebration`.
 
-Il peut enrichir l'affichage avec les informations de groupe, lieu, etat de validation planning et presence de cellules incompletes.
+Il peut enrichir l'affichage avec les informations de groupe, lieu, etat de
+validation planning et presence de cellules incompletes.
 
 ## 3.4 Creation des cellules manquantes
 
-Le service cree les cellules manquantes pour les membres actifs du groupe lorsque la celebration n'est pas validee cote planning.
+Le service cree les cellules manquantes pour les membres actifs du groupe
+lorsque la celebration n'est pas validee cote planning.
 
 Les valeurs par defaut viennent de `app_group` :
 
@@ -185,7 +195,21 @@ Un Responsable peut modifier toutes les cellules ouvertes de son groupe.
 
 Un membre avec compte peut modifier sa cellule et les cellules des Membres AM selon les regles fonctionnelles de `SFD-02`.
 
-## 3.6 Validation et devalidation planning
+## 3.6 Arrivee d'un nouveau membre
+
+Lorsqu'un Membre ou Membre AM devient actif dans un groupe, le service cree ses
+cellules manquantes uniquement pour les celebrations :
+
+- futures ;
+- rattachees au groupe ;
+- non validees cote planning.
+
+Il ne cree rien sur les celebrations passees ni sur les celebrations deja
+validees cote planning.
+
+Cette operation est idempotente.
+
+## 3.7 Validation et devalidation planning
 
 La validation planning vit dans `app_celebration`.
 
@@ -198,7 +222,7 @@ La validation :
 
 - verrouille les cellules courantes de la celebration ;
 - considere les cellules en etat `selection` comme les participations retenues ;
-- ne cree pas de seconde equipe reelle ;
+- ne cree pas de seconde equipe separee ;
 - ne copie pas les cellules vers une table distincte ;
 - ne modifie pas la validation de celebration (`validated_at`).
 
@@ -208,7 +232,8 @@ La devalidation :
 - rouvre les memes cellules ;
 - ne supprime aucune donnee dans une equipe separee, puisqu'aucune equipe separee n'existe en V1.
 
-La revalidation valide l'etat courant des memes cellules. Elle ne fait ni fusion, ni resynchronisation avec une deuxieme source.
+La revalidation valide l'etat courant des memes cellules. Elle ne fait ni
+fusion, ni resynchronisation avec une deuxieme source.
 
 ---
 
@@ -218,6 +243,7 @@ Les operations suivantes doivent etre atomiques :
 
 - generation d'une periode ;
 - creation des cellules manquantes d'une celebration ;
+- creation des cellules d'un nouveau membre ;
 - modification d'une cellule et de ses fonctions ;
 - validation planning ;
 - devalidation planning.
@@ -235,7 +261,7 @@ Les protections contre les doublons vivent dans les contraintes de `app_celebrat
 - dupliquer les membres, fonctions, etats ou lieux ;
 - posseder les regles durables de generation ;
 - posseder les celebrations ;
-- posseder une equipe reelle distincte des cellules de celebration ;
+- posseder une equipe separee des cellules de celebration ;
 - introduire un champ `status` de celebration ;
 - synchroniser deux representations concurrentes d'une meme participation.
 
@@ -250,8 +276,11 @@ Les tests de `app_planning` devront verifier :
 - application de `collision_mode replace` ;
 - absence d'effet retroactif apres modification d'une regle ;
 - creation des cellules manquantes ;
+- creation idempotente des cellules lors de l'arrivee d'un nouveau membre ;
 - permissions de modification cellule par cellule ;
 - verrouillage apres validation planning ;
 - reouverture apres devalidation ;
 - impossibilite de devalider une celebration passee ;
+- purge RGPD d'un `g_group_member` et suppression en cascade de ses cellules ;
+- passage a `NULL` de `planning_validated_by_ggm_id` si le validateur disparait ;
 - absence de creation de tables `p_*`.

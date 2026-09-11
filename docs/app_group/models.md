@@ -2,9 +2,8 @@
 
 Ce document est le contrat BDD canonique de `app_group` pour la V1.
 
-Il consolide les décisions issues des SFD et des fichiers de travail
-`docs/TABLES/*`. Les SFD restent prioritaires en cas de contradiction
-fonctionnelle.
+Il consolide les décisions issues des SFD et des anciens fichiers de travail
+BDD. Les SFD restent prioritaires en cas de contradiction fonctionnelle.
 
 Sources principales :
 
@@ -114,6 +113,11 @@ propriétaires AM.
 
 Pour l'usage AM du recueil, utiliser les tables `am.s_*` décrites plus bas. Ne
 pas introduire d'application `app_song` ou `app_chant`.
+
+Les anciennes pistes `common.song_tags`, `common.group_song_tags` et
+`common.group_verse_tags` ne sont pas la cible de persistance du recueil AM V1.
+Si elles existent côté socle partagé LSS, elles restent externes et ne doivent
+pas remplacer les tables propriétaires `am.s_*`.
 
 ---
 
@@ -1033,8 +1037,8 @@ Il ne crée pas de tables `p_*` en V1.
 - `common.group_tags` ;
 - les références `am.s_*` pour initialiser les blocs chants.
 
-Les célébrations, leurs participants effectifs, leurs fonctions réellement
-exercées, leurs validations, leurs gabarits, leurs feuilles et leurs caches
+Les célébrations, leurs participants effectifs, leurs fonctions sélectionnées
+ou validées, leurs validations, leurs gabarits, leurs feuilles et leurs caches
 AELF restent propriétaires de `app_celebration`.
 
 ---
@@ -1090,4 +1094,4 @@ Ne pas :
 - créer des tables `p_*` en V1 ;
 - déplacer les gabarits de célébration ou d'impression dans `app_group` ;
 - faire dépendre une célébration d'une FK obligatoire vers `g_location` ;
-- modéliser une deuxième équipe réelle séparée du planning.
+- modéliser une deuxième équipe séparée des cellules de célébration.

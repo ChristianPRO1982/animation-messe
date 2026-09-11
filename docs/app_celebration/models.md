@@ -2,7 +2,7 @@
 
 Ce document est le contrat BDD canonique de `app_celebration` pour la V1.
 
-Il consolide les décisions issues des SFD, de `docs/TABLES/tables_celebration.md`
+Il consolide les décisions issues des SFD, des anciens fichiers de travail BDD
 et des contrats déjà posés pour `app_member` et `app_group`. Les SFD restent
 prioritaires en cas de contradiction fonctionnelle.
 
@@ -24,7 +24,7 @@ Sources principales :
 - les célébrations réelles ;
 - leurs groupes participants ;
 - les cellules persistantes vues par le planning ;
-- les personnes affectées et leurs fonctions réellement exercées ;
+- les personnes affectées et leurs fonctions sélectionnées pour la célébration ;
 - les droits effectifs de modification d'une célébration ;
 - le déroulé réel ;
 - les blocs chants, blocs textes et balises de section ;
@@ -338,8 +338,9 @@ Contraintes :
 UNIQUE (ccm_id, gf_id)
 ```
 
-Cette table stocke les fonctions réellement exercées par cette personne pour
-cette célébration.
+Cette table stocke les fonctions sélectionnées pour cette personne dans cette
+célébration. Après validation du planning, ces fonctions deviennent les
+fonctions retenues côté planning.
 
 Validations service :
 
@@ -994,11 +995,14 @@ n'altère pas les feuilles existantes.
 - création automatique du groupe participant créateur ;
 - création des cellules manquantes lors de la création d'une célébration ou de
   l'arrivée d'un membre ;
+- retrait d'un groupe participant avec suppression de ses cellules uniquement ;
 - validation et dévalidation du planning ;
 - validation et dévalidation de la célébration ;
 - génération et suppression atomiques des feuilles ;
 - réinitialisation totale depuis un gabarit ;
 - remplacement d'un chant et recréation de ses parts ;
+- autocomplétion du déroulé en mode `complete_empty` ou `overwrite`, sans
+  recalcul silencieux des parts d'un chant déjà présent ;
 - refresh AELF sans toucher aux textes finaux ;
 - archivage, désarchivage, purge automatique et purge RGPD.
 
