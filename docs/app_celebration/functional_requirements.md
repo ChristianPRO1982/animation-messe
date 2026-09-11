@@ -7,6 +7,17 @@ Sources fonctionnelles principales :
 - `docs/SFD-04-celebrations.md`
 - `docs/SFD-03-chants.md`
 - `docs/SFD-01-groupes_et_membres.md`
+- `docs/app_group/models.md`
+
+---
+
+# Note de consolidation V1
+
+`app_group` fournit les groupes, membres, fonctions, lieux habituels, tags de groupe et paramètres durables.
+
+`app_celebration` possède les célébrations réelles, leurs participants effectifs, leurs fonctions réellement exercées, les cellules persistantes vues par le planning, les validations, les gabarits, le déroulé, les feuilles et les caches AELF.
+
+Les gabarits de célébration et les gabarits d’impression ne doivent pas être déplacés dans `app_group`.
 
 ---
 
@@ -25,6 +36,7 @@ Sources fonctionnelles principales :
 - de la validation/verrouillage du déroulé ;
 - de l’archivage ;
 - des célébrations partagées entre groupes ;
+- des cellules persistantes vues par le planning ;
 - des gabarits d’impression ;
 - des feuilles de messe.
 
@@ -33,7 +45,7 @@ Sources fonctionnelles principales :
 - les rôles de groupe ;
 - le recueil de chants du groupe ;
 - les textes sources LSS ;
-- les cellules du planning ;
+- les paramètres durables de planning ;
 - l’identité externe des utilisateurs.
 
 ---

@@ -7,6 +7,17 @@ Sources fonctionnelles principales :
 - `docs/SFD-02-planning.md`
 - `docs/SFD-04-celebrations.md`
 - `docs/SFD-01-groupes_et_membres.md`
+- `docs/app_group/models.md`
+
+---
+
+# Note de consolidation V1
+
+Les paramètres durables du planning appartiennent à `app_group`.
+
+Les cellules réelles et la validation du planning sont portées par `app_celebration`, car une ligne de planning est une célébration.
+
+`app_planning` ne crée pas de tables `p_*` en V1. Il orchestre, génère et affiche les données des groupes et des célébrations.
 
 ---
 
@@ -15,19 +26,18 @@ Sources fonctionnelles principales :
 `app_planning` est responsable :
 
 - du calendrier visible par un groupe ;
-- des règles de génération de planning ;
-- des célébrations régulières principales et liées ;
-- des dates particulières ;
-- des lignes de planning ;
-- des cellules membre/célébration ;
-- des états de disponibilité ;
-- des fonctions d’animation ;
+- des services de génération de célébrations futures ;
+- de l’application des règles régulières et dates particulières définies par `app_group` ;
+- de l’affichage des lignes de planning dérivées des célébrations ;
+- de l’affichage et de la modification autorisée des cellules membre/célébration ;
 - de la validation du planning ;
-- de la distinction entre planning figé et équipe réelle.
+- des règles de permission propres au planning.
 
 `app_planning` ne possède pas :
 
 - la célébration comme objet métier central ;
+- les règles régulières, dates particulières, lieux, fonctions et états de planning ;
+- les cellules persistantes membre/célébration ;
 - le déroulé liturgique ;
 - les chants et textes ;
 - les feuilles de messe ;
@@ -85,19 +95,21 @@ Le planning principal est un tableau :
 - une colonne = un Membre ou Membre AM ;
 - une cellule = un état de disponibilité et une ou plusieurs fonctions d’animation.
 
-Le groupe configure :
+Le groupe configure dans `app_group` :
 
-- au moins deux états ;
+- les états de planning ;
 - les couleurs des états ;
 - les fonctions d’animation disponibles ;
 - l’ordre des fonctions ;
 - les fonctions possibles pour chaque personne.
 
-L’état 1 est l’état de sélection reporté dans l’équipe réelle lors de la validation du planning.
+L’état `selection` sélectionne les personnes retenues lors de la validation du planning.
 
-L’état 2 est l’état par défaut des nouvelles cellules.
+L’état `default` est l’état des nouvelles cellules.
 
 Les noms et couleurs sont configurables, mais ne changent pas le sens fonctionnel des états.
+
+Les cellules persistantes appartiennent à `app_celebration`.
 
 ---
 
@@ -108,17 +120,13 @@ La validation du planning est distincte de la validation de célébration.
 Elle signifie :
 
 - les cellules de la ligne deviennent non modifiables depuis le planning ;
-- les personnes en état 1 sont ajoutées à l’équipe réelle de la célébration ;
-- elles sont ajoutées avec les fonctions sélectionnées dans leur cellule.
+- les personnes, états et fonctions sélectionnés constituent l’état courant validé de la célébration côté planning.
 
-Après validation :
+Après validation, il n’existe pas de seconde équipe réelle à synchroniser ou fusionner.
 
-- l’équipe réelle peut encore être modifiée depuis la célébration ;
-- ces modifications ne rouvrent pas le planning ;
-- la coche de participation reflète l’équipe réelle actuelle ;
-- les états et fonctions figés restent historiques.
+Une modification des personnes ou fonctions attachées à la célébration nécessite d’abord une dévalidation du planning.
 
-La dévalidation rouvre le planning, mais ne supprime pas automatiquement l’équipe réelle.
+La dévalidation rouvre les cellules de la célébration.
 
 Une célébration passée ne peut plus être dévalidée côté planning.
 
@@ -144,9 +152,9 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 **PLANNING-STATE-01** — Le groupe doit disposer d’au moins deux états.
 
-**PLANNING-STATE-02** — L’état 1 sélectionne les personnes à reporter dans l’équipe réelle lors de la validation.
+**PLANNING-STATE-02** — L’état `selection` identifie les personnes retenues lors de la validation.
 
-**PLANNING-STATE-03** — L’état 2 est l’état par défaut.
+**PLANNING-STATE-03** — L’état `default` est l’état par défaut.
 
 **PLANNING-FUNC-01** — Une personne possède au moins une fonction possible.
 
@@ -154,11 +162,11 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 **PLANNING-VAL-01** — La validation du planning verrouille les cellules, pas le déroulé de célébration.
 
-**PLANNING-VAL-02** — La validation ajoute les personnes en état 1 à l’équipe réelle de la célébration.
+**PLANNING-VAL-02** — La validation du planning verrouille l’état courant des personnes et fonctions de la célébration.
 
-**PLANNING-VAL-03** — L’équipe réelle peut diverger du planning figé.
+**PLANNING-VAL-03** — Il n’existe pas de deuxième équipe réelle séparée des cellules de célébration.
 
-**PLANNING-VAL-04** — La dévalidation ne supprime pas automatiquement l’équipe réelle.
+**PLANNING-VAL-04** — La dévalidation rend les cellules à nouveau modifiables selon les permissions normales.
 
 **PLANNING-HIST-01** — Les états et fonctions figés constituent l’historique du planning.
 
@@ -166,8 +174,7 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 # 7. Points encore à spécifier
 
-1. collision entre dates particulières et célébrations dominicales régulières ;
-2. effet de la modification ou suppression d’une règle après génération ;
-3. règles exactes de fusion lors d’une revalidation du planning ;
-4. affichage détaillé des divergences entre fonctions planifiées et fonctions réelles ;
-5. interface entre `app_planning` et `app_celebration` pour la création de célébrations générées.
+1. interface exacte entre `app_planning` et `app_celebration` pour la création de célébrations générées ;
+2. UX détaillée du tableau et du calendrier ;
+3. forme finale des services de génération et de validation ;
+4. comportement exact des permissions de modification cellule par cellule.

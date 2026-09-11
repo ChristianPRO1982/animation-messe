@@ -23,7 +23,7 @@ Sources fonctionnelles principales :
 - des paramètres globaux stockés dans `am.site_params` ;
 - de la page compte partagée ;
 - des préférences de langue et de thème au niveau navigateur ;
-- des messages globaux administrateur et modérateur.
+- des messages globaux administrateur.
 
 `app_main` ne possède pas :
 
@@ -74,10 +74,11 @@ Le contrat minimal contient :
 - `email` ;
 - `first_name` ;
 - `last_name` ;
-- `is_moderator` ;
 - `is_admin`.
 
-Les indicateurs `is_moderator` et `is_admin` sont fournis par `app_member`.
+L’indicateur `is_admin` est fourni par `app_member`.
+
+Le code peut encore exposer temporairement des champs hérités de l’ancien miroir LSS. Ils ne doivent pas devenir un nouveau contrat fonctionnel AM.
 
 Si l’utilisateur externe disparaît ou devient désactivé, la session locale doit être vidée.
 
@@ -92,7 +93,7 @@ Ces paramètres couvrent :
 - titre du site ;
 - contenus de page d’accueil ;
 - URL d’inscription ou de provisioning ;
-- messages administrateur et modérateur ;
+- messages administrateur ;
 - délais de réaffichage des messages.
 
 La recherche d’un `SiteParams` doit :

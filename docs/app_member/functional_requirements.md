@@ -9,15 +9,20 @@ Sources fonctionnelles principales :
 - `docs/SFD-01-groupes_et_membres.md`
 - `docs/general_overview.md`
 
+Contrat BDD cible :
+
+- `docs/app_member/models.md`
+
 ---
 
 # 1. Rôle fonctionnel
 
 `app_member` est responsable :
 
+- du profil global AM d’un utilisateur CARThographie ;
 - des préférences persistantes faibles d’un membre authentifié ;
-- des rôles globaux AM `moderator` et `admin` ;
-- des services exposant ces rôles au reste du projet ;
+- du rôle global Administrateur du site AM ;
+- des services exposant ce rôle au reste du projet ;
 - des formulaires ou services consommés par `app_main` pour l’administration globale ;
 - de la recherche en lecture seule dans le répertoire externe lorsque nécessaire à l’administration globale.
 
@@ -49,18 +54,17 @@ Ces données restent lues depuis `users.users` par `app_main`.
 
 ---
 
-# 3. Rôles globaux AM
+# 3. Rôle global AM
 
-Les rôles globaux locaux sont :
+Le seul rôle global local cible est :
 
-- `moderator` ;
-- `admin`.
+- Administrateur du site AM.
 
-Un `admin` est toujours implicitement `moderator`.
+Ce rôle est stocké comme `is_admin` dans le modèle BDD cible.
 
-Ces rôles sont globaux à toute l’application AM.
+Il n’existe aucun rôle global de modération dans Animation Messe.
 
-Ils ne remplacent pas les rôles de groupe :
+Le rôle Administrateur ne remplace pas les rôles de groupe :
 
 - Responsable ;
 - Membre ;
@@ -72,25 +76,22 @@ Les rôles de groupe relèvent de `app_group`.
 
 # 4. Permissions globales
 
-Un administrateur global AM peut :
+Un Administrateur global AM peut :
 
-- gérer les rôles globaux des membres authentifiés ;
+- gérer les profils globaux AM ;
 - gérer les paramètres globaux du site ;
 - publier un message administrateur global ;
-- hériter de toutes les permissions modérateur.
+- créer, administrer ou supprimer des groupes selon les règles de `SFD-01` ;
+- se nommer explicitement Responsable d’un groupe pour intervenir dans son fonctionnement.
 
-Un modérateur global AM peut :
+Être Administrateur ne rend pas automatiquement la personne :
 
-- publier un message modérateur global ;
-- disposer de pouvoirs de support transverses explicitement prévus par les apps métier.
+- Membre d’un groupe ;
+- Responsable d’un groupe ;
+- participant au planning ;
+- membre d’une célébration.
 
 Les pouvoirs métier concrets restent définis par les apps concernées.
-
-Exemples :
-
-- `app_group` définit si un modérateur global peut intervenir sur un groupe ;
-- `app_celebration` définit si un modérateur global peut consulter ou débloquer une célébration ;
-- `app_planning` définit si un modérateur global peut diagnostiquer une ligne de planning.
 
 ---
 
@@ -107,51 +108,57 @@ Elles doivent rester :
 
 Les invités ne reçoivent aucune préférence persistante serveur.
 
-Le champ `theme_slug`, s’il existe, reste un emplacement réservé.
+Le modèle cible prévoit au minimum :
 
-La source runtime actuelle du thème reste le navigateur tant qu’un flux de synchronisation serveur n’est pas spécifié avec `app_main`.
+- `theme_slug` ;
+- `calendar_week_start`.
 
-Le champ `song_search`, hérité du miroir LSS, ne doit pas devenir le contrat principal d’AM.
+La source runtime actuelle du thème peut rester le navigateur tant qu’un flux de synchronisation serveur n’est pas spécifié avec `app_main`.
 
-Il peut être conservé temporairement pour compatibilité technique, mais les futures préférences AM doivent être renommées ou modélisées selon leurs vrais usages.
-
----
-
-# 6. Tables fonctionnelles
-
-Tables actuellement attendues dans le périmètre AM :
-
-- `am.m_preferences` ;
-- `am.m_member_roles`.
-
-`am.m_member_roles` porte :
-
-- `member_id` ;
-- `is_moderator` ;
-- `is_admin`.
-
-Contraintes fonctionnelles :
-
-- `member_id` référence l’identité externe `users.users.id` ;
-- `is_admin` implique `is_moderator` ;
-- retirer `moderator` retire aussi `admin` ;
-- une ligne sans aucun rôle actif peut être supprimée.
+Les anciennes préférences héritées de LSS ne doivent pas devenir le contrat principal d’AM.
 
 ---
 
-# 7. Règles fonctionnelles
+# 6. Tables fonctionnelles cibles
+
+Tables attendues dans le périmètre AM :
+
+- `am.m_member` ;
+- `am.m_preferences`.
+
+`am.m_member` référence `users.users.id` par `mm_id` et porte `is_admin`.
+
+`am.m_preferences` référence `am.m_member.mm_id` et porte les préférences faibles.
+
+Le détail des champs, contraintes et relations est défini dans `docs/app_member/models.md`.
+
+---
+
+# 7. Héritage technique
+
+Le dépôt contient encore une structure historique héritée de LSS :
+
+- table de rôles globale séparée ;
+- rôle de modération ;
+- préférence de recherche de chants.
+
+Ces éléments doivent être traités comme des artefacts de migration à corriger lors de la future passe BDD. Ils ne constituent plus la cible fonctionnelle d’Animation Messe.
+
+Toute migration corrective devra préserver l’information Administrateur existante.
+
+---
+
+# 8. Règles fonctionnelles
 
 **MEMBER-ID-01** — `app_member` référence les membres authentifiés par le UUID externe `users.users.id`.
 
 **MEMBER-ID-02** — `app_member` ne duplique pas les données d’identité du répertoire externe.
 
-**MEMBER-ROLE-01** — Les rôles globaux locaux sont `moderator` et `admin`.
+**MEMBER-ROLE-01** — Le seul rôle global AM cible est Administrateur du site.
 
-**MEMBER-ROLE-02** — `admin` implique toujours `moderator`.
+**MEMBER-ROLE-02** — Les rôles globaux AM ne remplacent pas les rôles de groupe.
 
-**MEMBER-ROLE-03** — Les rôles globaux AM ne remplacent pas les rôles de groupe.
-
-**MEMBER-ROLE-04** — Les rôles de groupe relèvent de `app_group`.
+**MEMBER-ROLE-03** — Les rôles de groupe relèvent de `app_group`.
 
 **MEMBER-PREF-01** — Les préférences persistantes concernent uniquement les membres authentifiés.
 
@@ -165,10 +172,9 @@ Contraintes fonctionnelles :
 
 ---
 
-# 8. Points encore à spécifier
+# 9. Points encore à spécifier
 
-1. liste finale des préférences persistantes réellement utiles à AM ;
-2. devenir du champ hérité `song_search` ;
-3. pouvoirs exacts du rôle global `moderator` dans les apps métier ;
-4. éventuelle synchronisation serveur de la préférence de thème ;
-5. interface cible de gestion des rôles globaux hors page compte.
+1. liste finale des préférences persistantes réellement utiles à AM hors `theme_slug` et `calendar_week_start` ;
+2. éventuelle synchronisation serveur de la préférence de thème ;
+3. interface cible de gestion des profils globaux hors page compte ;
+4. stratégie exacte de migration si les migrations historiques `app_member` ont déjà été appliquées.

@@ -27,6 +27,11 @@ Les exigences fonctionnelles par app Django sont :
 - `docs/app_celebration/functional_requirements.md` — célébrations, déroulé, AELF, validation, feuilles.
 - `docs/app_planning/functional_requirements.md` — planning dérivé des célébrations, cellules, fonctions, validation planning.
 
+Les contrats BDD consolidés par app Django sont :
+
+- `docs/app_member/models.md` — profil global AM, préférences, rôle Administrateur, héritage technique à corriger.
+- `docs/app_group/models.md` — groupes, membres, rôles, fonctions, paramètres planning, recueil chants et contrats vers les apps métier.
+
 Les contrats techniques transverses déjà disponibles sont :
 
 - `docs/keycloak_connexion.md` — authentification Keycloak, session AM, provisioning, diagnostics.
