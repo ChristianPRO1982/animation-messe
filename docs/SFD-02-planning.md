@@ -20,7 +20,7 @@ Il couvre :
 - les états de disponibilité ;
 - les fonctions d’animation ;
 - la validation du planning ;
-- la création de l’équipe réelle d’une célébration ;
+- les participations validées côté planning ;
 - le lien entre célébrations principales et célébrations liées ;
 - les règles d’historisation associées.
 
@@ -504,7 +504,7 @@ Une cellule contient au minimum deux informations distinctes :
 1. un **état de planning** ;
 2. une ou plusieurs **fonctions d’animation**.
 
-Après validation, elle peut également afficher un indicateur montrant si la personne appartient actuellement à l’équipe réelle de l’animation.
+Après validation, la cellule reste la donnée courante verrouillée côté planning. Il n’existe pas de seconde équipe séparée à synchroniser.
 
 ---
 
@@ -530,7 +530,7 @@ Exemple courant :
 
 Cet état signifie fonctionnellement :
 
-> lors de la validation du planning, cette personne doit être ajoutée à l’équipe de l’animation.
+> lors de la validation du planning, cette personne est retenue dans l’état courant de la célébration côté planning.
 
 Le comportement ne doit jamais dépendre du texte « Disponible ».
 
@@ -809,9 +809,9 @@ La validation concerne **le planning**, et non l’animation elle-même.
 
 Elle signifie fonctionnellement :
 
-> les réponses du tableau sont désormais figées et les personnes sélectionnées sont reportées dans l’équipe de l’animation.
+> les réponses du tableau sont désormais figées dans les cellules de la célébration.
 
-La validation ne rend donc pas l’équipe de l’animation immuable.
+La validation ne verrouille pas le déroulé liturgique de la célébration.
 
 ---
 
@@ -820,9 +820,9 @@ La validation ne rend donc pas l’équipe de l’animation immuable.
 Lorsqu’un Responsable valide une ligne :
 
 1. les cellules de la ligne deviennent non modifiables depuis le planning ;
-2. toutes les personnes actuellement dans l’état 1 sont ajoutées à l’équipe de l’animation ;
-3. elles sont ajoutées avec toutes les fonctions sélectionnées dans leur cellule ;
-4. le planning affiche quelles personnes appartiennent actuellement à l’équipe de l’animation.
+2. les personnes actuellement dans l’état 1 sont retenues dans l’état courant validé de la célébration côté planning ;
+3. les fonctions sélectionnées dans leur cellule sont conservées comme fonctions validées côté planning ;
+4. aucune copie n’est réalisée vers une seconde équipe séparée.
 
 Si plusieurs personnes sont dans l’état 1, elles sont toutes ajoutées.
 
@@ -842,124 +842,92 @@ Avant validation :
 
 Après validation :
 
-### Équipe de la célébration
+### Données de célébration validées côté planning
 
 - Marie — Chantre + Maître de chœur ;
 - Paul — Organiste.
 
-Alice n’est pas ajoutée.
+Alice reste présente dans sa cellule, mais n’est pas retenue par l’état de sélection.
 
 ---
 
-# 26. Coche de participation dans le planning
+# 26. Indicateur de participation dans le planning
 
-Après validation, le planning peut afficher une coche à côté d’une personne.
+Après validation, le planning peut afficher un indicateur à côté d’une personne.
 
-Cette coche signifie uniquement :
+Cet indicateur signifie uniquement :
 
-> cette personne appartient actuellement à l’équipe de l’animation.
+> cette personne est retenue dans les cellules validées de la célébration côté planning.
 
-La coche ne signifie pas :
+L’indicateur ne signifie pas :
 
-- que son état est nécessairement l’état 1 ;
-- que ses fonctions actuelles sont identiques à celles figées dans le planning.
-
----
-
-# 27. Modification de l’équipe après validation
-
-Une fois le planning validé, le Responsable peut toujours modifier directement l’équipe depuis l’animation.
-
-Il peut notamment :
-
-- ajouter une personne ;
-- retirer une personne ;
-- ajouter une fonction à une personne ;
-- retirer une fonction ;
-- remplacer une fonction par une autre.
-
-Ces modifications ne rouvrent pas le planning.
+- qu’il existe une seconde équipe synchronisée ;
+- que la validation du déroulé de célébration est faite.
 
 ---
 
-# 28. Synchronisation des coches
+# 27. Modification après validation planning
 
-Les coches du planning reflètent en temps réel l’équipe actuelle de l’animation.
+Une fois le planning validé, les cellules de la ligne ne sont plus modifiables depuis le planning.
+
+Pour modifier les personnes, états ou fonctions de cette ligne, le Responsable doit :
+
+1. dévalider la ligne ;
+2. modifier les cellules ;
+3. valider à nouveau si nécessaire.
+
+La validation du planning ne bloque pas la préparation liturgique de la célébration.
+
+---
+
+# 28. Absence de synchronisation parallèle
+
+Le planning et la célébration lisent les mêmes cellules de participation.
+
+Il n’existe donc pas de synchronisation entre :
+
+- des cellules de planning validées ;
+- et une équipe séparée.
 
 Exemple après validation :
 
-| Personne | État planning | Équipe |
+| Personne | État planning | Retenue côté planning |
 |---|---|---|
-| Alice | Disponible | ✓ |
-| Paul | Indisponible | |
-| Marie | Disponible | ✓ |
+| Alice | Disponible | Oui |
+| Paul | Indisponible | Non |
+| Marie | Disponible | Oui |
 
-Le Responsable modifie ensuite directement l’équipe :
-
-- retire Alice ;
-- ajoute Paul.
-
-Le planning devient :
-
-| Personne | État planning | Équipe |
-|---|---|---|
-| Alice | Disponible | |
-| Paul | Indisponible | ✓ |
-| Marie | Disponible | ✓ |
-
-Les états restent figés.
-
-Seules les coches reflètent la nouvelle équipe.
+Ces informations restent verrouillées jusqu’à dévalidation.
 
 ---
 
-# 29. Écart entre planning figé et équipe réelle
+# 29. Absence d’écart entre planning validé et équipe séparée
 
-Le système doit accepter qu’un écart existe entre le planning validé et l’équipe réelle.
+En V1, le système ne maintient pas deux sources concurrentes pour les participations.
 
 Exemple :
 
-### Planning figé
+### Planning validé
 
-> Marie — Disponible — Chantre + Maître de chœur — ✓
+> Marie — Disponible — Chantre + Maître de chœur
 
-### Équipe actuelle
+Cette donnée est la participation courante côté planning pour la célébration.
 
-> Marie — Maître de chœur
-
-Marie participe toujours, donc la coche reste présente.
-
-Mais sa fonction réelle a changé.
-
-Autre exemple :
-
-### Planning figé
-
-> Jean — Indisponible — Chantre — ✓
-
-Cela peut arriver si Jean a finalement été ajouté directement à l’animation après validation.
-
-Ce n’est pas une incohérence.
-
-Le planning conserve ce qui avait été déclaré ou arbitré.
-
-L’animation conserve ce qui est réellement prévu.
+Toute correction fonctionnelle passe par une dévalidation, une modification des mêmes cellules, puis une revalidation.
 
 ---
 
-# 30. Absence de synchronisation permanente état 1 → équipe
+# 30. Absence de synchronisation permanente état 1 vers une autre source
 
-Après validation, l’état 1 ne pilote plus automatiquement l’équipe.
+Après validation, l’état 1 ne pilote aucune équipe séparée.
 
 Le planning ne doit pas continuellement imposer :
 
-> état 1 = membre de l’équipe
+> état 1 = copie vers une table d’équipe distincte
 
-L’état 1 est utilisé au moment de la validation pour alimenter l’équipe.
+L’état 1 est utilisé au moment de la validation pour identifier les cellules retenues.
 
-Ensuite :
-
-> l’animation devient la référence opérationnelle pour son équipe.
+Ensuite, les mêmes cellules restent la référence côté planning jusqu’à dévalidation ou archivage historique.
 
 ---
 
@@ -976,11 +944,10 @@ Seul un Responsable peut dévalider une ligne.
 La dévalidation :
 
 - rouvre la ligne du planning ;
+- efface les champs de validation planning ;
 - permet à nouveau les modifications normales des états et fonctions.
 
-Elle ne supprime pas automatiquement l’équipe déjà enregistrée dans l’animation.
-
-Les deux informations ont désormais une existence propre.
+Elle ne supprime pas une équipe séparée, puisqu’aucune équipe séparée n’est créée en V1.
 
 ---
 
@@ -988,11 +955,9 @@ Les deux informations ont désormais une existence propre.
 
 Après modification du planning, le Responsable peut valider à nouveau la ligne.
 
-Les personnes en état 1 sont alors de nouveau reportées vers l’animation conformément aux règles de validation.
+La nouvelle validation valide l’état courant des mêmes cellules.
 
-Le comportement précis d’une nouvelle validation vis-à-vis des membres déjà présents dans l’équipe doit rester non destructif.
-
-Une nouvelle validation ne doit pas supprimer implicitement une personne ajoutée manuellement dans l’animation.
+Il n’y a pas de fusion ni de resynchronisation avec une autre source.
 
 ---
 
@@ -1004,7 +969,7 @@ Le planning devient alors une donnée historique.
 
 Les états du planning permettent de conserver ce qui avait été déclaré et figé.
 
-Les coches peuvent refléter les personnes enregistrées dans l’équipe de l’animation.
+Les cellules validées restent l’historique consultable, sous réserve des règles RGPD.
 
 ---
 
@@ -1102,18 +1067,18 @@ Le Responsable valide une ligne.
 Le système :
 
 - fige le planning ;
-- ajoute à l’animation toutes les personnes en état 1 ;
-- leur attribue les fonctions sélectionnées.
+- retient les personnes en état 1 dans les cellules validées ;
+- conserve leurs fonctions sélectionnées.
 
 ---
 
-## Étape 6 — Organisation réelle de la célébration
+## Étape 6 — Organisation validée côté planning
 
-Après validation, le Responsable peut encore modifier directement l’équipe de l’animation.
+Après validation, le Responsable ne modifie plus les cellules validées sans dévalidation.
 
 Le planning reste figé.
 
-Les coches suivent l’équipe réelle.
+Les indicateurs de participation reflètent les cellules validées.
 
 ---
 
@@ -1125,7 +1090,7 @@ Tant que l’animation n’est pas passée, le Responsable peut :
 - modifier le planning ;
 - valider à nouveau.
 
-L’équipe de l’animation n’est pas automatiquement effacée lors de la dévalidation.
+Les mêmes cellules sont rouvertes lors de la dévalidation.
 
 ---
 
@@ -1136,7 +1101,7 @@ Une fois l’animation passée :
 - elle ne peut plus être dévalidée ;
 - les états du planning restent consultables ;
 - les fonctions planifiées restent consultables ;
-- l’équipe réelle reste identifiable.
+- les cellules validées restent identifiables.
 
 ---
 
@@ -1276,29 +1241,29 @@ Une fois l’animation passée :
 
 **PLAN-VAL-02** — La validation du planning verrouille les cellules de planning, pas le déroulé de la célébration.
 
-**PLAN-VAL-03** — Lors de la validation du planning, toutes les personnes en état 1 sont ajoutées à l’équipe réelle de la célébration.
+**PLAN-VAL-03** — Lors de la validation du planning, toutes les personnes en état 1 sont retenues dans les cellules validées de la célébration.
 
 **PLAN-VAL-04** — Les fonctions attribuées lors de la validation sont celles sélectionnées dans la cellule.
 
 **PLAN-VAL-05** — Une personne peut être ajoutée avec plusieurs fonctions.
 
-**PLAN-VAL-06** — L’équipe réelle de la célébration peut être modifiée après validation du planning.
+**PLAN-VAL-06** — Les cellules de participation ne peuvent pas être modifiées après validation du planning sans dévalidation préalable.
 
-**PLAN-VAL-07** — Une coche indique l’appartenance actuelle à l’équipe réelle de la célébration.
+**PLAN-VAL-07** — Un indicateur peut montrer qu’une personne est retenue dans les cellules validées.
 
-**PLAN-VAL-08** — La coche est indépendante de l’état du planning.
+**PLAN-VAL-08** — L’indicateur ne représente pas une seconde équipe synchronisée.
 
-**PLAN-VAL-09** — La coche ne garantit pas que les fonctions réelles sont identiques aux fonctions planifiées.
+**PLAN-VAL-09** — Les fonctions retenues sont celles sélectionnées dans les cellules au moment de la validation.
 
-**PLAN-VAL-10** — Modifier l’équipe ne modifie pas rétroactivement les états ou fonctions figés dans le planning.
+**PLAN-VAL-10** — Il n’existe pas de modification parallèle d’une équipe qui réécrirait les cellules figées.
 
-**PLAN-VAL-11** — Après validation, l’état 1 ne pilote plus automatiquement l’équipe.
+**PLAN-VAL-11** — Après validation, l’état 1 ne pilote pas une source séparée.
 
 **PLAN-VAL-12** — Seul un Responsable peut dévalider une ligne future.
 
-**PLAN-VAL-13** — La dévalidation rouvre le planning sans supprimer automatiquement l’équipe existante.
+**PLAN-VAL-13** — La dévalidation rouvre les mêmes cellules et efface les champs de validation planning.
 
-**PLAN-VAL-14** — Une nouvelle validation doit être non destructive vis-à-vis des ajouts manuels déjà effectués dans la célébration.
+**PLAN-VAL-14** — Une nouvelle validation valide l’état courant des cellules sans fusion avec une autre source.
 
 **PLAN-VAL-15** — Une célébration passée ne peut plus être dévalidée côté planning.
 
@@ -1312,7 +1277,7 @@ Une fois l’animation passée :
 
 **PLAN-HIST-02** — Les fonctions planifiées sont conservées comme historique.
 
-**PLAN-HIST-03** — L’équipe réelle de la célébration reste distincte de l’historique du planning.
+**PLAN-HIST-03** — Les cellules validées de la célébration constituent l’historique du planning.
 
 **PLAN-HIST-04** — Modifier les fonctions possibles d’un membre ne réécrit pas l’historique.
 
@@ -1330,11 +1295,10 @@ Exemple :
 
 > Noël tombe un dimanche.
 
-Il reste à déterminer précisément si une date particulière :
+Une date particulière définit explicitement son mode de collision :
 
-- ajoute de nouvelles animations ;
-- remplace les animations dominicales habituelles ;
-- ou peut être configurée au cas par cas pour faire l’un ou l’autre.
+- `add` : elle ajoute de nouvelles célébrations ;
+- `replace` : elle remplace les célébrations régulières du groupe sur la date concernée.
 
 Aucune règle implicite ne doit considérer que deux célébrations à la même date constituent forcément un doublon.
 
@@ -1342,32 +1306,26 @@ Aucune règle implicite ne doit considérer que deux célébrations à la même 
 
 ## 36.2 Suppression ou modification d’une règle ayant déjà généré des célébrations
 
-Il reste à définir ce qu’il se passe lorsqu’un Responsable modifie ou supprime une règle de calendrier après que des célébrations ont déjà été générées.
-
-Le principe général devrait éviter toute suppression silencieuse de célébrations déjà organisées.
+Lorsqu’un Responsable modifie, supprime ou désactive une règle de calendrier après génération, les célébrations déjà créées ne sont pas modifiées rétroactivement.
 
 ---
 
 ## 36.3 Comportement précis d’une revalidation
 
-Le principe est fixé :
+La revalidation valide l’état courant des mêmes cellules.
 
-- la dévalidation ne supprime pas l’équipe ;
-- une nouvelle validation ajoute les personnes en état 1 ;
-- les modifications directes réalisées dans l’animation ne doivent pas être écrasées silencieusement.
-
-Ce point bloque la conception technique détaillée de la revalidation du planning et doit être tranché avant implémentation.
+Elle ne réalise ni fusion, ni resynchronisation avec une équipe séparée.
 
 ---
 
-## 36.4 Affichage détaillé des fonctions réelles dans le planning
+## 36.4 Affichage détaillé des fonctions dans le planning
 
-La coche indique seulement la présence dans l’équipe.
+L’indicateur de participation signale les cellules retenues.
 
 Il reste à déterminer si le planning doit également afficher directement :
 
-- les fonctions réellement exercées ;
-- un indicateur de divergence entre fonctions planifiées et fonctions réelles ;
+- les fonctions sélectionnées dans les cellules ;
+- un indicateur de modification après dévalidation/revalidation ;
 - ou uniquement ces informations dans le détail de la célébration.
 
 ---
@@ -1392,16 +1350,16 @@ Exemple :
 
 > Disponible — Maître de chœur
 
-### 3. L’équipe réelle de la célébration
+### 3. Sa participation validée côté planning
 
-> Ce qu’elle fera effectivement.
+> Ce qui est retenu dans les cellules validées de la célébration.
 
 Exemple :
 
 > Chantre + Maître de chœur
 
-Cette séparation permet de conserver un planning souple, compréhensible et historiquement fidèle sans imposer artificiellement que la situation réelle reste identique à la proposition initiale.
+Cette séparation permet de conserver un planning souple, compréhensible et historiquement fidèle sans créer une seconde représentation concurrente de la participation.
 
 Le planning n’est donc jamais la source autonome d’une célébration.
 
-Il est une vue et un outil de préparation construit à partir des célébrations et de leurs équipes.
+Il est une vue et un outil de préparation construit à partir des célébrations et de leurs cellules de participation.

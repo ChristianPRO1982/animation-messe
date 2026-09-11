@@ -13,7 +13,7 @@ Il résume l’état des SFD, l’ordre de lecture recommandé et les décisions
 Les documents actuels sont :
 
 - `docs/SFD-01-groupes_et_membres.md` — groupes, rôles, accès, Membres AM, consentement, usages publics.
-- `docs/SFD-02-planning.md` — calendrier, génération du planning, disponibilités, fonctions, validation du planning, équipe réelle.
+- `docs/SFD-02-planning.md` — calendrier, génération du planning, disponibilités, fonctions, validation du planning.
 - `docs/SFD-03-chants.md` — relation AM/LSS, recueils, tags, structure des chants, synchronisation, suppressions.
 - `docs/SFD-04-celebrations.md` — célébrations, déroulé, blocs chants/textes, AELF, validation, feuilles, archivage, partage.
 
@@ -31,6 +31,8 @@ Les contrats BDD consolidés par app Django sont :
 
 - `docs/app_member/models.md` — profil global AM, préférences, rôle Administrateur, héritage technique à corriger.
 - `docs/app_group/models.md` — groupes, membres, rôles, fonctions, paramètres planning, recueil chants et contrats vers les apps métier.
+- `docs/app_celebration/models.md` — célébrations, cellules planning, déroulé, AELF, gabarits, feuilles et validations.
+- `docs/app_planning/models.md` — contrat de non-possession BDD, services planning et interfaces vers `app_group` et `app_celebration`.
 
 Les contrats techniques transverses déjà disponibles sont :
 
@@ -80,7 +82,7 @@ Il ne doit pas être modélisé comme une entité concurrente de la célébratio
 
 ## 3.2. Deux validations distinctes
 
-La **validation du planning** fige les cellules du planning et reporte les personnes sélectionnées dans l’équipe réelle de la célébration.
+La **validation du planning** fige les cellules de célébration utilisées par le planning. Elle ne copie pas les personnes sélectionnées vers une seconde équipe séparée.
 
 La **validation de célébration** verrouille le déroulé et déclenche la génération des feuilles de messe.
 

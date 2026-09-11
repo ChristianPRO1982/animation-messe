@@ -7,7 +7,9 @@ Sources fonctionnelles principales :
 - `docs/SFD-02-planning.md`
 - `docs/SFD-04-celebrations.md`
 - `docs/SFD-01-groupes_et_membres.md`
+- `docs/app_planning/models.md`
 - `docs/app_group/models.md`
+- `docs/app_celebration/models.md`
 
 ---
 
@@ -73,13 +75,15 @@ Un Responsable peut générer le planning :
 
 La génération utilise :
 
-- les célébrations régulières principales ;
-- les célébrations régulières liées ;
-- les dates particulières du groupe.
+- les règles régulières principales de `app_group` ;
+- les règles régulières liées de `app_group` ;
+- les dates particulières du groupe, avec `collision_mode = add` ou `replace`.
 
 La génération est incrémentale et idempotente.
 
 Elle ne remplace pas les célébrations existantes et ne doit pas créer de doublons.
+
+Modifier, supprimer ou désactiver une règle après génération n’a pas d’effet rétroactif sur les célébrations déjà créées.
 
 L’identification fonctionnelle d’une occurrence générée repose sur :
 
@@ -122,11 +126,13 @@ Elle signifie :
 - les cellules de la ligne deviennent non modifiables depuis le planning ;
 - les personnes, états et fonctions sélectionnés constituent l’état courant validé de la célébration côté planning.
 
-Après validation, il n’existe pas de seconde équipe réelle à synchroniser ou fusionner.
+Après validation, il n’existe pas de seconde équipe séparée à synchroniser ou fusionner.
 
 Une modification des personnes ou fonctions attachées à la célébration nécessite d’abord une dévalidation du planning.
 
 La dévalidation rouvre les cellules de la célébration.
+
+La revalidation valide l’état courant des mêmes cellules. Elle ne réalise ni fusion, ni resynchronisation avec une équipe séparée.
 
 Une célébration passée ne peut plus être dévalidée côté planning.
 
@@ -148,6 +154,10 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 **PLANNING-GEN-04** — Une occurrence générée est identifiée par groupe + date réelle + heure + lieu.
 
+**PLANNING-GEN-05** — Une date particulière utilise explicitement `collision_mode = add` ou `replace`.
+
+**PLANNING-GEN-06** — Modifier ou supprimer une règle après génération ne modifie pas rétroactivement les célébrations déjà créées.
+
 **PLANNING-TAB-01** — Une cellule associe une personne, une célébration, un état et une ou plusieurs fonctions.
 
 **PLANNING-STATE-01** — Le groupe doit disposer d’au moins deux états.
@@ -164,9 +174,11 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 **PLANNING-VAL-02** — La validation du planning verrouille l’état courant des personnes et fonctions de la célébration.
 
-**PLANNING-VAL-03** — Il n’existe pas de deuxième équipe réelle séparée des cellules de célébration.
+**PLANNING-VAL-03** — Il n’existe pas de deuxième équipe séparée des cellules de célébration.
 
 **PLANNING-VAL-04** — La dévalidation rend les cellules à nouveau modifiables selon les permissions normales.
+
+**PLANNING-VAL-05** — La revalidation valide l’état courant des cellules sans fusion avec une autre source.
 
 **PLANNING-HIST-01** — Les états et fonctions figés constituent l’historique du planning.
 
@@ -174,7 +186,6 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 
 # 7. Points encore à spécifier
 
-1. interface exacte entre `app_planning` et `app_celebration` pour la création de célébrations générées ;
-2. UX détaillée du tableau et du calendrier ;
-3. forme finale des services de génération et de validation ;
-4. comportement exact des permissions de modification cellule par cellule.
+1. UX détaillée du tableau et du calendrier ;
+2. contrats Python exacts des services et selectors ;
+3. comportement exact des permissions de modification cellule par cellule.

@@ -9,6 +9,10 @@ Sources fonctionnelles principales :
 - `docs/SFD-01-groupes_et_membres.md`
 - `docs/app_group/models.md`
 
+Contrat BDD cible :
+
+- `docs/app_celebration/models.md`
+
 ---
 
 # Note de consolidation V1
@@ -18,6 +22,8 @@ Sources fonctionnelles principales :
 `app_celebration` possède les célébrations réelles, leurs participants effectifs, leurs fonctions réellement exercées, les cellules persistantes vues par le planning, les validations, les gabarits, le déroulé, les feuilles et les caches AELF.
 
 Les gabarits de célébration et les gabarits d’impression ne doivent pas être déplacés dans `app_group`.
+
+Les blocs chants de célébration référencent LSS par une FK vivante nullable vers `lss.s_songs.song_id`, avec snapshot historique minimal `source_song_id` et `source_song_title` pour rester lisibles si le chant disparaît.
 
 ---
 
@@ -177,6 +183,10 @@ Les feuilles :
 **CELEBRATION-SONG-01** — Un bloc chant peut conserver une référence historique cassée.
 
 **CELEBRATION-SONG-02** — Les coches de couplets appartiennent au bloc de célébration.
+
+**CELEBRATION-PLAN-01** — Les cellules persistantes vues par le planning appartiennent à `app_celebration`.
+
+**CELEBRATION-PLAN-02** — La validation du planning est portée par la célébration et reste distincte de la validation de célébration.
 
 **CELEBRATION-AELF-01** — Les données AELF sont mises en cache au niveau de la célébration.
 
