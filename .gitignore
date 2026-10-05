@@ -1,6 +1,7 @@
 chris/
 .uv-cache/
-staticfiles/
+staticfiles/*
+!staticfiles/.gitkeep
 
 
 
