@@ -81,8 +81,7 @@ class Command(BaseCommand):
             else:
                 updated_members += 1
                 self.stdout.write(
-                    f"am.m_member updated: {record.username} "
-                    f"(admin={member.is_admin})"
+                    f"am.m_member updated: {record.username} (admin={member.is_admin})"
                 )
 
         self.stdout.write(

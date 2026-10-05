@@ -25,9 +25,7 @@ class MemberSearchForm(forms.Form):
 class MemberRoleActionForm(forms.Form):
     member_id = forms.UUIDField(widget=forms.HiddenInput())
     role_name = forms.ChoiceField(
-        choices=(
-            ("admin", _("Administrateur")),
-        ),
+        choices=(("admin", _("Administrateur")),),
         widget=forms.HiddenInput(),
     )
     enabled = forms.BooleanField(required=False, widget=forms.HiddenInput())
