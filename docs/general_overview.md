@@ -148,7 +148,28 @@ Avant d’implémenter une fonctionnalité touchant un point ouvert :
 
 ---
 
-# 6. Contrôles utiles pour Codex
+# 6. Exigence de tests
+
+Le projet doit viser la couverture `pytest` la plus haute possible.
+
+La cible générale est **100 % de couverture** pour le code applicatif, avec des
+tests unitaires ou fonctionnels couvrant les règles documentées et les cas
+d'erreur significatifs.
+
+La seule exception admise concerne les zones trop difficiles à tester de façon
+fiable à cause de la configuration de connexion avec le mock d'authentification
+ou l'intégration Keycloak/Home. Ces exceptions doivent rester limitées,
+justifiées et ne doivent pas servir à exclure du code métier testable.
+
+Avant de considérer une fonctionnalité terminée, vérifier que :
+
+- les règles fonctionnelles ajoutées ou modifiées ont des tests associés ;
+- les branches d'erreur importantes sont couvertes ;
+- les exclusions de couverture restent explicites et liées à la connexion/mock.
+
+---
+
+# 7. Contrôles utiles pour Codex
 
 Commandes utiles après modification documentaire :
 
@@ -167,7 +188,7 @@ rg -n "CHANT-DEL|CELEB-CHANT-04|référence.*cassée|ne sont pas supprim|ne supp
 
 ---
 
-# 7. Règle de travail
+# 8. Règle de travail
 
 Ne pas créer de document technique à partir d’une seule SFD si le sujet touche :
 
