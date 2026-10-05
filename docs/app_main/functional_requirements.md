@@ -9,6 +9,10 @@ Sources fonctionnelles principales :
 - `docs/SFD-01-groupes_et_membres.md`
 - `docs/general_overview.md`
 
+Contrat BDD cible :
+
+- `docs/app_main/models.md`
+
 ---
 
 # 1. Rôle fonctionnel
@@ -27,13 +31,15 @@ Sources fonctionnelles principales :
 
 `app_main` ne possède pas :
 
+- les profils globaux AM persistés ;
 - les rôles de groupe ;
 - les Membres AM ;
 - les consentements ;
 - les célébrations ;
 - le planning ;
 - les chants ou recueils ;
-- les règles métier de validation des modules.
+- les règles métier de validation des modules ;
+- les droits métier propres aux apps `app_group`, `app_planning` ou `app_celebration`.
 
 ---
 
@@ -78,7 +84,7 @@ Le contrat minimal contient :
 
 L’indicateur `is_admin` est fourni par `app_member`.
 
-Le code peut encore exposer temporairement des champs hérités de l’ancien miroir LSS. Ils ne doivent pas devenir un nouveau contrat fonctionnel AM.
+Le code peut encore exposer temporairement des champs hérités de l’ancien miroir LSS, notamment des indicateurs de modération. Ils ne doivent pas devenir un nouveau contrat fonctionnel AM.
 
 Si l’utilisateur externe disparaît ou devient désactivé, la session locale doit être vidée.
 
@@ -93,8 +99,10 @@ Ces paramètres couvrent :
 - titre du site ;
 - contenus de page d’accueil ;
 - URL d’inscription ou de provisioning ;
-- messages administrateur ;
+- messages administrateur globaux ;
 - délais de réaffichage des messages.
+
+Les champs de message de modération encore présents sont un héritage technique. Ils ne constituent pas une cible fonctionnelle AM, car `SFD-01` exclut le rôle global de modérateur.
 
 La recherche d’un `SiteParams` doit :
 
@@ -127,9 +135,9 @@ Les routes de debug éventuelles doivent retourner `404` lorsque `DEBUG=False`.
 La page compte est le point d’entrée partagé pour :
 
 - consulter son identité runtime ;
-- comprendre ses rôles globaux ;
+- comprendre son rôle global Administrateur le cas échéant ;
 - gérer les actions administrateur globales ;
-- gérer les messages globaux ;
+- gérer les messages administrateur globaux ;
 - rechercher un membre du répertoire externe pour lui attribuer un rôle global AM.
 
 ---
@@ -148,9 +156,13 @@ La page compte est le point d’entrée partagé pour :
 
 **MAIN-USER-02** — Les rôles globaux AM sont lus depuis `app_member`, pas depuis Keycloak.
 
+**MAIN-USER-03** — Le seul rôle global AM cible exposé par `app_main` est Administrateur.
+
 **MAIN-PARAM-01** — Les paramètres globaux sont stockés dans `am.site_params`.
 
 **MAIN-PARAM-02** — Les contenus administrables doivent être résolus par langue avec fallback.
+
+**MAIN-PARAM-03** — Les messages globaux cibles sont des messages administrateur, hors héritage technique explicitement identifié.
 
 **MAIN-PAGE-01** — La page d’accueil reste accessible sans compte.
 

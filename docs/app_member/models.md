@@ -1,7 +1,7 @@
 # app_member — Modèle BDD
 
-Ce document décrit la cible BDD minimale de `app_member` nécessaire à la
-consolidation de `app_group`.
+Ce document décrit la cible BDD minimale de `app_member` nécessaire au socle AM
+et à la consolidation future de `app_group`.
 
 Les règles fonctionnelles sources restent :
 
@@ -179,6 +179,10 @@ Si les migrations historiques n'ont jamais été appliquées dans l'environnemen
 cible, il est acceptable de repartir avec une migration initiale propre. Si
 elles ont déjà été appliquées, créer des migrations correctives sans réécrire
 l'historique.
+
+Tant que l'état réel des environnements appliqués n'est pas arbitré, ce document
+décrit la cible et les écarts hérités sans imposer une stratégie de migration
+unique.
 
 ---
 

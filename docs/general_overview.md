@@ -29,10 +29,15 @@ Les exigences fonctionnelles par app Django sont :
 
 Les contrats BDD consolidés par app Django sont :
 
+- `docs/app_main/models.md` — paramètres globaux du site, lecture seule du répertoire externe et frontière du socle partagé.
 - `docs/app_member/models.md` — profil global AM, préférences, rôle Administrateur, héritage technique à corriger.
 - `docs/app_group/models.md` — groupes, membres, rôles, fonctions, paramètres planning, recueil chants et contrats vers les apps métier.
 - `docs/app_celebration/models.md` — célébrations, cellules planning, déroulé, AELF, gabarits, feuilles et validations.
 - `docs/app_planning/models.md` — contrat de non-possession BDD, services planning et interfaces vers `app_group` et `app_celebration`.
+
+Il n'existe pas de document `docs/app_song/functional_requirements.md` dans la
+cible AM. Les chants sont couverts par `SFD-03-chants.md` et par les contrats
+`app_group` qui décrivent la manière dont AM référence les chants LSS.
 
 Les contrats techniques transverses déjà disponibles sont :
 

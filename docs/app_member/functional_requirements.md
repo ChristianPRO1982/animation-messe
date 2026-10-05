@@ -138,13 +138,13 @@ Le détail des champs, contraintes et relations est défini dans `docs/app_membe
 
 Le dépôt contient encore une structure historique héritée de LSS :
 
-- table de rôles globale séparée ;
-- rôle de modération ;
-- préférence de recherche de chants.
+- table `am.m_member_roles` séparée de la cible `am.m_member` ;
+- champ `is_moderator` et rôle de modération global ;
+- préférence `song_search` issue de la recherche de chants LSS.
 
 Ces éléments doivent être traités comme des artefacts de migration à corriger lors de la future passe BDD. Ils ne constituent plus la cible fonctionnelle d’Animation Messe.
 
-Toute migration corrective devra préserver l’information Administrateur existante.
+Toute migration corrective devra préserver l’information Administrateur existante et ne devra pas réécrire l'historique déjà appliqué tant que l'état des environnements cibles n'a pas été arbitré.
 
 ---
 

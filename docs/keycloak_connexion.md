@@ -129,7 +129,9 @@ Pre-requis :
 - les UUID de connexion reussie existent dans `users.users` ;
 - l'UUID desactive existe avec `enabled = false` ;
 - l'UUID inconnu reste volontairement absent de `users.users` ;
-- les roles locaux dans `am.m_member_roles` sont coherents avec les profils de test.
+- les profils AM locaux exposent correctement le role Administrateur cible ;
+- si l'environnement utilise encore l'heritage `am.m_member_roles`, seule
+  l'information `is_admin` doit etre consideree comme cible fonctionnelle AM.
 
 Variables locales utiles :
 
@@ -198,7 +200,7 @@ Limite actuelle :
 3. Cliquer l'entree de simulation.
 4. Choisir un utilisateur admin et verifier l'interface `Admin`.
 5. Se deconnecter et verifier le retour anonyme.
-6. Choisir un moderateur et verifier les droits `Moderator` sans `Admin`.
+6. Choisir un membre non administrateur et verifier l'absence de droits globaux.
 7. Se deconnecter et verifier le retour anonyme.
 8. Choisir un membre simple et verifier l'interface membre.
 9. Se deconnecter et verifier le retour anonyme.
