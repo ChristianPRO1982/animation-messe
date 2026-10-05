@@ -2,7 +2,6 @@
 {% load i18n %}
 {% get_current_language as CURRENT_LANGUAGE %}
 {% trans "Rôle global administrateur" as nav_admin_role_label %}
-{% trans "Rôle global modérateur" as nav_moderator_role_label %}
 {% trans "Fermer" as nav_close_label %}
 {% trans "Accueil" as nav_home_label %}
 {% trans "Déconnexion" as nav_logout_label %}
@@ -54,9 +53,6 @@
                             {% if request.user.is_admin %}
                                 <span class="site-nav-role-marker site-nav-role-marker--admin site-nav-role-marker--top" aria-label="{{ nav_admin_role_label }}">👑</span>
                             {% endif %}
-                            {% if request.user.is_moderator %}
-                                <span class="site-nav-role-marker site-nav-role-marker--moderator site-nav-role-marker--bottom" aria-label="{{ nav_moderator_role_label }}">⚖️</span>
-                            {% endif %}
                         </a>
                     {% else %}
                         <a href="{% url 'login' %}" title="{{ nav_login_label }}">
@@ -118,9 +114,6 @@
                             {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="account" icon_alt=nav_view_profile_label %}
                             {% if request.user.is_admin %}
                                 <span class="site-nav-role-marker site-nav-role-marker--admin site-nav-role-marker--top" aria-label="{{ nav_admin_role_label }}">👑</span>
-                            {% endif %}
-                            {% if request.user.is_moderator %}
-                                <span class="site-nav-role-marker site-nav-role-marker--moderator site-nav-role-marker--bottom" aria-label="{{ nav_moderator_role_label }}">⚖️</span>
                             {% endif %}
                         </a>
                     {% else %}
@@ -171,9 +164,6 @@
                             {% if request.user.is_admin %}
                                 <span class="site-nav-role-marker site-nav-role-marker--admin site-nav-role-marker--top" aria-label="{{ nav_admin_role_label }}">👑</span>
                             {% endif %}
-                            {% if request.user.is_moderator %}
-                                <span class="site-nav-role-marker site-nav-role-marker--moderator site-nav-role-marker--bottom" aria-label="{{ nav_moderator_role_label }}">⚖️</span>
-                            {% endif %}
                         </a>
                     {% else %}
                         <a href="{% url 'login' %}" title="{{ nav_login_label }}">
@@ -235,9 +225,6 @@
                             {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="account" icon_alt=nav_view_profile_label %}
                             {% if request.user.is_admin %}
                                 <span class="site-nav-role-marker site-nav-role-marker--admin site-nav-role-marker--top" aria-label="{{ nav_admin_role_label }}">👑</span>
-                            {% endif %}
-                            {% if request.user.is_moderator %}
-                                <span class="site-nav-role-marker site-nav-role-marker--moderator site-nav-role-marker--bottom" aria-label="{{ nav_moderator_role_label }}">⚖️</span>
                             {% endif %}
                         </a>
                     {% else %}

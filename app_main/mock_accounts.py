@@ -28,12 +28,12 @@ DEV_MOCK_ACCOUNTS: list[dict[str, str]] = [
         "last_name": "User",
     },
     {
-        "label": "testmock_moderateur (Moderator)",
+        "label": "testmock_moderateur (Member)",
         "external_id": "44444444-4444-4444-4444-444444444444",
         "username": "testmock_moderateur",
         "email": "testmock_moderateur@example.test",
         "first_name": "Testmock",
-        "last_name": "Moderateur",
+        "last_name": "Member",
     },
     {
         "label": "testmock_simpletuser (Member)",

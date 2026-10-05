@@ -26,31 +26,12 @@ class MemberRoleActionForm(forms.Form):
     member_id = forms.UUIDField(widget=forms.HiddenInput())
     role_name = forms.ChoiceField(
         choices=(
-            ("moderator", _("Modérateur")),
             ("admin", _("Administrateur")),
         ),
         widget=forms.HiddenInput(),
     )
     enabled = forms.BooleanField(required=False, widget=forms.HiddenInput())
     member_search = forms.CharField(required=False, widget=forms.HiddenInput())
-
-
-class ModeratorMessageForm(forms.ModelForm):
-    class Meta:
-        model = SiteParams
-        fields = [
-            "moderator_message",
-            "moderator_message_cooldown_minutes",
-        ]
-        labels = {
-            "moderator_message": _("Message de modération"),
-            "moderator_message_cooldown_minutes": _(
-                "Délai de réaffichage du message de modération (minutes)"
-            ),
-        }
-        widgets = {
-            "moderator_message": forms.Textarea(attrs={"rows": 6}),
-        }
 
 
 class AdminMessageForm(forms.ModelForm):
@@ -161,7 +142,6 @@ class SiteParamsAdminForm(forms.ModelForm):
             "bloc1_text",
             "bloc2_text",
             "admin_message_cooldown_minutes",
-            "moderator_message_cooldown_minutes",
         ]
         labels = {
             "title": _("Titre du site"),
@@ -172,9 +152,6 @@ class SiteParamsAdminForm(forms.ModelForm):
             "bloc2_text": _("Texte du bloc 2"),
             "admin_message_cooldown_minutes": _(
                 "Délai de réaffichage du message administrateur (minutes)"
-            ),
-            "moderator_message_cooldown_minutes": _(
-                "Délai de réaffichage du message modérateur (minutes)"
             ),
         }
         widgets = {

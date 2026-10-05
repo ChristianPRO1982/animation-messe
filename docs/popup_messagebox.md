@@ -6,7 +6,7 @@ Ce document décrit l’implémentation actuelle de `static/js/message_box.js`.
 
 Les noms publics `LSSMessageBox`, `lss-messagebox-root`, `lss-site-popup-config`, les classes CSS `lss-messagebox-*` et `body.lss-messagebox-open` sont conservés volontairement dans AM. Ils font partie du contrat technique copié et permettent de garder les fichiers JS/CSS synchronisables avec leur origine.
 
-Le contrat public conserve donc le préfixe technique `LSS`. En revanche, les messages de modération encore exposés par certains paramètres de site sont un héritage applicatif : Animation Messe n'a pas de rôle global Modérateur dans sa cible fonctionnelle.
+Le contrat public conserve donc le préfixe technique `LSS`. Animation Messe n'a pas de rôle global Modérateur dans sa cible fonctionnelle ; les messages site cibles sont les messages administrateur globaux.
 
 ## Loading Contract
 
@@ -14,9 +14,7 @@ Le contrat public conserve donc le préfixe technique `LSS`. En revanche, les me
 - l’hôte popup global est `<div id="lss-messagebox-root" hidden></div>`
 - `templates/base.html` expose la configuration site dans `<script id="lss-site-popup-config" type="application/json">`
 - `app_member.context_processors.site_popup` fournit `lss_site_popup_json`
-- les sections de message site cibles sont les messages administrateur globaux ;
-  toute section de modération doit être traitée comme compatibilité temporaire
-  héritée de LSS
+- les sections de message site cibles sont les messages administrateur globaux
 - le popup utilise `window.LSS_THEME_CONFIG`
 - l’icône de fermeture dépend du thème actif et du `prefers-color-scheme`
 - `page_scripts` est injecté après `message_box.js`, ce qui permet aux pages d’utiliser immédiatement `window.LSSMessageBox`

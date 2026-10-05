@@ -1,80 +1,48 @@
 import json
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 
 from app_member.forms import SiteParamsAdminForm
-from app_member.models import (
-    MemberPreferences,
-    default_song_search,
-    validate_song_search,
-)
+from app_member.models import Member, MemberPreferences
 from app_member.services import (
-    can_manage_moderator_popup,
     can_manage_site_members,
     can_manage_site_settings,
 )
 
 
 class MemberPreferencesTests(SimpleTestCase):
-    def test_default_preferences_keep_shared_member_ui_contract(self):
-        self.assertEqual(
-            default_song_search(),
-            {
-                "text": "",
-                "everywhere": False,
-                "match_all_selected_refs": False,
-                "genre_ids": [],
-                "band_ids": [],
-                "artist_ids": [],
-                "validation": "all",
-                "favorites_only": False,
-            },
-        )
-
+    def test_default_preferences_keep_member_ui_contract(self):
+        member = Member(mm_id=uuid.UUID("11111111-1111-1111-1111-111111111111"))
         preferences = MemberPreferences(
-            member_id=uuid.UUID("11111111-1111-1111-1111-111111111111")
+            member=member,
         )
+
         self.assertEqual(preferences.theme_slug, "normal")
-        self.assertEqual(preferences.song_search, default_song_search())
+        self.assertEqual(preferences.calendar_week_start, "monday")
 
-    def test_song_search_validation_rejects_invalid_payloads(self):
-        with self.assertRaisesMessage(ValidationError, "objet JSON"):
-            validate_song_search([])
-
-        with self.assertRaisesMessage(ValidationError, "validation"):
-            validate_song_search({**default_song_search(), "validation": "approved"})
-
-        with self.assertRaisesMessage(ValidationError, "genre_ids"):
-            validate_song_search({**default_song_search(), "genre_ids": ["1"]})
+    def test_member_admin_flag_defaults_to_false(self):
+        member = Member(mm_id=uuid.UUID("11111111-1111-1111-1111-111111111111"))
+        self.assertFalse(member.is_admin)
 
 
 class PermissionHelperTests(SimpleTestCase):
-    def test_permission_helpers_follow_admin_and_moderator_roles(self):
+    def test_permission_helpers_follow_admin_role(self):
         admin_user = type(
             "User",
             (),
-            {"is_authenticated": True, "is_admin": True, "is_moderator": True},
-        )()
-        moderator_user = type(
-            "User",
-            (),
-            {"is_authenticated": True, "is_admin": False, "is_moderator": True},
+            {"is_authenticated": True, "is_admin": True},
         )()
         member_user = type(
             "User",
             (),
-            {"is_authenticated": True, "is_admin": False, "is_moderator": False},
+            {"is_authenticated": True, "is_admin": False},
         )()
 
         self.assertTrue(can_manage_site_members(admin_user))
         self.assertTrue(can_manage_site_settings(admin_user))
-        self.assertTrue(can_manage_moderator_popup(admin_user))
-        self.assertFalse(can_manage_site_members(moderator_user))
-        self.assertTrue(can_manage_moderator_popup(moderator_user))
         self.assertFalse(can_manage_site_members(member_user))
-        self.assertFalse(can_manage_moderator_popup(member_user))
+        self.assertFalse(can_manage_site_settings(member_user))
 
 
 class SiteParamsAdminFormTests(SimpleTestCase):
@@ -88,7 +56,6 @@ class SiteParamsAdminFormTests(SimpleTestCase):
                 "bloc1_text": "Bloc 1",
                 "bloc2_text": "Bloc 2",
                 "admin_message_cooldown_minutes": "5",
-                "moderator_message_cooldown_minutes": "60",
                 "home_card_1_title": " Accueil ",
                 "home_card_1_text": " Préparer une animation ",
                 "home_card_1_image": "home",

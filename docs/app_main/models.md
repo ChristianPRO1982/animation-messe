@@ -82,20 +82,20 @@ La résolution d'une ligne `SiteParams` doit suivre cet ordre :
 
 Le code consommateur doit donc accepter l'absence totale de paramètres.
 
-## Héritage technique à corriger
+## Héritage technique corrigé dans la cible
 
-Le dépôt contient encore des champs issus d'un ancien besoin de modération LSS :
+Les migrations historiques peuvent encore mentionner des champs issus d'un
+ancien besoin de modération LSS :
 
 ```text
 moderator_message
 moderator_message_cooldown_minutes
 ```
 
-Ces champs ne constituent pas une cible fonctionnelle AM, car Animation Messe
-n'a pas de rôle global Modérateur. Ils peuvent rester temporairement présents
-pour compatibilité technique, mais toute évolution cible doit privilégier les
-messages administrateur globaux ou des messages métier portés par les apps
-concernées.
+Ces champs ne constituent pas une cible fonctionnelle AM et ne doivent pas être
+présents dans le modèle actif `SiteParams`, car Animation Messe n'a pas de rôle
+global Modérateur. Toute évolution cible doit privilégier les messages
+administrateur globaux ou des messages métier portés par les apps concernées.
 
 ---
 

@@ -129,9 +129,8 @@ Pre-requis :
 - les UUID de connexion reussie existent dans `users.users` ;
 - l'UUID desactive existe avec `enabled = false` ;
 - l'UUID inconnu reste volontairement absent de `users.users` ;
-- les profils AM locaux exposent correctement le role Administrateur cible ;
-- si l'environnement utilise encore l'heritage `am.m_member_roles`, seule
-  l'information `is_admin` doit etre consideree comme cible fonctionnelle AM.
+- les profils AM locaux dans `am.m_member` exposent correctement le role
+  Administrateur cible.
 
 Variables locales utiles :
 

@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
 
 SONG_SEARCH_VALIDATION_VALUES = {
     "all",
@@ -24,6 +24,7 @@ def default_song_search() -> dict[str, object]:
 
 
 def validate_song_search(value: object) -> None:
+    """Legacy migration helper for the retired LSS song_search field."""
     if not isinstance(value, dict):
         raise ValidationError(_("song_search doit être un objet JSON."))
 
@@ -76,27 +77,50 @@ def validate_song_search(value: object) -> None:
         )
 
 
+class Member(models.Model):
+    mm_id = models.UUIDField(primary_key=True, editable=False)
+    is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'am"."m_member'
+
+
 class MemberPreferences(models.Model):
-    member_id = models.UUIDField(primary_key=True, editable=False)
-    theme_slug = models.CharField(max_length=32, default="normal")
-    song_search = models.JSONField(
-        default=default_song_search, validators=[validate_song_search]
+    CALENDAR_WEEK_START_MONDAY = "monday"
+    CALENDAR_WEEK_START_SUNDAY = "sunday"
+    CALENDAR_WEEK_START_CHOICES = (
+        (CALENDAR_WEEK_START_MONDAY, _("Lundi")),
+        (CALENDAR_WEEK_START_SUNDAY, _("Dimanche")),
     )
+
+    mp_id = models.BigAutoField(primary_key=True)
+    member = models.OneToOneField(
+        Member,
+        on_delete=models.CASCADE,
+        db_column="mm_id",
+        related_name="preferences",
+    )
+    theme_slug = models.CharField(max_length=32, default="normal")
+    calendar_week_start = models.CharField(
+        max_length=8,
+        choices=CALENDAR_WEEK_START_CHOICES,
+        default=CALENDAR_WEEK_START_MONDAY,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'am"."m_preferences'
-
-
-class MemberRole(models.Model):
-    member_id = models.UUIDField(primary_key=True, editable=False)
-    is_moderator = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'am"."m_member_roles'
         constraints = [
             models.CheckConstraint(
-                condition=Q(is_admin=False) | Q(is_moderator=True),
-                name="m_member_roles_admin_requires_moderator",
+                condition=models.Q(
+                    calendar_week_start__in=[
+                        "monday",
+                        "sunday",
+                    ]
+                ),
+                name="m_preferences_calendar_week_start_valid",
             ),
         ]

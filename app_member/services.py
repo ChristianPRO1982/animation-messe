@@ -8,22 +8,13 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from app_main.models import DirectoryUserRecord, SiteParams
-from app_member.models import MemberRole
-
-MAIN_PAGE_NAMES = {
-    "homepage",
-    "groups",
-    "songs",
-    "animations",
-}
+from app_member.models import Member
 
 ROLE_ADMIN = "admin"
-ROLE_MODERATOR = "moderator"
 
 
 @dataclass(frozen=True)
 class MemberRoleFlags:
-    is_moderator: bool = False
     is_admin: bool = False
 
 
@@ -35,7 +26,6 @@ class DirectoryMemberSearchResult:
     first_name: str | None
     last_name: str | None
     enabled: bool
-    is_moderator: bool
     is_admin: bool
 
 
@@ -71,14 +61,12 @@ def _user_table_has_column(column_name: str) -> bool:
 
 def get_member_role_flags(member_id: str) -> MemberRoleFlags:
     normalized_id = _normalize_uuid(member_id)
-    role = MemberRole.objects.filter(member_id=normalized_id).first()
+    member = Member.objects.filter(mm_id=normalized_id).first()
 
-    if role is None:
+    if member is None:
         return MemberRoleFlags()
 
-    is_admin = bool(role.is_admin)
-    is_moderator = bool(role.is_admin or role.is_moderator)
-    return MemberRoleFlags(is_moderator=is_moderator, is_admin=is_admin)
+    return MemberRoleFlags(is_admin=bool(member.is_admin))
 
 
 def get_member_role_flags_safe(member_id: str | None) -> MemberRoleFlags:
@@ -95,29 +83,15 @@ def set_member_role(member_id: str, role_name: str, enabled: bool) -> MemberRole
     normalized_id = _normalize_uuid(member_id)
     role_name = str(role_name).strip().lower()
 
-    if role_name not in {ROLE_ADMIN, ROLE_MODERATOR}:
+    if role_name != ROLE_ADMIN:
         raise ValidationError(_("Rôle de membre non pris en charge."))
 
-    role, _created = MemberRole.objects.get_or_create(member_id=normalized_id)
+    member, _created = Member.objects.get_or_create(mm_id=normalized_id)
+    member.is_admin = bool(enabled)
 
-    if role_name == ROLE_ADMIN:
-        role.is_admin = bool(enabled)
-        if role.is_admin:
-            role.is_moderator = True
-    else:
-        role.is_moderator = bool(enabled)
-        if not role.is_moderator:
-            role.is_admin = False
-
-    if not role.is_admin and not role.is_moderator:
-        role.delete()
-        return MemberRoleFlags()
-
-    role.full_clean()
-    role.save()
-    return MemberRoleFlags(
-        is_moderator=role.is_moderator or role.is_admin, is_admin=role.is_admin
-    )
+    member.full_clean()
+    member.save()
+    return MemberRoleFlags(is_admin=member.is_admin)
 
 
 def can_manage_site_members(user) -> bool:
@@ -134,19 +108,8 @@ def can_manage_global_popup(user) -> bool:
     return can_manage_site_members(user)
 
 
-def can_manage_moderator_popup(user) -> bool:
-    return bool(
-        getattr(user, "is_authenticated", False)
-        and getattr(user, "is_moderator", False)
-    )
-
-
-def can_validate_songs(user) -> bool:
-    return can_manage_moderator_popup(user)
-
-
 def can_manage_groups_globally(user) -> bool:
-    return can_manage_moderator_popup(user)
+    return can_manage_site_members(user)
 
 
 def get_site_params_for_language(language_code: str | None) -> SiteParams | None:
@@ -204,11 +167,8 @@ def _search_directory_users_with_sql(
         rows = cursor.fetchall()
 
     role_map = {
-        str(role.member_id): MemberRoleFlags(
-            is_moderator=role.is_moderator or role.is_admin,
-            is_admin=role.is_admin,
-        )
-        for role in MemberRole.objects.filter(member_id__in=[row[0] for row in rows])
+        str(member.mm_id): MemberRoleFlags(is_admin=member.is_admin)
+        for member in Member.objects.filter(mm_id__in=[row[0] for row in rows])
     }
 
     return [
@@ -219,7 +179,6 @@ def _search_directory_users_with_sql(
             first_name=row[3],
             last_name=row[4],
             enabled=bool(row[5]),
-            is_moderator=role_map.get(row[0], MemberRoleFlags()).is_moderator,
             is_admin=role_map.get(row[0], MemberRoleFlags()).is_admin,
         )
         for row in rows
@@ -236,13 +195,8 @@ def search_directory_members(
     if settings.USER_SCHEMA == "users" and settings.USER_TABLE == "users":
         rows = list(_build_directory_user_queryset(normalized_search)[:limit])
         role_map = {
-            str(role.member_id): MemberRoleFlags(
-                is_moderator=role.is_moderator or role.is_admin,
-                is_admin=role.is_admin,
-            )
-            for role in MemberRole.objects.filter(
-                member_id__in=[row.id for row in rows]
-            )
+            str(member.mm_id): MemberRoleFlags(is_admin=member.is_admin)
+            for member in Member.objects.filter(mm_id__in=[row.id for row in rows])
         }
         return [
             DirectoryMemberSearchResult(
@@ -252,7 +206,6 @@ def search_directory_members(
                 first_name=row.first_name,
                 last_name=row.last_name,
                 enabled=bool(row.enabled),
-                is_moderator=role_map.get(str(row.id), MemberRoleFlags()).is_moderator,
                 is_admin=role_map.get(str(row.id), MemberRoleFlags()).is_admin,
             )
             for row in rows

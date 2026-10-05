@@ -10,9 +10,7 @@ class SiteParams(models.Model):
     bloc1_text = models.TextField()
     bloc2_text = models.TextField()
     admin_message = models.TextField()
-    moderator_message = models.TextField()
     admin_message_cooldown_minutes = models.IntegerField(default=5)
-    moderator_message_cooldown_minutes = models.IntegerField(default=60)
 
     class Meta:
         db_table = 'am"."site_params'

@@ -84,7 +84,7 @@ Le contrat minimal contient :
 
 L’indicateur `is_admin` est fourni par `app_member`.
 
-Le code peut encore exposer temporairement des champs hérités de l’ancien miroir LSS, notamment des indicateurs de modération. Ils ne doivent pas devenir un nouveau contrat fonctionnel AM.
+Les migrations historiques peuvent encore mentionner des champs hérités de l’ancien miroir LSS. Ils ne doivent pas redevenir un contrat fonctionnel AM.
 
 Si l’utilisateur externe disparaît ou devient désactivé, la session locale doit être vidée.
 
@@ -102,7 +102,7 @@ Ces paramètres couvrent :
 - messages administrateur globaux ;
 - délais de réaffichage des messages.
 
-Les champs de message de modération encore présents sont un héritage technique. Ils ne constituent pas une cible fonctionnelle AM, car `SFD-01` exclut le rôle global de modérateur.
+Les anciens champs de message de modération relèvent de l'historique LSS. Ils ne constituent pas une cible fonctionnelle AM, car `SFD-01` exclut le rôle global de modérateur.
 
 La recherche d’un `SiteParams` doit :
 

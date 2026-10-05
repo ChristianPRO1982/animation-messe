@@ -3,7 +3,7 @@ import json
 
 from django.utils.translation import gettext as _
 
-from app_member.services import MAIN_PAGE_NAMES, get_site_params_for_language
+from app_member.services import get_site_params_for_language
 
 
 def _build_section(
@@ -30,8 +30,6 @@ def site_popup(request) -> dict[str, str]:
         params = None
 
     sections: list[dict[str, object]] = []
-    url_name = getattr(getattr(request, "resolver_match", None), "url_name", "")
-
     if params is not None:
         admin_section = _build_section(
             "admin",
@@ -41,16 +39,6 @@ def site_popup(request) -> dict[str, str]:
         )
         if admin_section:
             sections.append(admin_section)
-
-        if url_name in MAIN_PAGE_NAMES:
-            moderator_section = _build_section(
-                "moderator",
-                _("Message de modération"),
-                params.moderator_message,
-                params.moderator_message_cooldown_minutes,
-            )
-            if moderator_section:
-                sections.append(moderator_section)
 
     return {
         "lss_signup_url": str(getattr(params, "signup_url", "") or "").strip(),

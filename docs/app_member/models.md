@@ -156,8 +156,8 @@ spécifié.
 
 # 5. Héritage technique à corriger
 
-Le dépôt contient actuellement des migrations et du code issus d'une conception
-historique :
+Le dépôt contient des migrations historiques et des helpers de compatibilité
+issus d'une conception historique :
 
 ```text
 am.m_member_roles

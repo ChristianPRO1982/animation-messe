@@ -136,7 +136,8 @@ Le détail des champs, contraintes et relations est défini dans `docs/app_membe
 
 # 7. Héritage technique
 
-Le dépôt contient encore une structure historique héritée de LSS :
+Les migrations historiques et certains helpers de compatibilité peuvent encore
+mentionner une structure héritée de LSS :
 
 - table `am.m_member_roles` séparée de la cible `am.m_member` ;
 - champ `is_moderator` et rôle de modération global ;
