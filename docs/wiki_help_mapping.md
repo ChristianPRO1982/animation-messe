@@ -1,18 +1,26 @@
-# Mapping du lien wiki contextuel - Animation Messe
+# Lien wiki contextuel - Animation Messe
 
 ## Objet
 
-Le bouton `?` du footer utilise `request.resolver_match.url_name` pour choisir une page wiki contextuelle.
+Le bouton `?` du footer utilise `request.resolver_match.url_name` pour choisir
+une page wiki contextuelle.
+
+Pour l'instant, une seule page wiki est active. Toutes les routes doivent donc
+pointer vers la home du wiki Animation Messe :
+
+- `https://github.com/ChristianPRO1982/animation-messe/wiki`
 
 Source de verite technique :
 
 - `app_main/wiki_help.py`
 
-Regle de maintenance :
+Regle de maintenance actuelle :
 
-- ajouter une entree dans `WIKI_PAGE_BY_URL_NAME` pour toute nouvelle page importante ;
-- si aucune entree n'existe, le lien pointe automatiquement vers la home du wiki ;
-- garder ce document aligne avec `app_main/wiki_help.py` quand une route importante est ajoutee ou changee.
+- garder `WIKI_PAGE_BY_URL_NAME` vide tant qu'il n'existe pas de pages wiki
+  dediees ;
+- toute route, connue ou inconnue, doit pointer vers la home du wiki ;
+- garder ce document aligne avec `app_main/wiki_help.py` quand le projet wiki
+  dedie sera ouvert.
 
 URL par defaut :
 
@@ -22,26 +30,11 @@ URL par defaut :
 
 | `url_name` | Cible wiki principale | Notes |
 | --- | --- | --- |
-| `homepage` | home du wiki AM | Point d'entree generique |
-| `login` | `Connexion` | Page principale pour expliquer la connexion |
-| `site_params` | `Administration-du-site` | Administration globale du site |
-| `groups_home` | `Groupes` | Accueil public des groupes AM |
-| `theme_preferences` | `Thèmes` | Preferences visuelles |
-| `language` | `Langue` | Choix de langue |
-| `privacy_policy` | `Confidentialité` | Politique de confidentialite |
+| toutes les routes | home du wiki AM | Mapping contextuel volontairement desactive |
 
 ## Routes en fallback par defaut
 
-Ces routes existent dans `app_main` mais n'ont pas encore de page wiki dediee dans le mapping courant. Elles pointent donc vers la home du wiki :
-
-- `account`
-- `auth_callback`
-- `keycloak_diagnostic`
-- `provision_redirect`
-- `provision_complete`
-- `logout`
-- `heavy`
-- `heavy_asset`
+Toutes les routes sont en fallback par defaut pour le moment.
 
 ## Routes futures attendues
 
@@ -54,4 +47,6 @@ Les apps metier creees pour AM devront enrichir ce mapping quand leurs pages ser
 
 ## Regle de travail
 
-Ne pas recopier le mapping wiki de Lyrics Slide Show. Le mapping AM doit suivre les routes Django reelles du projet Animation Messe et pointer vers le wiki `animation-messe`.
+Ne pas recopier le mapping wiki de Lyrics Slide Show. Le mapping AM devra suivre
+les routes Django reelles du projet Animation Messe quand des pages dediees
+existeront dans le wiki `animation-messe`.

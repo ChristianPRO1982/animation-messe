@@ -12,7 +12,7 @@ from django.http import Http404, HttpResponse
 from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.utils import timezone
 
-from app_main import auth, views
+from app_main import auth, views, wiki_help
 from app_main.auth import (
     HOME_PROVISION_TARGET_SESSION_KEY,
     KEYCLOAK_DIAGNOSTIC_SESSION_KEY,
@@ -159,6 +159,26 @@ class PublicPageTests(SimpleTestCase):
             [theme["slug"] for theme in AVAILABLE_THEMES],
             ["normal", "scout", "taize", "me†al"],
         )
+
+
+class WikiHelpTests(SimpleTestCase):
+    def test_all_routes_point_to_the_single_active_wiki_home(self):
+        self.assertEqual(wiki_help.WIKI_PAGE_BY_URL_NAME, {})
+
+        for url_name in (
+            None,
+            "",
+            "homepage",
+            "login",
+            "groups_home",
+            "site_params",
+            "unknown",
+        ):
+            with self.subTest(url_name=url_name):
+                self.assertEqual(
+                    wiki_help.get_wiki_help_url(url_name),
+                    wiki_help.WIKI_DEFAULT_URL,
+                )
 
 
 class AccountPageTemplateTests(SimpleTestCase):

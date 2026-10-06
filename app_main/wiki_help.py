@@ -1,15 +1,8 @@
 WIKI_DEFAULT_URL = "https://github.com/ChristianPRO1982/animation-messe/wiki"
-WIKI_MODERATION_URL = f"{WIKI_DEFAULT_URL}/Mod%C3%A9ration-du-site"
 
-WIKI_PAGE_BY_URL_NAME: dict[str, str] = {
-    "homepage": WIKI_DEFAULT_URL,
-    "login": f"{WIKI_DEFAULT_URL}/Connexion",
-    "site_params": WIKI_MODERATION_URL,
-    "groups_home": f"{WIKI_DEFAULT_URL}/Groupes",
-    "theme_preferences": f"{WIKI_DEFAULT_URL}/Th%C3%A8mes",
-    "language": f"{WIKI_DEFAULT_URL}/Langue",
-    "privacy_policy": f"{WIKI_DEFAULT_URL}/Confidentialit%C3%A9",
-}
+# Temporary contract: only the wiki home exists for now.
+# Keep the mapping empty until a dedicated wiki project is ready.
+WIKI_PAGE_BY_URL_NAME: dict[str, str] = {}
 
 
 def get_wiki_help_url(url_name: str | None) -> str:
