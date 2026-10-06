@@ -115,9 +115,10 @@ common.tags
 common.group_tags
     PK gt_id
     FK group_id -> common.g_groups.group_id
+    name
+    sort_order
+    is_active
     tags de groupe partagés avec LSS
-    dépendance externe cible ; peut être absente tant que le socle common ne
-    l'a pas livrée
 ```
 
 Les éventuels modèles Django représentant ces tables doivent être
@@ -127,13 +128,9 @@ Les éventuels modèles Django représentant ces tables doivent être
 `app_group` ne doivent pas créer ni modifier ces tables comme si elles étaient
 propriétaires AM.
 
-Les modèles Django représentant `common.g_groups`, `common.g_group_user` et
-`common.g_group_user_ask_to_join` sont obligatoirement `managed = False`.
-
-Tant que `common.group_tags` n'existe pas dans le socle commun effectif, la
-colonne AM `gt_id` reste une référence logique sans FK PostgreSQL. Lorsque la
-table commune sera livrée par son propriétaire, une migration corrective pourra
-ajouter la FK `am.s_song_tag.gt_id -> common.group_tags.gt_id`.
+Les modèles Django représentant `common.g_groups`, `common.g_group_user`,
+`common.g_group_user_ask_to_join` et `common.group_tags` sont obligatoirement
+`managed = False`.
 
 Pour l'usage AM du recueil, utiliser les tables `am.s_*` décrites plus bas. Ne
 pas introduire d'application `app_song` ou `app_chant`.
@@ -951,11 +948,9 @@ ss_id
     ON DELETE CASCADE
 
 gt_id
-    référence logique vers common.group_tags.gt_id
+    -> common.group_tags.gt_id
+    ON DELETE CASCADE
 ```
-
-La FK PostgreSQL vers `common.group_tags` n'est pas posée en migration initiale
-tant que cette table n'existe pas dans le schéma commun effectivement déployé.
 
 Contraintes :
 

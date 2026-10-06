@@ -29,3 +29,21 @@ alias djmakemigrations='uvr python manage.py makemigrations'
 alias djmigrate='uvr python manage.py migrate'
 alias djmig='djsetenvdev && djmakemigrations && djmigrate'
 ```
+
+## Niveau courant
+
+- `app_main` et `app_member` : socle initial valide.
+- `app_group` : fondation BDD valide avec groupes communs `common`, ancre AM
+  des participants, Membres AM, paramètres planning et recueil.
+- `common.group_tags` est livré par le repo propriétaire de `common` ;
+  `app_group.0002` pose la FK `am.s_song_tag.gt_id -> common.group_tags.gt_id`.
+
+Contrôles au dernier point de validation :
+
+```text
+ruff check: passed
+ruff format: passed
+django check: passed
+pytest: 127 passed
+coverage: 95%
+```

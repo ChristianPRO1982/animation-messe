@@ -63,6 +63,8 @@ class CommonGroupTag(models.Model):
     gt_id = models.BigIntegerField(primary_key=True)
     group_id = models.IntegerField()
     name = models.CharField(max_length=255)
+    sort_order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         managed = False
@@ -311,9 +313,7 @@ class GroupLocation(models.Model):
 
 
 class AccessRequest(models.Model):
-    REQUEST_TYPE_CHOICES = (
-        (REQUEST_TYPE_AM_ACCESS, _("Acces AM")),
-    )
+    REQUEST_TYPE_CHOICES = ((REQUEST_TYPE_AM_ACCESS, _("Acces AM")),)
 
     gar_id = models.BigAutoField(primary_key=True)
     group = models.ForeignKey(
@@ -427,7 +427,13 @@ class PlanningState(models.Model):
         db_table = 'am"."g_planning_state'
         constraints = [
             models.CheckConstraint(
-                condition=Q(kind__in=[PLANNING_STATE_SELECTION, PLANNING_STATE_DEFAULT, "custom"]),
+                condition=Q(
+                    kind__in=[
+                        PLANNING_STATE_SELECTION,
+                        PLANNING_STATE_DEFAULT,
+                        "custom",
+                    ]
+                ),
                 name="g_planning_state_kind_valid",
             ),
             models.UniqueConstraint(
@@ -612,7 +618,6 @@ class SongTag(models.Model):
         on_delete=models.CASCADE,
         db_column="gt_id",
         related_name="song_tags",
-        db_constraint=False,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
