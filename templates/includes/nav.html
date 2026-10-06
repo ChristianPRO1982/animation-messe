@@ -8,6 +8,7 @@
 {% trans "Connexion" as nav_login_label %}
 {% trans "Créer un compte" as nav_signup_label %}
 {% trans "Thèmes" as nav_theme_label %}
+{% trans "Groupes" as nav_groups_label %}
 {% trans "Cookies et politique de confidentialité" as nav_cookies_label %}
 {% trans "Navigation principale" as nav_main_links_label %}
 {% trans "Profil et préférences" as nav_profile_label %}
@@ -37,6 +38,10 @@
                     <a href="{% url 'homepage' %}" title="{{ nav_home_label }}">
                         {% include "includes/themed_icon.html" with picture_class="site-nav-link-picture" img_class="site-nav-link-icon" icon_name="home" icon_alt=nav_home_label %}
                         <span>{{ nav_home_label }}</span>
+                    </a>
+                    <a href="{% url 'groups_home' %}" title="{{ nav_groups_label }}" data-django-alias="groups">
+                        {% include "includes/themed_icon.html" with picture_class="site-nav-link-picture" img_class="site-nav-link-icon" icon_name="groups" icon_alt=nav_groups_label %}
+                        <span>{{ nav_groups_label }}</span>
                     </a>
                 </section>
 
@@ -102,6 +107,9 @@
                 <section class="site-nav-group">
                     <a href="{% url 'homepage' %}" title="{{ nav_home_label }}" data-django-alias="homepage">
                         {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="home" icon_alt=nav_home_label %}
+                    </a>
+                    <a href="{% url 'groups_home' %}" title="{{ nav_groups_label }}" data-django-alias="groups">
+                        {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="groups" icon_alt=nav_groups_label %}
                     </a>
                 </section>
 
@@ -149,6 +157,10 @@
                         {% include "includes/themed_icon.html" with picture_class="site-nav-link-picture" img_class="site-nav-link-icon" icon_name="home" icon_alt=nav_home_label %}
                         <span>{{ nav_home_label }}</span>
                     </a>
+                    <a href="{% url 'groups_home' %}" title="{{ nav_groups_label }}" data-django-alias="groups">
+                        {% include "includes/themed_icon.html" with picture_class="site-nav-link-picture" img_class="site-nav-link-icon" icon_name="groups" icon_alt=nav_groups_label %}
+                        <span>{{ nav_groups_label }}</span>
+                    </a>
                 </section>
 
                 <section class="site-nav-group">
@@ -213,6 +225,9 @@
                 <section class="site-nav-group">
                     <a href="{% url 'homepage' %}" title="{{ nav_home_label }}" data-django-alias="homepage">
                         {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="home" icon_alt=nav_home_label %}
+                    </a>
+                    <a href="{% url 'groups_home' %}" title="{{ nav_groups_label }}" data-django-alias="groups">
+                        {% include "includes/themed_icon.html" with picture_class="site-nav-button-picture" img_class="site-nav-button-icon" icon_name="groups" icon_alt=nav_groups_label %}
                     </a>
                 </section>
 

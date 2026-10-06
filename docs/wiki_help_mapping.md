@@ -25,6 +25,7 @@ URL par defaut :
 | `homepage` | home du wiki AM | Point d'entree generique |
 | `login` | `Connexion` | Page principale pour expliquer la connexion |
 | `site_params` | `Administration-du-site` | Administration globale du site |
+| `groups_home` | `Groupes` | Accueil public des groupes AM |
 | `theme_preferences` | `Thèmes` | Preferences visuelles |
 | `language` | `Langue` | Choix de langue |
 | `privacy_policy` | `Confidentialité` | Politique de confidentialite |

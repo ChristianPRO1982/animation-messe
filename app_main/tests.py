@@ -144,6 +144,16 @@ class PublicPageTests(SimpleTestCase):
         for theme in ("normal", "scout", "taize", "me†al"):
             self.assertContains(response, theme)
 
+    def test_public_navigation_exposes_groups_entry(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="/groups/"', count=2)
+        self.assertContains(response, 'data-django-alias="groups"', count=2)
+        self.assertContains(response, ">Groupes</span>")
+        self.assertContains(response, 'data-theme-icon="groups"', count=2)
+        self.assertContains(response, "icons/ui/normal/64/light/groups.png")
+
     def test_available_themes_match_shared_theme_set(self):
         self.assertEqual(
             [theme["slug"] for theme in AVAILABLE_THEMES],

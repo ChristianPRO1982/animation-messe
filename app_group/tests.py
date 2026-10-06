@@ -2,6 +2,7 @@ import importlib
 
 from django.db import migrations
 from django.test import SimpleTestCase
+from django.urls import reverse
 
 from app_group import models as group_models
 
@@ -12,6 +13,21 @@ second_migration = importlib.import_module(
 third_migration = importlib.import_module(
     "app_group.migrations.0003_common_group_tag_runtime_fields"
 )
+
+
+class AppGroupPublicPageTests(SimpleTestCase):
+    def test_groups_home_is_public(self):
+        response = self.client.get(reverse("groups_home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Groupes")
+
+    def test_groups_home_uses_themed_groups_icon(self):
+        response = self.client.get(reverse("groups_home"))
+
+        self.assertContains(response, 'data-theme-icon="groups"')
+        self.assertContains(response, "icons/ui/normal/512/light/groups.png")
+        self.assertContains(response, "icons/ui/normal/512/dark/groups.png")
 
 
 class AppGroupModelContractTests(SimpleTestCase):

@@ -4,6 +4,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
+    path("groups/", include("app_group.urls")),
     path("", include("app_main.urls")),
     path("member/", include("app_member.urls")),
 ]
