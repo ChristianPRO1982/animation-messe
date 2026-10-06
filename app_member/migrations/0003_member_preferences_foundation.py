@@ -94,6 +94,34 @@ class Migration(migrations.Migration):
                     END
                     $$;
 
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.table_constraints
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND constraint_name = 'm_users_id_not_null'
+                        ) THEN
+                            ALTER TABLE "am"."m_preferences"
+                            RENAME CONSTRAINT "m_users_id_not_null"
+                            TO "m_preferences_mm_id_not_null";
+                        END IF;
+
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.table_constraints
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND constraint_name = 'm_users_theme_slug_not_null'
+                        ) THEN
+                            ALTER TABLE "am"."m_preferences"
+                            RENAME CONSTRAINT "m_users_theme_slug_not_null"
+                            TO "m_preferences_theme_slug_not_null";
+                        END IF;
+                    END
+                    $$;
+
                     ALTER TABLE "am"."m_preferences"
                     DROP COLUMN IF EXISTS "song_search";
 
@@ -170,7 +198,142 @@ class Migration(migrations.Migration):
 
                     DROP TABLE IF EXISTS "am"."m_member_roles";
                     """,
-                    reverse_sql=migrations.RunSQL.noop,
+                    reverse_sql="""
+                    CREATE TABLE IF NOT EXISTS "am"."m_member_roles" (
+                        "member_id" uuid NOT NULL PRIMARY KEY,
+                        "is_moderator" boolean NOT NULL DEFAULT false,
+                        "is_admin" boolean NOT NULL DEFAULT false,
+                        CONSTRAINT "m_member_roles_admin_requires_moderator"
+                        CHECK (NOT "is_admin" OR "is_moderator")
+                    );
+
+                    INSERT INTO "am"."m_member_roles" (
+                        "member_id",
+                        "is_moderator",
+                        "is_admin"
+                    )
+                    SELECT
+                        "mm_id",
+                        "is_admin",
+                        "is_admin"
+                    FROM "am"."m_member"
+                    ON CONFLICT ("member_id") DO UPDATE
+                    SET
+                        "is_moderator" = EXCLUDED."is_moderator",
+                        "is_admin" = EXCLUDED."is_admin";
+
+                    ALTER TABLE "am"."m_member_roles"
+                    DROP CONSTRAINT IF EXISTS "m_member_roles_user_fk";
+
+                    ALTER TABLE "am"."m_member_roles"
+                    ADD CONSTRAINT "m_member_roles_user_fk"
+                    FOREIGN KEY ("member_id")
+                    REFERENCES "users"."users" ("id")
+                    ON DELETE CASCADE;
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP CONSTRAINT IF EXISTS "m_preferences_member_fk";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP CONSTRAINT IF EXISTS "m_preferences_calendar_week_start_valid";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP CONSTRAINT IF EXISTS "m_preferences_mm_id_key";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP CONSTRAINT IF EXISTS "m_preferences_pkey";
+
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND column_name = 'mm_id'
+                        )
+                        AND NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND column_name = 'member_id'
+                        ) THEN
+                            ALTER TABLE "am"."m_preferences"
+                            RENAME COLUMN "mm_id" TO "member_id";
+                        END IF;
+                    END
+                    $$;
+
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.table_constraints
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND constraint_name = 'm_preferences_mm_id_not_null'
+                        ) THEN
+                            ALTER TABLE "am"."m_preferences"
+                            RENAME CONSTRAINT "m_preferences_mm_id_not_null"
+                            TO "m_users_id_not_null";
+                        END IF;
+
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.table_constraints
+                            WHERE table_schema = 'am'
+                              AND table_name = 'm_preferences'
+                              AND constraint_name = 'm_preferences_theme_slug_not_null'
+                        ) THEN
+                            ALTER TABLE "am"."m_preferences"
+                            RENAME CONSTRAINT "m_preferences_theme_slug_not_null"
+                            TO "m_users_theme_slug_not_null";
+                        END IF;
+                    END
+                    $$;
+
+                    ALTER TABLE "am"."m_preferences"
+                    ADD COLUMN IF NOT EXISTS "song_search" jsonb NOT NULL DEFAULT
+                    '{
+                        "text": "",
+                        "everywhere": false,
+                        "match_all_selected_refs": false,
+                        "genre_ids": [],
+                        "band_ids": [],
+                        "artist_ids": [],
+                        "validation": "all",
+                        "favorites_only": false
+                    }'::jsonb;
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP COLUMN IF EXISTS "calendar_week_start";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP COLUMN IF EXISTS "created_at";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP COLUMN IF EXISTS "updated_at";
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP COLUMN IF EXISTS "mp_id";
+
+                    DROP SEQUENCE IF EXISTS "am"."m_preferences_mp_id_seq";
+
+                    ALTER TABLE "am"."m_preferences"
+                    ADD CONSTRAINT "m_preferences_pkey" PRIMARY KEY ("member_id");
+
+                    ALTER TABLE "am"."m_preferences"
+                    DROP CONSTRAINT IF EXISTS "m_preferences_user_fk";
+
+                    ALTER TABLE "am"."m_preferences"
+                    ADD CONSTRAINT "m_preferences_user_fk"
+                    FOREIGN KEY ("member_id")
+                    REFERENCES "users"."users" ("id")
+                    ON DELETE CASCADE;
+
+                    DROP TABLE IF EXISTS "am"."m_member";
+                    """,
                 ),
             ],
             state_operations=[
