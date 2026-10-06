@@ -1,6 +1,8 @@
 # app_group — Functional Requirements
 
-`app_group` porte les groupes AM, leurs rôles internes, leurs membres, les Membres AM, les paramètres durables du groupe et le recueil de chants utilisé par le groupe.
+`app_group` porte l'environnement AM des groupes communs, leurs droits internes
+propres à AM, les Membres AM, les paramètres durables du groupe et le recueil
+de chants utilisé par le groupe.
 
 Sources fonctionnelles principales :
 
@@ -19,12 +21,11 @@ Contrat BDD cible :
 
 `app_group` est responsable :
 
-- de l’extension AM des groupes communs à AM et LSS ;
-- de l’accès AM à un groupe ;
-- des rôles de groupe Responsable et Responsable impression ;
-- de l’appartenance de base des Membres avec compte ;
+- de l’extension AM des groupes communs à CARThographie, AM et LSS ;
+- de l’accès AM à un groupe pour les membres avec compte ;
+- du rôle AM Responsable impression ;
 - des Membres AM sans compte ;
-- des demandes d’accès ;
+- des demandes d’accès AM pour les membres déjà présents dans le groupe commun ;
 - des consentements liés aux Membres AM ;
 - des paramètres de groupe utiles au planning ;
 - des lieux habituels du groupe ;
@@ -39,6 +40,9 @@ Contrat BDD cible :
 `app_group` ne possède pas :
 
 - l’identité externe des utilisateurs ;
+- les groupes communs CARThographie ;
+- l’appartenance commune des utilisateurs aux groupes ;
+- le rôle Responsable porté par le groupe commun ;
 - le rôle global Administrateur porté par `app_member` ;
 - les célébrations elles-mêmes ;
 - les cellules réelles de planning, portées par `app_celebration` ;
@@ -50,17 +54,28 @@ Contrat BDD cible :
 
 # 2. Groupes et accès AM
 
-Les groupes AM et LSS représentent une même entité fonctionnelle de groupe.
+Les groupes AM et LSS représentent une même entité fonctionnelle de groupe,
+portée par CARThographie dans le schéma `common`.
 
-La table cible `am.g_group` est une extension 1–1 de `lss.g_groups`.
+La table commune `common.g_groups` est la source de vérité du groupe.
+
+La table cible `am.g_group` est une extension 1–1 de `common.g_groups` et ne
+stocke que les paramètres propres à AM.
 
 Avoir accès à AM pour un groupe implique que le groupe soit disponible dans LSS.
 
-Faire partie d’un groupe dans LSS ne donne pas automatiquement accès à AM.
+Faire partie du groupe commun ne donne pas automatiquement accès à AM.
+
+Pour un membre avec compte, l’appartenance au groupe commun est portée par
+`common.g_group_user`.
+
+L’accès AM est porté par `common.g_group_user.am_access`.
 
 La présence d’une ligne `am.g_group` signifie que le groupe dispose de son environnement AM.
 
-Le mode ouvert ou fermé est un paramètre du groupe. Toute nouvelle fonctionnalité est privée par défaut, sauf décision explicite de la rendre utilisable dans l’espace public d’un groupe ouvert.
+Le mode ouvert ou fermé est porté par `common.g_groups.status`. Toute nouvelle
+fonctionnalité est privée par défaut, sauf décision explicite de la rendre
+utilisable dans l’espace public d’un groupe ouvert.
 
 ---
 
@@ -73,22 +88,39 @@ Les statuts fonctionnels visibles dans un groupe AM sont :
 - Responsable ;
 - Responsable impression.
 
-En BDD, les rôles de groupe assignés qui ajoutent des droits sont :
+En BDD, le rôle Responsable est porté par
+`common.g_group_user.is_group_admin`.
 
-- Responsable ;
+Les rôles AM assignés qui ajoutent des droits propres à AM sont :
+
 - Responsable impression.
 
-Un Membre avec compte est représenté par son appartenance au groupe. Il ne faut pas créer un rôle `Membre` redondant.
+Un Membre avec compte est représenté par son appartenance dans
+`common.g_group_user`. Il ne faut pas créer un rôle `Membre` redondant.
+
+Un Membre avec compte utilisable par AM possède aussi une ancre technique
+`am.g_group_member` lorsque `common.g_group_user.am_access = TRUE`. Cette ancre
+sert aux fonctions, au planning et aux célébrations, mais ne remplace pas la
+source de vérité commune.
 
 Un Membre AM est représenté par une appartenance `member_kind = am` et par son profil Membre AM.
 
-Un groupe doit toujours conserver au moins un Responsable.
+Un groupe doit toujours conserver au moins un Responsable commun
+`is_group_admin = TRUE`.
 
 Un Responsable peut gérer les membres, les Membres AM, les paramètres du groupe et les validations administratives prévues par les apps métier.
 
 Un Responsable impression peut gérer les feuilles de messe selon les règles de `app_celebration`, sans droit sur le planning, le déroulé, la validation ou l’administration du groupe.
 
 Les rôles de groupe sont distincts du rôle global Administrateur de `app_member`.
+
+Une demande de rejoindre le groupe depuis AM utilise le workflow commun
+`common.g_group_user_ask_to_join`. Si elle est acceptée depuis AM, elle crée
+l’appartenance commune et active aussi `am_access`.
+
+Une personne déjà membre du groupe commun mais sans accès AM peut demander
+uniquement l’accès AM. Cette demande relève de `app_group` et sa validation met
+à jour `common.g_group_user.am_access`.
 
 ---
 
@@ -179,17 +211,17 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 
 **GROUP-ROLE-01** — Un groupe AM distingue les statuts Membre, Membre AM, Responsable et Responsable impression.
 
-**GROUP-ROLE-02** — Seuls Responsable et Responsable impression sont des rôles assignés ajoutant des droits.
+**GROUP-ROLE-02** — Responsable est porté par `common.g_group_user.is_group_admin`; Responsable impression est un rôle AM propre à `app_group`.
 
-**GROUP-ROLE-03** — Un Membre avec compte est représenté par son appartenance au groupe, sans rôle `Membre` redondant.
+**GROUP-ROLE-03** — Un Membre avec compte est représenté par son appartenance commune au groupe, sans rôle `Membre` redondant.
 
 **GROUP-ROLE-04** — Un groupe doit toujours avoir au moins un Responsable.
 
 **GROUP-ROLE-05** — Les rôles de groupe sont distincts du rôle global Administrateur de `app_member`.
 
-**GROUP-ACCESS-01** — L’accès LSS à un groupe ne donne pas automatiquement accès AM.
+**GROUP-ACCESS-01** — L’appartenance au groupe commun ne donne pas automatiquement accès AM.
 
-**GROUP-ACCESS-02** — L’accès AM implique l’accès au même groupe côté LSS.
+**GROUP-ACCESS-02** — L’accès AM implique l’appartenance au groupe commun.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

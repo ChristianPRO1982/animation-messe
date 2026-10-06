@@ -19,9 +19,9 @@ Sources principales :
 
 `app_group` possède :
 
-- l'extension AM des groupes communs LSS/AM ;
-- l'appartenance AM aux groupes ;
-- les rôles de groupe ;
+- l'extension AM des groupes communs CARThographie/LSS/AM ;
+- l'ancre technique AM des personnes utilisables par les apps métier ;
+- les rôles propres à AM, hors Responsable commun ;
 - les Membres AM sans compte ;
 - les demandes d'accès et de création de Membre AM ;
 - les fonctions possibles des personnes du groupe ;
@@ -32,7 +32,10 @@ Sources principales :
 `app_group` ne possède pas :
 
 - les comptes `users.users` ;
-- les groupes sources LSS ;
+- les groupes communs `common.g_groups` ;
+- l'appartenance commune `common.g_group_user` ;
+- les demandes communes de rattachement `common.g_group_user_ask_to_join` ;
+- le rôle Responsable porté par `common.g_group_user.is_group_admin` ;
 - les textes, titres et métadonnées éditoriales des chants LSS ;
 - les célébrations réelles ;
 - les cellules réelles d'une célébration ;
@@ -83,9 +86,19 @@ users.users
     PK id
     source de vérité des comptes CARThographie
 
-lss.g_groups
+common.g_groups
     PK group_id
-    source du groupe commun LSS/AM
+    source de vérité des groupes communs CARThographie/LSS/AM
+
+common.g_group_user
+    PK (group_id, member_id)
+    appartenance commune d'un compte à un groupe
+    is_group_admin porte le rôle Responsable
+    am_access porte l'accès AM
+
+common.g_group_user_ask_to_join
+    PK (group_id, member_id)
+    demande de rejoindre le groupe commun
 
 lss.s_songs
     PK song_id
@@ -101,7 +114,10 @@ common.tags
 
 common.group_tags
     PK gt_id
+    FK group_id -> common.g_groups.group_id
     tags de groupe partagés avec LSS
+    dépendance externe cible ; peut être absente tant que le socle common ne
+    l'a pas livrée
 ```
 
 Les éventuels modèles Django représentant ces tables doivent être
@@ -110,6 +126,14 @@ Les éventuels modèles Django représentant ces tables doivent être
 `common.*` est un schéma partagé avec LSS. Les migrations Django de
 `app_group` ne doivent pas créer ni modifier ces tables comme si elles étaient
 propriétaires AM.
+
+Les modèles Django représentant `common.g_groups`, `common.g_group_user` et
+`common.g_group_user_ask_to_join` sont obligatoirement `managed = False`.
+
+Tant que `common.group_tags` n'existe pas dans le socle commun effectif, la
+colonne AM `gt_id` reste une référence logique sans FK PostgreSQL. Lorsque la
+table commune sera livrée par son propriétaire, une migration corrective pourra
+ajouter la FK `am.s_song_tag.gt_id -> common.group_tags.gt_id`.
 
 Pour l'usage AM du recueil, utiliser les tables `am.s_*` décrites plus bas. Ne
 pas introduire d'application `app_song` ou `app_chant`.
@@ -121,7 +145,7 @@ pas remplacer les tables propriétaires `am.s_*`.
 
 ---
 
-# 4. Groupe commun LSS/AM
+# 4. Groupe commun CARThographie/LSS/AM
 
 ## `am.g_group`
 
@@ -134,7 +158,6 @@ Champs :
 
 ```text
 gg_id
-is_open
 celebration_retention_months
 created_at
 updated_at
@@ -144,7 +167,7 @@ Relations :
 
 ```text
 gg_id
-    -> lss.g_groups.group_id
+    -> common.g_groups.group_id
     ON DELETE CASCADE
 ```
 
@@ -154,10 +177,12 @@ Contraintes :
 1 <= celebration_retention_months <= 24
 ```
 
-`gg_id` reprend exactement la valeur `lss.g_groups.group_id`.
+`gg_id` reprend exactement la valeur `common.g_groups.group_id`.
 
-Ne pas recopier le nom, la description ou les propriétés intrinsèques du groupe
-LSS dans `am.g_group`.
+Ne pas recopier le nom, la description, le statut ouvert/privé ou les propriétés
+intrinsèques du groupe commun dans `am.g_group`.
+
+Le mode ouvert/privé est lu depuis `common.g_groups.status`.
 
 La présence d'une ligne `am.g_group` signifie que le groupe dispose de son
 environnement AM.
@@ -195,6 +220,11 @@ gg_id
 mm_id
     -> am.m_member.mm_id
     ON DELETE CASCADE
+
+(gg_id, mm_id)
+    -> common.g_group_user(group_id, member_id)
+    ON DELETE CASCADE
+    pour les membres account
 ```
 
 Contraintes :
@@ -207,8 +237,13 @@ UNIQUE (gg_id, mm_id) pour les membres account
 ```
 
 Pour un utilisateur CARThographie, l'existence d'une ligne
-`g_group_member(member_kind = 'account')` signifie être Membre du groupe dans
-AM. Ne pas créer de rôle `Membre` redondant.
+`g_group_member(member_kind = 'account')` signifie que le membre commun possède
+une ancre technique AM parce que `common.g_group_user.am_access = TRUE`. Cette
+ligne ne remplace pas l'appartenance commune et ne crée pas de rôle `Membre`
+redondant.
+
+Le rôle Responsable n'est pas stocké dans `am.g_group_member` ni dans
+`am.g_role`. Il est lu depuis `common.g_group_user.is_group_admin`.
 
 `ggm_id` est l'ancre stable d'une personne dans un groupe. Une future fusion
 Membre AM vers compte CARThographie doit conserver le même `ggm_id`.
@@ -293,7 +328,7 @@ Le secret personnel ne doit jamais être stocké en clair.
 
 ---
 
-# 6. Rôles de groupe
+# 6. Rôles AM de groupe
 
 ## `am.g_role`
 
@@ -330,21 +365,18 @@ Contraintes :
 UNIQUE (gg_id, code)
 ```
 
-Dans ce document, `g_role` porte les rôles assignés qui ajoutent des droits.
-Membre et Membre AM restent des statuts d'appartenance, pas des lignes
-`g_role`.
+Dans ce document, `g_role` porte uniquement les rôles assignés qui ajoutent des
+droits propres à AM. Membre et Membre AM restent des statuts d'appartenance, pas
+des lignes `g_role`.
+
+Responsable n'est pas une ligne `g_role` : il est porté par
+`common.g_group_user.is_group_admin`.
 
 Rôles système V1 :
 
 ```text
-responsable
 responsable_impression
 ```
-
-Ces rôles sont cumulables.
-
-`responsable` donne les pouvoirs administratifs du groupe, dont les validations
-du planning et des célébrations.
 
 `responsable_impression` donne uniquement les droits liés aux feuilles de messe
 après validation d'une célébration. Il ne donne aucun droit sur le planning, le
@@ -388,11 +420,12 @@ Validations service :
 
 - `g_group_member.gg_id == g_role.gg_id` ;
 - un Membre AM ne reçoit aucun rôle donnant des droits ;
-- un groupe conserve toujours au moins un Responsable.
+- un groupe conserve toujours au moins un Responsable dans
+  `common.g_group_user`.
 
 Le garde-fou du dernier Responsable doit être transactionnel :
-`transaction.atomic()` et verrouillage des lignes concernées avec
-`select_for_update()`.
+`transaction.atomic()` et verrouillage des lignes `common.g_group_user`
+concernées avec `select_for_update()`.
 
 ---
 
@@ -549,16 +582,19 @@ mm_id
 Contraintes :
 
 ```text
-request_type IN ('join_group', 'am_access')
+request_type IN ('am_access')
 une seule demande active par (gg_id, mm_id)
 ```
 
-`join_group` concerne un utilisateur extérieur au groupe commun.
+Une demande de rattachement au groupe commun utilise
+`common.g_group_user_ask_to_join`, pas une table propriétaire AM.
 
-`am_access` concerne un utilisateur déjà membre du groupe côté LSS mais pas
+`am_access` concerne un utilisateur déjà membre du groupe commun mais pas
 encore autorisé dans AM.
 
-Les demandes sont transitoires et ne doivent pas rester actives après décision.
+Les demandes AM sont transitoires et ne doivent pas rester actives après
+décision. L'acceptation met à jour `common.g_group_user.am_access = TRUE` et
+crée l'ancre `am.g_group_member` correspondante.
 
 ## `am.g_am_member_request`
 
@@ -915,9 +951,11 @@ ss_id
     ON DELETE CASCADE
 
 gt_id
-    -> common.group_tags.gt_id
-    ON DELETE CASCADE
+    référence logique vers common.group_tags.gt_id
 ```
+
+La FK PostgreSQL vers `common.group_tags` n'est pas posée en migration initiale
+tant que cette table n'existe pas dans le schéma commun effectivement déployé.
 
 Contraintes :
 
@@ -928,7 +966,7 @@ UNIQUE (ss_id, gt_id)
 Validation service :
 
 ```text
-s_song.gg_id == common.group_tags.gg_id
+s_song.gg_id == common.group_tags.group_id
 ```
 
 Il est interdit d'associer à un chant du groupe A un tag appartenant au groupe B.
