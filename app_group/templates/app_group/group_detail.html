@@ -12,6 +12,7 @@
 {% block tools_title %}{% trans "Groupe" %}{% endblock %}
 {% block page_tools %}
     <p><a class="site-action site-action--secondary" href="{% url 'groups_manage' %}">{% trans "Tous les groupes" %}</a></p>
+    {% if group %}<p><a class="site-action site-action--primary" href="{% url 'group_songs' common_group.group_id %}">{% trans "Gestion des chants" %}</a></p>{% endif %}
     <p><a class="site-action site-action--secondary" href="{% url 'groups_home' %}">{% trans "Page publique" %}</a></p>
 {% endblock %}
 {% block mobile_side_title %}{{ common_group.name }}{% endblock %}
@@ -22,19 +23,27 @@
 {% endblock %}
 {% block page_kicker %}Animation Messe{% endblock %}
 {% block page_title %}{{ common_group.name }}{% endblock %}
-{% block page_intro %}
-    <p>
-        {% if common_group.status == "open" %}
-            {% trans "Groupe commun ouvert." %}
-        {% else %}
-            {% trans "Groupe commun privé." %}
-        {% endif %}
-    </p>
-{% endblock %}
+{% block page_intro %}{% endblock %}
 {% block page_summary %}
     {% if group %}
         <p>{% trans "Espace AM actif." %}</p>
-        <p>{% blocktrans with members=metrics.members requests=metrics.requests songs=metrics.songs %}{{ members }} membres AM, {{ requests }} demandes, {{ songs }} chants.{% endblocktrans %}</p>
+        <p>
+            {% if common_group.status == "open" %}
+                {% trans "Groupe commun public." %}
+            {% else %}
+                {% trans "Groupe commun privé." %}
+            {% endif %}
+        </p>
+        <p>{% blocktrans with members=metrics.account_members %}{{ members }} membres avec compte.{% endblocktrans %}</p>
+        <p>
+            {% if metrics.requests > 0 %}
+                <a href="{% url 'group_am_members' common_group.group_id %}">{% blocktrans with requests=metrics.requests %}{{ requests }} demandes en cours.{% endblocktrans %}</a>
+            {% else %}
+                {% trans "Aucune demande en cours." %}
+            {% endif %}
+        </p>
+        <p>{% blocktrans with am_members=metrics.am_members %}{{ am_members }} Membres AM.{% endblocktrans %}</p>
+        <p>{% blocktrans with songs=metrics.songs %}{{ songs }} chants dans le recueil.{% endblocktrans %}</p>
     {% else %}
         <p>{% trans "Espace AM à activer pour utiliser les paramètres et les demandes." %}</p>
     {% endif %}
@@ -59,259 +68,57 @@
             </article>
         </section>
     {% else %}
-        <section class="site-theme-selection" aria-label="{% trans 'Tableau de bord groupe' %}">
+        <section class="site-theme-selection" aria-label="{% trans 'Personnes du groupe' %}">
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Synthèse" %}</h2></div></header>
-                <p>{% blocktrans with functions=metrics.functions %}{{ functions }} fonctions configurées.{% endblocktrans %}</p>
-                <p>{% trans "Le rôle Responsable reste porté par le groupe commun." %}</p>
-            </article>
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Responsables communs" %}</h2></div></header>
-                {% for membership in common_memberships %}
-                    <p>
-                        <code>{{ membership.member_id }}</code>
-                        {% if membership.is_group_admin %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
-                        {% if membership.am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
-                    </p>
-                    <form method="post" data-app-group-confirm="{% trans 'Modifier le rôle Responsable de ce membre ?' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="set_common_responsable">
-                        <input type="hidden" name="member_id" value="{{ membership.member_id }}">
-                        <input type="hidden" name="enabled" value="{{ membership.is_group_admin|yesno:',on' }}">
-                        <button class="site-action site-action--secondary" type="submit">
-                            {% if membership.is_group_admin %}{% trans "Retirer Responsable" %}{% else %}{% trans "Nommer Responsable" %}{% endif %}
-                        </button>
-                    </form>
+                <header class="site-theme-card-header"><div><h2>{% trans "Liste des membres" %}</h2></div></header>
+                {% for member in account_members %}
+                    <p><code>{{ member.member_id }}</code></p>
                 {% empty %}
-                    <p>{% trans "Aucune appartenance commune trouvée." %}</p>
+                    <p>{% trans "Aucun membre avec compte actif." %}</p>
                 {% endfor %}
             </article>
-        </section>
-
-        <section class="site-theme-selection" aria-label="{% trans 'Membres du groupe' %}">
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Membres et Membres AM" %}</h2></div></header>
-                {% for member in members %}
-                    <article class="site-theme-card">
-                        <header class="site-theme-card-header">
-                            <div>
-                                <h3>
-                                    {% if member.member_kind == "am" %}
-                                        {{ member.am_profile.first_name }} {{ member.am_profile.last_name }}
-                                    {% else %}
-                                        {{ member.member_id }}
-                                    {% endif %}
-                                </h3>
-                                <p>{{ member.get_member_kind_display }}</p>
-                            </div>
-                        </header>
-                        {% if member.member_kind == "account" %}
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="assign_responsable_impression">
-                                <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                                <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
-                            </form>
-                            <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="remove_responsable_impression">
-                                <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                                <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
-                            </form>
-                        {% else %}
-                            <p>{% trans "Aucun droit applicatif ne peut être attribué à un Membre AM." %}</p>
-                        {% endif %}
-                        {% if functions %}
-                            <p>{% trans "Fonctions" %}</p>
-                            {% for function in functions %}
-                                <form method="post" style="display: inline-block;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="assign_function">
-                                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                                    <input type="hidden" name="function_id" value="{{ function.gf_id }}">
-                                    <button class="site-action site-action--secondary" type="submit">{{ function.name }}</button>
-                                </form>
-                                <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Retirer cette fonction ?' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="remove_function">
-                                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                                    <input type="hidden" name="function_id" value="{{ function.gf_id }}">
-                                    <button class="site-action site-action--danger" type="submit">- {{ function.name }}</button>
-                                </form>
-                            {% endfor %}
-                        {% endif %}
-                    </article>
+                <header class="site-theme-card-header"><div><h2>{% trans "Liste des responsables" %}</h2></div></header>
+                {% for membership in responsable_memberships %}
+                    <p><code>{{ membership.member_id }}</code></p>
                 {% empty %}
-                    <p>{% trans "Aucun membre AM actif pour l’instant." %}</p>
+                    <p>{% trans "Aucun Responsable commun trouvé." %}</p>
                 {% endfor %}
             </article>
-        </section>
-
-        <section class="site-theme-selection" aria-label="{% trans 'Demandes' %}">
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande d’accès AM" %}</h2></div></header>
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="create_access_request">
-                    {% for field in forms.access_request.visible_fields %}<div>{{ field.label_tag }} {{ field }} {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Créer la demande" %}</button>
-                </form>
-            </article>
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande Membre AM" %}</h2></div></header>
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="create_am_member_request">
-                    {% for field in forms.am_member_request.visible_fields %}<div>{{ field.label_tag }} {{ field }} {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Créer l’invitation" %}</button>
-                </form>
-            </article>
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Demandes en cours" %}</h2></div></header>
-                {% for access_request in access_requests %}
-                    <p>{% trans "Accès AM" %} <code>{{ access_request.member_id }}</code></p>
-                    <form method="post" style="display: inline-block;">
-                        {% csrf_token %}<input type="hidden" name="action" value="accept_access_request"><input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
-                        <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
-                    </form>
-                    <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande ?' %}">
-                        {% csrf_token %}<input type="hidden" name="action" value="refuse_access_request"><input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
-                        <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
-                    </form>
-                {% endfor %}
-                {% for am_request in am_member_requests %}
-                    <p>{% trans "Membre AM" %} {{ am_request.first_name }} {{ am_request.last_name }} — {{ am_request.get_status_display }}</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="accept_am_member_request">
-                        <input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
-                        <label>{% trans "Jeton" %} <input name="consent_token"></label>
-                        <label>{% trans "Secret" %} <input name="withdrawal_secret" type="password"></label>
-                        <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
-                    </form>
-                    <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande Membre AM ?' %}">
-                        {% csrf_token %}<input type="hidden" name="action" value="refuse_am_member_request"><input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
-                        <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
-                    </form>
-                    <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Expirer cette demande Membre AM ?' %}">
-                        {% csrf_token %}<input type="hidden" name="action" value="expire_am_member_request"><input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
-                        <button class="site-action site-action--secondary" type="submit">{% trans "Expirer" %}</button>
-                    </form>
+                <header class="site-theme-card-header"><div><h2>{% trans "Liste des Membres AM" %}</h2></div></header>
+                {% for member in am_members %}
+                    <p>{{ member.am_profile.first_name }} {{ member.am_profile.last_name }}</p>
                 {% empty %}
-                    {% if not access_requests %}<p>{% trans "Aucune demande en cours." %}</p>{% endif %}
+                    <p>{% trans "Aucun Membre AM actif." %}</p>
                 {% endfor %}
             </article>
         </section>
 
-        <section class="site-theme-selection" aria-label="{% trans 'Paramètres groupe' %}">
+        <section class="site-theme-selection" aria-label="{% trans 'Actions de gestion' %}">
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Fonctions" %}</h2></div></header>
-                {% for function in functions %}<p>{{ function.name }}{% if not function.is_active %} — {% trans "inactive" %}{% endif %}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="save_function">
-                    {% for field in forms.function.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer la fonction" %}</button>
-                </form>
+                <header class="site-theme-card-header"><div><h2>{% trans "Modifier les personnes" %}</h2></div></header>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_members' common_group.group_id %}">{% trans "Membres" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_responsables' common_group.group_id %}">{% trans "Responsables" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_am_members' common_group.group_id %}">{% trans "Membres AM" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_functions' common_group.group_id %}">{% trans "Fonctions" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_am_member_titles' common_group.group_id %}">{% trans "Titres Membre AM" %}</a></p>
             </article>
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Titres Membre AM" %}</h2></div></header>
-                {% for title in titles %}<p>{{ title.label }}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="save_am_member_title">
-                    {% for field in forms.title.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer le titre" %}</button>
-                </form>
+                <header class="site-theme-card-header"><div><h2>{% trans "Paramètres du calendrier" %}</h2></div></header>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_calendar_states' common_group.group_id %}">{% trans "États planning" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_calendar_regular_rules' common_group.group_id %}">{% trans "Règles régulières" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_calendar_special_dates' common_group.group_id %}">{% trans "Dates particulières" %}</a></p>
             </article>
             <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Lieux" %}</h2></div></header>
-                {% for location in locations %}<p>{{ location.name }}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="save_location">
-                    {% for field in forms.location.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer le lieu" %}</button>
-                </form>
-            </article>
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "États planning" %}</h2></div></header>
-                {% for state in planning_states %}<p>{{ state.name }} — {{ state.get_kind_display }}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="save_planning_state">
-                    {% for field in forms.planning_state.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer l’état" %}</button>
-                </form>
+                <header class="site-theme-card-header"><div><h2>{% trans "Paramètres du groupe" %}</h2></div></header>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_settings' common_group.group_id %}">{% trans "Paramètres généraux" %}</a></p>
+                <p><a class="site-action site-action--secondary" href="{% url 'group_locations' common_group.group_id %}">{% trans "Lieux" %}</a></p>
             </article>
         </section>
-
-        <section class="site-theme-selection" aria-label="{% trans 'Règles de célébration' %}">
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Règles régulières" %}</h2></div></header>
-                {% for rule in celebration_rules %}<p>{{ rule.weekday }} — {{ rule.time }} — {{ rule.location.name }}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="create_celebration_rule">
-                    {% for field in forms.celebration_rule.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Créer la règle" %}</button>
-                </form>
-            </article>
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Dates particulières" %}</h2></div></header>
-                {% for rule in special_date_rules %}<p>{{ rule.name }} — {{ rule.rule_type }}</p>{% endfor %}
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="create_special_date_rule">
-                    {% for field in forms.special_date_rule.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Créer la date" %}</button>
-                </form>
-            </article>
-        </section>
-
-        <section class="site-theme-selection" aria-label="{% trans 'Recueil' %}">
-            <article class="site-theme-card">
-                <header class="site-theme-card-header"><div><h2>{% trans "Ajouter un chant LSS" %}</h2></div></header>
-                <form method="post" data-unsaved-guard>
-                    {% csrf_token %}<input type="hidden" name="action" value="add_song">
-                    {% for field in forms.song.visible_fields %}<div>{{ field.label_tag }} {{ field }}{% if field.help_text %}<p>{{ field.help_text }}</p>{% endif %}</div>{% endfor %}
-                    <button class="site-action site-action--primary" type="submit">{% trans "Ajouter au recueil" %}</button>
-                </form>
-            </article>
-            {% for song in songs %}
-                <article class="site-theme-card">
-                    <header class="site-theme-card-header"><div><h2>{% trans "Chant LSS" %} {{ song.song_id }}</h2></div></header>
-                    <p>{% trans "Blocs" %}: {% for verse in song.verses.all %}<code>{{ verse.verse_id }}</code> {% empty %}{% trans "aucun" %}{% endfor %}</p>
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="tag_song">
-                        <input type="hidden" name="song_id" value="{{ song.ss_id }}">
-                        <label>{% trans "Tag" %}
-                            <select name="group_tag_id">
-                                {% for tag in group_tags %}<option value="{{ tag.gt_id }}">{{ tag.name }}</option>{% endfor %}
-                            </select>
-                        </label>
-                        <button class="site-action site-action--secondary" type="submit">{% trans "Associer le tag" %}</button>
-                    </form>
-                    {% for song_tag in song.song_tags.all %}
-                        <p>{{ song_tag.group_tag.name }}</p>
-                        {% for selection in song_tag.verse_selections.all %}
-                            <form method="post" style="display: inline-block;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="set_tag_verse_selection">
-                                <input type="hidden" name="song_tag_id" value="{{ song_tag.sst_id }}">
-                                <input type="hidden" name="verse_id" value="{{ selection.verse_id }}">
-                                <input type="hidden" name="selected_by_default" value="{{ selection.selected_by_default|yesno:',on' }}">
-                                <button class="site-action site-action--secondary" type="submit">
-                                    {{ selection.verse.verse_id }} :
-                                    {% if selection.selected_by_default %}{% trans "retirer défaut" %}{% else %}{% trans "définir défaut" %}{% endif %}
-                                </button>
-                            </form>
-                        {% endfor %}
-                    {% endfor %}
-                </article>
-            {% endfor %}
-        </section>
-
-        <script id="app-group-invitation-notice" type="application/json">{{ invitation_notice_json|safe }}</script>
     {% endif %}
 {% endblock %}
 
 {% block page_scripts %}
-    <script src="{% static 'js/unsaved_changes.js' %}"></script>
     <script src="{% static 'js/app_group.js' %}"></script>
 {% endblock %}

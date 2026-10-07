@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ page_title }} | {{ common_group.name }} | Animation Messe{% endblock %}
+{% block section_title %}{{ common_group.name }}{% endblock %}
+{% block section_nav %}
+    <div class="site-home-media">
+        {% include "includes/themed_icon.html" with picture_class="" img_class="" icon_name="groups" icon_alt="" %}
+    </div>
+{% endblock %}
+{% block tools_title %}{% trans "Groupe" %}{% endblock %}
+{% block page_tools %}
+    <p><a class="site-action site-action--secondary" href="{% url 'group_detail' common_group.group_id %}">{% trans "Tableau de bord" %}</a></p>
+    <p><a class="site-action site-action--secondary" href="{% url 'groups_manage' %}">{% trans "Tous les groupes" %}</a></p>
+    <p><a class="site-action site-action--primary" href="{% url 'group_songs' common_group.group_id %}">{% trans "Gestion des chants" %}</a></p>
+{% endblock %}
+{% block mobile_side_title %}{{ page_title }}{% endblock %}
+{% block mobile_side_visual %}
+    <div class="site-home-media">
+        {% include "includes/themed_icon.html" with picture_class="" img_class="" icon_name="groups" icon_alt="" %}
+    </div>
+{% endblock %}
+{% block page_kicker %}{{ common_group.name }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_intro %}
+    <p>
+        {% if common_group.status == "open" %}
+            {% trans "Groupe commun public." %}
+        {% else %}
+            {% trans "Groupe commun privé." %}
+        {% endif %}
+    </p>
+{% endblock %}
+{% block page_summary %}
+    <p>{% trans "Espace AM actif." %}</p>
+{% endblock %}
+
+{% block content %}
+    {% block group_page_content %}{% endblock %}
+    <script id="app-group-invitation-notice" type="application/json">{{ invitation_notice_json|safe }}</script>
+{% endblock %}
+
+{% block page_scripts %}
+    <script src="{% static 'js/unsaved_changes.js' %}"></script>
+    <script src="{% static 'js/app_group.js' %}"></script>
+{% endblock %}

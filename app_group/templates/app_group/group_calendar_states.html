@@ -1,0 +1,17 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'États planning' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "États planning" %}</h2></div></header>
+            {% for state in planning_states %}<p>{{ state.name }} — {{ state.get_kind_display }}</p>{% empty %}<p>{% trans "Aucun état configuré." %}</p>{% endfor %}
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_planning_state">
+                {% for field in forms.planning_state.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer l’état" %}</button>
+            </form>
+        </article>
+    </section>
+{% endblock %}

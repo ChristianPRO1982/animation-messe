@@ -1,0 +1,56 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Membres avec compte' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Membres avec compte" %}</h2></div></header>
+            {% for member in account_members %}
+                <p><code>{{ member.member_id }}</code></p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="assign_responsable_impression">
+                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
+                    <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
+                </form>
+                <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_responsable_impression">
+                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
+                    <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
+                </form>
+            {% empty %}
+                <p>{% trans "Aucun membre avec compte actif." %}</p>
+            {% endfor %}
+        </article>
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande d’accès AM" %}</h2></div></header>
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_access_request">
+                {% for field in forms.access_request.visible_fields %}<div>{{ field.label_tag }} {{ field }} {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Créer la demande" %}</button>
+            </form>
+        </article>
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Demandes d’accès AM" %}</h2></div></header>
+            {% for access_request in access_requests %}
+                <p><code>{{ access_request.member_id }}</code></p>
+                <form method="post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept_access_request">
+                    <input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
+                    <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
+                </form>
+                <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande ?' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="refuse_access_request">
+                    <input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
+                    <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
+                </form>
+            {% empty %}
+                <p>{% trans "Aucune demande d’accès AM." %}</p>
+            {% endfor %}
+        </article>
+    </section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Recueil' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Ajouter un chant LSS" %}</h2></div></header>
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_song">
+                {% for field in forms.song.visible_fields %}<div>{{ field.label_tag }} {{ field }}{% if field.help_text %}<p>{{ field.help_text }}</p>{% endif %}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Ajouter au recueil" %}</button>
+            </form>
+        </article>
+        {% for song in songs %}
+            <article class="site-theme-card">
+                <header class="site-theme-card-header"><div><h2>{% trans "Chant LSS" %} {{ song.song_id }}</h2></div></header>
+                <p>{% trans "Blocs" %}: {% for verse in song.verses.all %}<code>{{ verse.verse_id }}</code> {% empty %}{% trans "aucun" %}{% endfor %}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="tag_song">
+                    <input type="hidden" name="song_id" value="{{ song.ss_id }}">
+                    <label>{% trans "Tag" %}
+                        <select name="group_tag_id">
+                            {% for tag in group_tags %}<option value="{{ tag.gt_id }}">{{ tag.name }}</option>{% endfor %}
+                        </select>
+                    </label>
+                    <button class="site-action site-action--secondary" type="submit">{% trans "Associer le tag" %}</button>
+                </form>
+                {% for song_tag in song.song_tags.all %}
+                    <p>{{ song_tag.group_tag.name }}</p>
+                    {% for selection in song_tag.verse_selections.all %}
+                        <form method="post" style="display: inline-block;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="set_tag_verse_selection">
+                            <input type="hidden" name="song_tag_id" value="{{ song_tag.sst_id }}">
+                            <input type="hidden" name="verse_id" value="{{ selection.verse_id }}">
+                            <input type="hidden" name="selected_by_default" value="{{ selection.selected_by_default|yesno:',on' }}">
+                            <button class="site-action site-action--secondary" type="submit">
+                                {{ selection.verse.verse_id }} :
+                                {% if selection.selected_by_default %}{% trans "retirer défaut" %}{% else %}{% trans "définir défaut" %}{% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                {% endfor %}
+            </article>
+        {% empty %}
+            <article class="site-theme-card">
+                <header class="site-theme-card-header"><div><h2>{% trans "Recueil vide" %}</h2></div></header>
+                <p>{% trans "Aucun chant n’est encore dans le recueil." %}</p>
+            </article>
+        {% endfor %}
+    </section>
+{% endblock %}

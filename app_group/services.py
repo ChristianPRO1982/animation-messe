@@ -214,6 +214,12 @@ def save_group_function(function: GroupFunction) -> GroupFunction:
     return function
 
 
+def save_group_settings(group: Group) -> Group:
+    group.full_clean()
+    group.save(update_fields=["celebration_retention_months", "updated_at"])
+    return group
+
+
 def save_am_member_title(title: AmMemberTitle) -> AmMemberTitle:
     title.full_clean()
     title.save()

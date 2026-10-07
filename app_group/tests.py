@@ -94,6 +94,49 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         self.group = group_models.Group(gg_id=7)
 
+    def empty_group_context(self):
+        return {
+            "common_group": self.common_group,
+            "group": self.group,
+            "selected_group": self.common_group,
+            "common_memberships": [],
+            "responsable_memberships": [],
+            "members": [],
+            "account_members": [],
+            "am_members": [],
+            "functions": [],
+            "titles": [],
+            "locations": [],
+            "planning_states": [],
+            "celebration_rules": [],
+            "special_date_rules": [],
+            "access_requests": [],
+            "am_member_requests": [],
+            "group_tags": [],
+            "songs": [],
+            "metrics": {
+                "members": 0,
+                "account_members": 0,
+                "am_members": 0,
+                "requests": 0,
+                "songs": 0,
+                "functions": 0,
+            },
+            "invitation_notice_json": "{}",
+            "forms": {
+                "settings": group_forms.GroupSettingsForm(),
+                "access_request": group_forms.AccessRequestForm(),
+                "am_member_request": group_forms.AmMemberRequestForm(),
+                "function": group_forms.GroupFunctionForm(),
+                "title": group_forms.AmMemberTitleForm(),
+                "location": group_forms.GroupLocationForm(),
+                "planning_state": group_forms.PlanningStateForm(),
+                "celebration_rule": group_forms.CelebrationRuleForm(),
+                "special_date_rule": group_forms.SpecialDateRuleForm(),
+                "song": group_forms.RepertoireSongForm(),
+            },
+        }
+
     def test_manage_requires_authentication(self):
         request = build_request(
             self.factory,
@@ -176,6 +219,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "metrics": {"members": 0, "requests": 0, "songs": 0, "functions": 0},
             "invitation_notice_json": "{}",
             "forms": {
+                "settings": group_forms.GroupSettingsForm(),
                 "access_request": group_forms.AccessRequestForm(),
                 "am_member_request": group_forms.AmMemberRequestForm(),
                 "function": group_forms.GroupFunctionForm(),
@@ -191,11 +235,148 @@ class AppGroupManagementViewTests(SimpleTestCase):
         response = group_views.group_detail(request, 7)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Membres et Membres AM")
-        self.assertContains(response, "Demandes")
-        self.assertContains(response, "Recueil")
+        self.assertContains(response, "Liste des membres")
+        self.assertContains(response, "Liste des responsables")
+        self.assertContains(response, "Liste des Membres AM")
+        self.assertContains(response, reverse("group_songs", kwargs={"group_id": 7}))
         self.assertContains(response, "static/js/app_group.js")
-        self.assertContains(response, "app-group-invitation-notice")
+        self.assertNotContains(response, "Créer une demande d’accès AM")
+        self.assertNotContains(response, "Ajouter au recueil")
+
+    @patch("app_group.views._get_common_group")
+    def test_dedicated_pages_redirect_anonymous_user(self, get_common_group):
+        dedicated_views = [
+            group_views.group_members,
+            group_views.group_responsables,
+            group_views.group_am_members,
+            group_views.group_functions,
+            group_views.group_am_member_titles,
+            group_views.group_calendar_states,
+            group_views.group_calendar_regular_rules,
+            group_views.group_calendar_special_dates,
+            group_views.group_settings,
+            group_views.group_locations,
+            group_views.group_songs,
+        ]
+
+        for view_func in dedicated_views:
+            with self.subTest(view=view_func.__name__):
+                request = build_request(
+                    self.factory,
+                    path="/groups/7/members/",
+                    user=build_user(authenticated=False),
+                )
+
+                response = view_func(request, 7)
+
+                self.assertEqual(response.status_code, 302)
+                self.assertEqual(response.url, reverse("login"))
+
+        get_common_group.assert_not_called()
+
+    @patch("app_group.views._can_manage_common_group", return_value=False)
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_dedicated_page_forbids_non_responsable(
+        self, get_common_group, group_model, _can_manage
+    ):
+        request = build_request(
+            self.factory,
+            path="/groups/7/members/",
+            user=self.user,
+        )
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+
+        response = group_views.group_members(request, 7)
+
+        self.assertEqual(response.status_code, 403)
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_dedicated_page_redirects_to_dashboard_when_am_inactive(
+        self, get_common_group, group_model, _can_manage, message_api
+    ):
+        request = build_request(
+            self.factory,
+            path="/groups/7/members/",
+            user=self.user,
+        )
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = None
+
+        response = group_views.group_members(request, 7)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("group_detail", kwargs={"group_id": 7}))
+        message_api.error.assert_called_once()
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_dedicated_pages_render_expected_templates(
+        self,
+        get_common_group,
+        group_model,
+        _can_manage,
+        build_context,
+    ):
+        pages = [
+            (group_views.group_members, "group_members", "Membres avec compte"),
+            (group_views.group_responsables, "group_responsables", "Responsables"),
+            (
+                group_views.group_am_members,
+                "group_am_members",
+                "Créer une demande Membre AM",
+            ),
+            (group_views.group_functions, "group_functions", "Affectations"),
+            (
+                group_views.group_am_member_titles,
+                "group_am_member_titles",
+                "Titres Membre AM",
+            ),
+            (
+                group_views.group_calendar_states,
+                "group_calendar_states",
+                "États planning",
+            ),
+            (
+                group_views.group_calendar_regular_rules,
+                "group_calendar_regular_rules",
+                "Règles régulières",
+            ),
+            (
+                group_views.group_calendar_special_dates,
+                "group_calendar_special_dates",
+                "Dates particulières",
+            ),
+            (group_views.group_settings, "group_settings", "Paramètres généraux"),
+            (group_views.group_locations, "group_locations", "Lieux"),
+            (group_views.group_songs, "group_songs", "Ajouter un chant LSS"),
+        ]
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+
+        for view_func, route_name, expected_text in pages:
+            with self.subTest(route=route_name):
+                request = build_request(
+                    self.factory,
+                    path=reverse(route_name, kwargs={"group_id": 7}),
+                    user=self.user,
+                )
+                build_context.return_value = self.empty_group_context()
+
+                response = view_func(request, 7)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, expected_text)
+                self.assertContains(
+                    response, reverse("group_detail", kwargs={"group_id": 7})
+                )
+                self.assertContains(response, "static/js/app_group.js")
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.ensure_group_environment")
@@ -247,7 +428,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         request = build_request(
             self.factory,
             method="post",
-            path="/groups/7/",
+            path="/groups/7/members/",
             data={
                 "action": "assign_responsable_impression",
                 "group_member_id": "42",
@@ -257,9 +438,10 @@ class AppGroupManagementViewTests(SimpleTestCase):
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
 
-        response = group_views.group_detail(request, 7)
+        response = group_views.group_members(request, 7)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("group_members", kwargs={"group_id": 7}))
         assign_responsable.assert_called_once_with(group_member)
 
     @patch("app_group.views.messages")
@@ -280,7 +462,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         request = build_request(
             self.factory,
             method="post",
-            path="/groups/7/",
+            path="/groups/7/responsables/",
             data={
                 "action": "set_common_responsable",
                 "member_id": "22222222-2222-2222-2222-222222222222",
@@ -291,9 +473,12 @@ class AppGroupManagementViewTests(SimpleTestCase):
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
 
-        response = group_views.group_detail(request, 7)
+        response = group_views.group_responsables(request, 7)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url, reverse("group_responsables", kwargs={"group_id": 7})
+        )
         set_common_responsable.assert_called_once_with(
             7,
             "22222222-2222-2222-2222-222222222222",
@@ -324,7 +509,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         request = build_request(
             self.factory,
             method="post",
-            path="/groups/7/",
+            path="/groups/7/am-members/",
             data={
                 "action": "create_am_member_request",
                 "first_name": "Alice",
@@ -337,9 +522,12 @@ class AppGroupManagementViewTests(SimpleTestCase):
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
 
-        response = group_views.group_detail(request, 7)
+        response = group_views.group_am_members(request, 7)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url, reverse("group_am_members", kwargs={"group_id": 7})
+        )
         create_request.assert_called_once()
         self.assertEqual(
             create_request.call_args.kwargs["consent_token"], "token-public"
@@ -377,7 +565,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         request = build_request(
             self.factory,
             method="post",
-            path="/groups/7/",
+            path="/groups/7/functions/",
             data={
                 "action": "assign_function",
                 "group_member_id": "42",
@@ -388,9 +576,12 @@ class AppGroupManagementViewTests(SimpleTestCase):
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
 
-        response = group_views.group_detail(request, 7)
+        response = group_views.group_functions(request, 7)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url, reverse("group_functions", kwargs={"group_id": 7})
+        )
         assign_function.assert_called_once_with(group_member, function)
 
     @patch("app_group.views.messages")
@@ -411,7 +602,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         request = build_request(
             self.factory,
             method="post",
-            path="/groups/7/",
+            path="/groups/7/songs/",
             data={
                 "action": "add_song",
                 "song_id": "123",
@@ -422,9 +613,10 @@ class AppGroupManagementViewTests(SimpleTestCase):
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
 
-        response = group_views.group_detail(request, 7)
+        response = group_views.group_songs(request, 7)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("group_songs", kwargs={"group_id": 7}))
         add_song.assert_called_once_with(self.group, song_id=123, verse_ids=[1, 2, 3])
 
 

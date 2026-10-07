@@ -1,0 +1,47 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Fonctions' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Fonctions" %}</h2></div></header>
+            {% for function in functions %}<p>{{ function.name }}{% if not function.is_active %} — {% trans "inactive" %}{% endif %}</p>{% empty %}<p>{% trans "Aucune fonction configurée." %}</p>{% endfor %}
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_function">
+                {% for field in forms.function.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer la fonction" %}</button>
+            </form>
+        </article>
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Affectations" %}</h2></div></header>
+            {% for member in members %}
+                <p>
+                    {% if member.member_kind == "am" %}
+                        {{ member.am_profile.first_name }} {{ member.am_profile.last_name }}
+                    {% else %}
+                        <code>{{ member.member_id }}</code>
+                    {% endif %}
+                </p>
+                {% for function in functions %}
+                    <form method="post" style="display: inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="assign_function">
+                        <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
+                        <input type="hidden" name="function_id" value="{{ function.gf_id }}">
+                        <button class="site-action site-action--secondary" type="submit">{{ function.name }}</button>
+                    </form>
+                    <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Retirer cette fonction ?' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove_function">
+                        <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
+                        <input type="hidden" name="function_id" value="{{ function.gf_id }}">
+                        <button class="site-action site-action--danger" type="submit">- {{ function.name }}</button>
+                    </form>
+                {% endfor %}
+            {% empty %}
+                <p>{% trans "Aucune personne active pour l’instant." %}</p>
+            {% endfor %}
+        </article>
+    </section>
+{% endblock %}

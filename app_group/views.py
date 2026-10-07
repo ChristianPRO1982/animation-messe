@@ -30,6 +30,86 @@ from app_member.models import Member
 
 INVITATION_NOTICE_SESSION_KEY = "app_group_invitation_notice"
 
+GROUP_PAGE_CONFIG = {
+    "members": {
+        "template": "app_group/group_members.html",
+        "title": _("Membres"),
+        "route": "group_members",
+        "actions": {
+            "assign_responsable_impression",
+            "remove_responsable_impression",
+            "create_access_request",
+            "accept_access_request",
+            "refuse_access_request",
+        },
+    },
+    "responsables": {
+        "template": "app_group/group_responsables.html",
+        "title": _("Responsables"),
+        "route": "group_responsables",
+        "actions": {"set_common_responsable"},
+    },
+    "am_members": {
+        "template": "app_group/group_am_members.html",
+        "title": _("Membres AM"),
+        "route": "group_am_members",
+        "actions": {
+            "create_am_member_request",
+            "accept_am_member_request",
+            "refuse_am_member_request",
+            "expire_am_member_request",
+        },
+    },
+    "functions": {
+        "template": "app_group/group_functions.html",
+        "title": _("Fonctions"),
+        "route": "group_functions",
+        "actions": {"save_function", "assign_function", "remove_function"},
+    },
+    "am_member_titles": {
+        "template": "app_group/group_am_member_titles.html",
+        "title": _("Titres Membre AM"),
+        "route": "group_am_member_titles",
+        "actions": {"save_am_member_title"},
+    },
+    "calendar_states": {
+        "template": "app_group/group_calendar_states.html",
+        "title": _("États planning"),
+        "route": "group_calendar_states",
+        "actions": {"save_planning_state"},
+    },
+    "calendar_regular_rules": {
+        "template": "app_group/group_calendar_regular_rules.html",
+        "title": _("Règles régulières"),
+        "route": "group_calendar_regular_rules",
+        "actions": {"create_celebration_rule"},
+    },
+    "calendar_special_dates": {
+        "template": "app_group/group_calendar_special_dates.html",
+        "title": _("Dates particulières"),
+        "route": "group_calendar_special_dates",
+        "actions": {"create_special_date_rule"},
+    },
+    "settings": {
+        "template": "app_group/group_settings.html",
+        "title": _("Paramètres généraux"),
+        "route": "group_settings",
+        "actions": {"save_group_settings"},
+    },
+    "locations": {
+        "template": "app_group/group_locations.html",
+        "title": _("Lieux"),
+        "route": "group_locations",
+        "actions": {"save_location"},
+    },
+    "songs": {
+        "template": "app_group/group_songs.html",
+        "title": _("Recueil"),
+        "route": "group_songs",
+        "actions": {"add_song", "tag_song", "set_tag_verse_selection"},
+    },
+}
+
 
 def groups_home(request):
     return render(request, "app_group/groups_home.html")
@@ -75,10 +155,60 @@ def group_detail(request, group_id: int):
         return HttpResponseForbidden(_("Accès refusé."))
 
     if request.method == "POST":
-        return _handle_detail_post(request, common_group, group)
+        return _handle_group_post(
+            request,
+            common_group,
+            group,
+            redirect_name="group_detail",
+            allowed_actions={"activate_group"},
+        )
 
     context = _build_group_context(request, common_group, group)
     return render(request, "app_group/group_detail.html", context)
+
+
+def group_members(request, group_id: int):
+    return _group_management_page(request, group_id, "members")
+
+
+def group_responsables(request, group_id: int):
+    return _group_management_page(request, group_id, "responsables")
+
+
+def group_am_members(request, group_id: int):
+    return _group_management_page(request, group_id, "am_members")
+
+
+def group_functions(request, group_id: int):
+    return _group_management_page(request, group_id, "functions")
+
+
+def group_am_member_titles(request, group_id: int):
+    return _group_management_page(request, group_id, "am_member_titles")
+
+
+def group_calendar_states(request, group_id: int):
+    return _group_management_page(request, group_id, "calendar_states")
+
+
+def group_calendar_regular_rules(request, group_id: int):
+    return _group_management_page(request, group_id, "calendar_regular_rules")
+
+
+def group_calendar_special_dates(request, group_id: int):
+    return _group_management_page(request, group_id, "calendar_special_dates")
+
+
+def group_settings(request, group_id: int):
+    return _group_management_page(request, group_id, "settings")
+
+
+def group_locations(request, group_id: int):
+    return _group_management_page(request, group_id, "locations")
+
+
+def group_songs(request, group_id: int):
+    return _group_management_page(request, group_id, "songs")
 
 
 def _handle_manage_post(request):
@@ -100,6 +230,55 @@ def _handle_manage_post(request):
 
 
 def _handle_detail_post(request, common_group: CommonGroup, group: Group | None):
+    return _handle_group_post(
+        request,
+        common_group,
+        group,
+        redirect_name="group_detail",
+    )
+
+
+def _group_management_page(request, group_id: int, page_key: str):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    common_group = _get_common_group(group_id)
+    group = Group.objects.filter(gg_id=group_id).first()
+    if not _can_manage_common_group(request.user, group_id):
+        return HttpResponseForbidden(_("Accès refusé."))
+
+    config = GROUP_PAGE_CONFIG[page_key]
+    if group is None:
+        messages.error(request, _("Activez l'espace AM avant cette action."))
+        return redirect("group_detail", group_id=group_id)
+
+    if request.method == "POST":
+        return _handle_group_post(
+            request,
+            common_group,
+            group,
+            redirect_name=config["route"],
+            allowed_actions=config["actions"],
+        )
+
+    context = _build_group_context(request, common_group, group)
+    context.update(
+        {
+            "page_key": page_key,
+            "page_title": config["title"],
+        }
+    )
+    return render(request, config["template"], context)
+
+
+def _handle_group_post(
+    request,
+    common_group: CommonGroup,
+    group: Group | None,
+    *,
+    redirect_name: str,
+    allowed_actions: set[str] | None = None,
+):
     action = request.POST.get("action", "").strip()
     group_id = common_group.group_id
 
@@ -116,6 +295,10 @@ def _handle_detail_post(request, common_group: CommonGroup, group: Group | None)
         messages.error(request, _("Activez l'espace AM avant cette action."))
         return redirect("group_detail", group_id=group_id)
 
+    if allowed_actions is not None and action not in allowed_actions:
+        messages.error(request, _("Action groupe invalide sur cette page."))
+        return redirect(redirect_name, group_id=group_id)
+
     try:
         services.require_group_manager(request.user, group)
         _dispatch_group_action(request, group, action)
@@ -124,7 +307,7 @@ def _handle_detail_post(request, common_group: CommonGroup, group: Group | None)
     except (ValidationError, ValueError) as exc:
         messages.error(request, _validation_message(exc))
 
-    return redirect("group_detail", group_id=group_id)
+    return redirect(redirect_name, group_id=group_id)
 
 
 def _dispatch_group_action(request, group: Group, action: str) -> None:
@@ -264,6 +447,16 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         messages.success(request, _("La fonction est enregistrée."))
         return
 
+    if action == "save_group_settings":
+        form = forms.GroupSettingsForm(request.POST)
+        _validate_action_form(form, action)
+        group.celebration_retention_months = form.cleaned_data[
+            "celebration_retention_months"
+        ]
+        services.save_group_settings(group)
+        messages.success(request, _("Les paramètres généraux sont enregistrés."))
+        return
+
     if action == "save_am_member_title":
         form = forms.AmMemberTitleForm(request.POST)
         _validate_action_form(form, action)
@@ -400,6 +593,16 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
         "common_memberships": common_memberships,
         "invitation_notice_json": json.dumps(invitation_notice or {}),
         "forms": {
+            "settings": forms.GroupSettingsForm(
+                initial={
+                    "action": "save_group_settings",
+                    "celebration_retention_months": (
+                        getattr(group, "celebration_retention_months", 24)
+                        if group
+                        else 24
+                    ),
+                }
+            ),
             "access_request": forms.AccessRequestForm(
                 initial={"action": "create_access_request"}
             ),
@@ -442,6 +645,21 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
     context.update(
         {
             "members": members,
+            "account_members": [
+                member
+                for member in members
+                if member.member_kind == MEMBER_KIND_ACCOUNT
+            ],
+            "am_members": [
+                member
+                for member in members
+                if member.member_kind != MEMBER_KIND_ACCOUNT
+            ],
+            "responsable_memberships": [
+                membership
+                for membership in common_memberships
+                if membership.is_group_admin
+            ],
             "functions": list(group.functions.all()),
             "titles": list(group.am_member_titles.all()),
             "locations": list(group.locations.all()),
@@ -456,6 +674,20 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
             "songs": songs,
             "metrics": {
                 "members": len(members),
+                "account_members": len(
+                    [
+                        member
+                        for member in members
+                        if member.member_kind == MEMBER_KIND_ACCOUNT
+                    ]
+                ),
+                "am_members": len(
+                    [
+                        member
+                        for member in members
+                        if member.member_kind != MEMBER_KIND_ACCOUNT
+                    ]
+                ),
                 "functions": group.functions.count(),
                 "requests": group.access_requests.count()
                 + group.am_member_requests.filter(

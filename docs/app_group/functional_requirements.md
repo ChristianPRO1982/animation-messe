@@ -137,6 +137,73 @@ Le lien vers cet espace peut être présenté par `app_main` :
 
 La page publique `/groups/` reste distincte de l'espace de gestion.
 
+La page `/groups/<id>/` est la page de pilotage synthétique d'un groupe.
+Elle ne doit pas devenir une page fourre-tout contenant tous les formulaires de
+gestion. Elle présente l'état du groupe, les listes utiles à la décision et des
+accès vers les actions ou pages dédiées.
+
+L'encadré résumé de `/groups/<id>/` est une zone de lecture seule. Il doit
+afficher, avec des éléments séparés et lisibles :
+
+- l'état de l'espace AM, actif ou inactif ;
+- le statut public ou privé du groupe commun ;
+- le nombre de membres avec compte ;
+- le nombre de demandes, avec un lien vers la page ou l'action dédiée lorsque
+  ce nombre est supérieur à zéro ;
+- le nombre de Membres AM ;
+- le nombre de chants dans le recueil du groupe.
+
+Le panneau outils de `/groups/<id>/` doit proposer un accès vers la gestion des
+chants ou du recueil du groupe.
+
+Le corps de `/groups/<id>/` doit privilégier des blocs de consultation et de
+navigation. Les blocs historiques `Synthèse` et `Responsables communs` ne sont
+pas la cible UX. Ils doivent être remplacés par :
+
+- `Liste des membres` ;
+- `Liste des responsables` ;
+- `Liste des Membres AM` ;
+- un bloc d'actions de modification proposant des accès dédiés pour gérer les
+  membres, les responsables, les Membres AM, les fonctions et les titres Membre
+  AM.
+
+Un bloc général de paramétrage doit regrouper les accès dédiés sans afficher
+tous les formulaires directement :
+
+- `Paramètres du calendrier` : états planning, règles régulières, dates
+  particulières ;
+- `Paramètres du groupe` : paramètres généraux, lieux.
+
+## Pages de gestion dédiées
+
+Les boutons et accès de `/groups/<id>/` doivent pointer vers des pages dédiées
+de gestion. Ces routes sont une cible UX à implémenter progressivement : leur
+présence dans ce document ne signifie pas qu'elles existent déjà dans le code.
+
+Le découpage cible est volontairement fin afin que chaque écran reste lisible :
+
+- `/groups/<id>/members/` : membres avec compte, accès AM et actions liées aux
+  membres ;
+- `/groups/<id>/responsables/` : Responsables communs portés par
+  `common.g_group_user.is_group_admin` ;
+- `/groups/<id>/am-members/` : Membres AM, demandes de création, consentements,
+  refus et expiration ;
+- `/groups/<id>/functions/` : fonctions possibles du groupe et affectations aux
+  personnes ;
+- `/groups/<id>/am-member-titles/` : titres proposés pour les Membres AM ;
+- `/groups/<id>/calendar/states/` : états planning configurables ;
+- `/groups/<id>/calendar/regular-rules/` : règles régulières de génération ;
+- `/groups/<id>/calendar/special-dates/` : dates particulières ;
+- `/groups/<id>/settings/` : paramètres généraux de l'espace AM du groupe ;
+- `/groups/<id>/locations/` : lieux habituels ;
+- `/groups/<id>/songs/` : recueil, chants LSS, tags et blocs sélectionnés par
+  défaut.
+
+Les formulaires longs, les listes éditables et les actions de masse doivent
+vivre sur ces pages dédiées. Le tableau de bord `/groups/<id>/` conserve
+seulement les indicateurs, les listes principales en lecture ou consultation
+rapide, et les boutons de navigation vers ces écrans.
+
 ---
 
 # 4. Membres AM et consentement
@@ -239,6 +306,10 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-ACCESS-02** — L’accès AM implique l’appartenance au groupe commun.
 
 **GROUP-ACCESS-03** — L'espace `/groups/manage/` est accessible aux Administrateurs globaux et aux Responsables d'au moins un groupe, avec une liste filtrée selon leurs droits.
+
+**GROUP-ACCESS-04** — La page `/groups/<id>/` est une page de pilotage synthétique : elle expose l'état du groupe, les listes principales et des accès vers les actions dédiées, sans concentrer tous les formulaires de gestion.
+
+**GROUP-UI-01** — Les formulaires longs et les listes éditables de gestion d'un groupe doivent vivre dans des pages dédiées sous `/groups/<id>/.../`, afin que le tableau de bord groupe reste synthétique.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

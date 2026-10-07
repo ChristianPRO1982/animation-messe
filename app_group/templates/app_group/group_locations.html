@@ -1,0 +1,17 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Lieux' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Lieux" %}</h2></div></header>
+            {% for location in locations %}<p>{{ location.name }}</p>{% empty %}<p>{% trans "Aucun lieu configuré." %}</p>{% endfor %}
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_location">
+                {% for field in forms.location.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer le lieu" %}</button>
+            </form>
+        </article>
+    </section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "app_group/group_page_base.html" %}
+{% load i18n %}
+
+{% block group_page_content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Membres AM' %}">
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Membres AM" %}</h2></div></header>
+            {% for member in am_members %}
+                <p>{{ member.am_profile.first_name }} {{ member.am_profile.last_name }}</p>
+                <p>{% trans "Aucun droit applicatif ne peut être attribué à un Membre AM." %}</p>
+            {% empty %}
+                <p>{% trans "Aucun Membre AM actif." %}</p>
+            {% endfor %}
+        </article>
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande Membre AM" %}</h2></div></header>
+            <form method="post" data-unsaved-guard>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_am_member_request">
+                {% for field in forms.am_member_request.visible_fields %}<div>{{ field.label_tag }} {{ field }} {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endfor %}
+                <button class="site-action site-action--primary" type="submit">{% trans "Créer l’invitation" %}</button>
+            </form>
+        </article>
+        <article class="site-theme-card">
+            <header class="site-theme-card-header"><div><h2>{% trans "Demandes Membre AM" %}</h2></div></header>
+            {% for am_request in am_member_requests %}
+                <p>{{ am_request.first_name }} {{ am_request.last_name }} — {{ am_request.get_status_display }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept_am_member_request">
+                    <input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
+                    <label>{% trans "Jeton" %} <input name="consent_token"></label>
+                    <label>{% trans "Secret" %} <input name="withdrawal_secret" type="password"></label>
+                    <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
+                </form>
+                <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande Membre AM ?' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="refuse_am_member_request">
+                    <input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
+                    <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
+                </form>
+                <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Expirer cette demande Membre AM ?' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="expire_am_member_request">
+                    <input type="hidden" name="am_member_request_id" value="{{ am_request.gamr_id }}">
+                    <button class="site-action site-action--secondary" type="submit">{% trans "Expirer" %}</button>
+                </form>
+            {% empty %}
+                <p>{% trans "Aucune demande Membre AM." %}</p>
+            {% endfor %}
+        </article>
+    </section>
+{% endblock %}

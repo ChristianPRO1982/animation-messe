@@ -15,6 +15,15 @@ class ActivateGroupForm(ActionForm):
     common_group_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
 
+class GroupSettingsForm(ActionForm):
+    celebration_retention_months = forms.IntegerField(
+        label=_("Conservation des célébrations"),
+        min_value=1,
+        max_value=24,
+        help_text=_("Durée en mois, entre 1 et 24."),
+    )
+
+
 class GroupMemberActionForm(ActionForm):
     group_member_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
