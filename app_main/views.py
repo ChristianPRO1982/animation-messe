@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import (
     FileResponse,
     Http404,
@@ -18,6 +19,7 @@ from django.urls import reverse
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
+from app_group.models import CommonGroupUser
 from app_main.auth import (
     HOME_PROVISION_TARGET_SESSION_KEY,
     KEYCLOAK_DIAGNOSTIC_SESSION_KEY,
@@ -134,10 +136,30 @@ def homepage(request: HttpRequest) -> HttpResponse:
             "home_bloc1_rendered": render_homepage_markdown(home_bloc1_text),
             "home_bloc2_text": home_bloc2_text,
             "home_bloc2_rendered": render_homepage_markdown(home_bloc2_text),
+            "can_access_group_management": _can_access_group_management(request.user),
             "moderation_song_results": (),
             "moderation_song_popup_markdown": "",
         },
     )
+
+
+def _can_access_group_management(user) -> bool:
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(user, "is_admin", False):
+        return True
+
+    member_id = str(getattr(user, "external_id", "") or "").strip()
+    if not member_id:
+        return False
+
+    try:
+        return CommonGroupUser.objects.filter(
+            member_id=member_id,
+            is_group_admin=True,
+        ).exists()
+    except (TypeError, ValueError, ValidationError):
+        return False
 
 
 def _parse_home_cards(raw_value: str | None) -> list[dict[str, str]]:

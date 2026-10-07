@@ -1097,20 +1097,30 @@ AELF restent propriétaires de `app_celebration`.
 
 # 14. Règles garanties par services Django
 
-À implémenter dans des services transactionnels :
+Les écritures métier de `app_group` doivent passer par `app_group.services`.
+Les vues, formulaires, admins, commandes et intégrations futures ne doivent pas
+écrire directement dans les modèles pour les opérations suivantes :
 
-- création d'un groupe avec au moins un Responsable ;
-- interdiction de retirer le dernier Responsable ;
+- création et validation de l'environnement AM d'un groupe commun ;
+- attribution et retrait du droit `responsable_impression` ;
+- interdiction de retirer le dernier Responsable commun ;
 - cohérence groupe/personne/rôle ;
 - cohérence groupe/personne/fonction ;
 - interdiction d'attribuer un rôle applicatif à un Membre AM ;
 - cycle demande, consentement, acceptation, refus et expiration de Membre AM ;
-- fusion explicite Membre AM vers compte CARThographie en conservant `ggm_id` ;
+- demandes d'accès AM pour les membres avec compte ;
 - cohérence groupe/tag pour `s_song_tag` ;
 - cohérence chant/bloc pour `s_song_tag_verse` ;
 - création des références `s_verse` lors de l'ajout d'un chant au recueil ;
 - création des sélections par défaut lors de l'ajout d'un tag à un chant ;
-- exactement un état actif `selection` et un état actif `default` par groupe.
+- validation des règles de célébration et de dates spéciales avant sauvegarde.
+
+Restent hors workflow V1 tant qu'un écran ou un scénario dédié n'est pas
+spécifié :
+
+- fusion explicite Membre AM vers compte CARThographie en conservant `ggm_id` ;
+- arbitrage fonctionnel complet des états actifs `selection` et `default` par
+  groupe au-delà des contraintes d'unicité déjà portées par le modèle.
 
 ---
 

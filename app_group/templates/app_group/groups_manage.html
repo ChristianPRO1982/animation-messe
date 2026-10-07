@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Gestion des groupes" %} | Animation Messe{% endblock %}
+{% block section_title %}{% trans "Groupes" %}{% endblock %}
+{% block section_nav %}
+    <div class="site-home-media">
+        {% include "includes/themed_icon.html" with picture_class="" img_class="" icon_name="groups" icon_alt="" %}
+    </div>
+{% endblock %}
+{% block tools_title %}{% trans "Accès" %}{% endblock %}
+{% block page_tools %}
+    <p><a class="site-action site-action--secondary" href="{% url 'groups_home' %}">{% trans "Page publique" %}</a></p>
+{% endblock %}
+{% block mobile_side_title %}{% trans "Groupes" %}{% endblock %}
+{% block mobile_side_visual %}
+    <div class="site-home-media">
+        {% include "includes/themed_icon.html" with picture_class="" img_class="" icon_name="groups" icon_alt="" %}
+    </div>
+{% endblock %}
+{% block page_kicker %}Animation Messe{% endblock %}
+{% block page_title %}{% trans "Gestion des groupes" %}{% endblock %}
+{% block page_intro %}
+    <p>{% trans "Gérez les espaces AM des groupes communs dont vous êtes Responsable." %}</p>
+{% endblock %}
+{% block page_summary %}
+    <p>{% trans "Les groupes communs restent la source de vérité. Cette page active seulement leur environnement Animation Messe." %}</p>
+{% endblock %}
+
+{% block content %}
+    <section class="site-theme-selection" aria-label="{% trans 'Groupes accessibles' %}">
+        {% if rows %}
+            {% for row in rows %}
+                <article class="site-theme-card{% if row.is_am_enabled %} is-active{% endif %}">
+                    <header class="site-theme-card-header">
+                        <div>
+                            <h2>{{ row.common_group.name }}</h2>
+                            <p>
+                                {% if row.common_group.status == "open" %}
+                                    {% trans "Groupe commun ouvert" %}
+                                {% else %}
+                                    {% trans "Groupe commun privé" %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% include "includes/themed_icon.html" with picture_class="site-theme-card-icon" img_class="" icon_name="groups" icon_alt="" %}
+                    </header>
+                    {% if row.common_group.info %}<p>{{ row.common_group.info }}</p>{% endif %}
+                    <p>
+                        {% if row.is_am_enabled %}
+                            {% trans "Espace AM actif." %}
+                        {% else %}
+                            {% trans "Espace AM non activé." %}
+                        {% endif %}
+                    </p>
+                    <p>
+                        <a class="site-action site-action--primary" href="{% url 'group_detail' row.common_group.group_id %}">{% trans "Ouvrir" %}</a>
+                    </p>
+                    {% if not row.is_am_enabled %}
+                        <form method="post" data-app-group-confirm="{% trans 'Activer l’espace AM pour ce groupe ?' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="activate_group">
+                            <input type="hidden" name="common_group_id" value="{{ row.common_group.group_id }}">
+                            <button class="site-action site-action--secondary" type="submit">{% trans "Activer l’espace AM" %}</button>
+                        </form>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <article class="site-theme-card">
+                <header class="site-theme-card-header">
+                    <div>
+                        <h2>{% trans "Aucun groupe accessible" %}</h2>
+                    </div>
+                </header>
+                <p>{% trans "Aucun groupe commun administrable n’est disponible pour votre compte." %}</p>
+            </article>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block page_scripts %}
+    <script src="{% static 'js/app_group.js' %}"></script>
+{% endblock %}

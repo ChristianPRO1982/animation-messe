@@ -101,6 +101,9 @@
     {% if home_bloc2_text %}
         <div class="site-home-markdown">{{ home_bloc2_rendered }}</div>
     {% endif %}
+    {% if can_access_group_management %}
+        <p><a class="site-action site-action--primary" href="{% url 'groups_manage' %}">{% trans "Gestion des groupes" %}</a></p>
+    {% endif %}
 {% endblock %}
 
 {% block content %}

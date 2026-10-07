@@ -481,6 +481,17 @@ class CelebrationRule(models.Model):
 
     class Meta:
         db_table = 'am"."g_celebration_rule'
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(weekday__gte=1, weekday__lte=7),
+                name="g_celebration_rule_weekday_valid",
+            ),
+            models.UniqueConstraint(
+                fields=["group", "weekday", "time", "location"],
+                condition=Q(is_active=True),
+                name="g_celebration_rule_active_slot_unique",
+            ),
+        ]
         ordering = ["position", "gcr_id"]
 
 
@@ -526,6 +537,18 @@ class SpecialDateRule(models.Model):
             models.CheckConstraint(
                 condition=Q(collision_mode__in=["add", "replace"]),
                 name="g_special_date_rule_collision_valid",
+            ),
+            models.CheckConstraint(
+                condition=Q(month__isnull=True) | Q(month__gte=1, month__lte=12),
+                name="g_special_date_rule_month_valid",
+            ),
+            models.CheckConstraint(
+                condition=Q(day__isnull=True) | Q(day__gte=1, day__lte=31),
+                name="g_special_date_rule_day_valid",
+            ),
+            models.CheckConstraint(
+                condition=Q(weekday__isnull=True) | Q(weekday__gte=1, weekday__lte=7),
+                name="g_special_date_rule_weekday_valid",
             ),
         ]
 

@@ -777,6 +777,41 @@ class MainViewHelperTests(SimpleTestCase):
             "<strong>Texte</strong>", str(context["home_cards"][0]["rendered_text"])
         )
         self.assertIn("Bloc 1", str(context["home_bloc1_rendered"]))
+        self.assertFalse(context["can_access_group_management"])
+
+    def test_homepage_allows_group_management_for_admin_user(self):
+        request = build_request(
+            self.factory, user=build_user(authenticated=True, admin=True)
+        )
+
+        with (
+            patch("app_main.views.get_site_params_for_language", return_value=None),
+            patch("app_main.views.render", return_value=HttpResponse("ok")) as render,
+        ):
+            views.homepage(request)
+
+        self.assertTrue(render.call_args.args[2]["can_access_group_management"])
+
+    @patch("app_main.views.CommonGroupUser")
+    def test_homepage_allows_group_management_for_common_group_responsable(
+        self, common_group_user
+    ):
+        user = build_user(authenticated=True, admin=False)
+        user.external_id = "44444444-4444-4444-4444-444444444444"
+        request = build_request(self.factory, user=user)
+        common_group_user.objects.filter.return_value.exists.return_value = True
+
+        with (
+            patch("app_main.views.get_site_params_for_language", return_value=None),
+            patch("app_main.views.render", return_value=HttpResponse("ok")) as render,
+        ):
+            views.homepage(request)
+
+        self.assertTrue(render.call_args.args[2]["can_access_group_management"])
+        common_group_user.objects.filter.assert_called_once_with(
+            member_id="44444444-4444-4444-4444-444444444444",
+            is_group_admin=True,
+        )
 
     def test_collect_heavy_images_returns_am_and_static_urls(self):
         with tempfile.TemporaryDirectory() as tmpdir:

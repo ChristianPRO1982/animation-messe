@@ -122,6 +122,21 @@ Une personne déjà membre du groupe commun mais sans accès AM peut demander
 uniquement l’accès AM. Cette demande relève de `app_group` et sa validation met
 à jour `common.g_group_user.am_access`.
 
+L'espace de gestion des groupes AM est exposé sous `/groups/manage/`.
+Cette route est réservée aux utilisateurs authentifiés pouvant gérer au moins
+un groupe :
+
+- Administrateur global AM, qui voit tous les groupes communs ;
+- Responsable d'au moins un groupe commun, qui ne voit que ses groupes.
+
+Le lien vers cet espace peut être présenté par `app_main` :
+
+- dans la section Administration du profil pour les Administrateurs globaux ;
+- dans l'encadré résumé de la page d'accueil pour les Administrateurs globaux
+  et les Responsables d'au moins un groupe.
+
+La page publique `/groups/` reste distincte de l'espace de gestion.
+
 ---
 
 # 4. Membres AM et consentement
@@ -222,6 +237,8 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-ACCESS-01** — L’appartenance au groupe commun ne donne pas automatiquement accès AM.
 
 **GROUP-ACCESS-02** — L’accès AM implique l’appartenance au groupe commun.
+
+**GROUP-ACCESS-03** — L'espace `/groups/manage/` est accessible aux Administrateurs globaux et aux Responsables d'au moins un groupe, avec une liste filtrée selon leurs droits.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

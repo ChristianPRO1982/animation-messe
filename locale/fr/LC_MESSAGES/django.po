@@ -1,0 +1,2474 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-07 12:29+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
+"1000000 == 0 ? 1 : 2;\n"
+#: app_group/forms.py:32
+msgid "Membre"
+msgstr ""
+
+#: app_group/forms.py:34 app_group/forms.py:49
+msgid "Version du consentement"
+msgstr ""
+
+#: app_group/forms.py:45
+msgid "Prénom"
+msgstr ""
+
+#: app_group/forms.py:46 app_group/forms.py:74 app_group/forms.py:119
+msgid "Nom"
+msgstr ""
+
+#: app_group/forms.py:47
+msgid "Adresse e-mail"
+msgstr ""
+
+#: app_group/forms.py:60
+msgid "Jeton de consentement"
+msgstr ""
+
+#: app_group/forms.py:62
+msgid "Secret personnel"
+msgstr ""
+
+#: app_group/forms.py:75 app_group/forms.py:93 app_group/forms.py:114
+msgid "Position"
+msgstr ""
+
+#: app_group/forms.py:76 app_group/forms.py:94
+msgid "Actif"
+msgstr ""
+
+#: app_group/forms.py:81
+msgid "Édition automatique des célébrations"
+msgstr ""
+
+#: app_group/forms.py:92
+msgid "Libellé"
+msgstr ""
+
+#: app_group/forms.py:99
+msgid "Adresse"
+msgstr ""
+
+#: app_group/forms.py:106
+msgid "Couleur"
+msgstr ""
+
+#: app_group/forms.py:107 app_group/forms.py:121
+msgid "Type"
+msgstr ""
+
+#: app_group/forms.py:111 app_group/forms.py:138
+msgid "Jour"
+msgstr ""
+
+#: app_group/forms.py:112
+msgid "Heure"
+msgstr ""
+
+#: app_group/forms.py:113
+msgid "Lieu"
+msgstr ""
+
+#: app_group/forms.py:115 app_group/forms.py:147
+msgid "Active"
+msgstr ""
+
+#: app_group/forms.py:123
+msgid "Date annuelle fixe"
+msgstr ""
+
+#: app_group/forms.py:124
+msgid "Date ponctuelle"
+msgstr ""
+
+#: app_group/forms.py:125
+msgid "Nième jour du mois"
+msgstr ""
+
+#: app_group/forms.py:129
+msgid "Collision"
+msgstr ""
+
+#: app_group/forms.py:131
+msgid "Ajouter"
+msgstr ""
+
+#: app_group/forms.py:132
+msgid "Remplacer"
+msgstr ""
+
+#: app_group/forms.py:136
+msgid "Mois"
+msgstr ""
+
+#: app_group/forms.py:139
+msgid "Date exacte"
+msgstr ""
+
+#: app_group/forms.py:141
+msgid "Jour de semaine"
+msgstr ""
+
+#: app_group/forms.py:146
+msgid "Occurrence"
+msgstr ""
+
+#: app_group/forms.py:151
+msgid "ID chant LSS"
+msgstr ""
+
+#: app_group/forms.py:153
+msgid "IDs blocs LSS"
+msgstr ""
+
+#: app_group/forms.py:155
+msgid "Séparer plusieurs IDs par des virgules ou des espaces."
+msgstr ""
+
+#: app_group/forms.py:167
+msgid "Les IDs de blocs doivent être entiers."
+msgstr ""
+
+#: app_group/forms.py:170
+msgid "Les IDs de blocs doivent être positifs."
+msgstr ""
+
+#: app_group/forms.py:177 app_group/templates/app_group/group_detail.html:283
+msgid "Tag"
+msgstr ""
+
+#: app_group/models.py:21
+msgid "Ouvert"
+msgstr ""
+
+#: app_group/models.py:22
+msgid "Prive"
+msgstr ""
+
+#: app_group/models.py:95
+msgid "Compte"
+msgstr ""
+
+#: app_group/models.py:96 app_group/templates/app_group/group_detail.html:183
+msgid "Membre AM"
+msgstr ""
+
+#: app_group/models.py:316
+msgid "Acces AM"
+msgstr ""
+
+#: app_group/models.py:360
+msgid "En attente"
+msgstr ""
+
+#: app_group/models.py:361
+msgid "Refusee"
+msgstr ""
+
+#: app_group/models.py:362
+msgid "Expiree"
+msgstr ""
+
+#: app_group/models.py:406
+msgid "Selection"
+msgstr ""
+
+#: app_group/models.py:407
+msgid "Defaut"
+msgstr ""
+
+#: app_group/models.py:408
+msgid "Personnalise"
+msgstr ""
+
+#: app_group/services.py:51
+msgid "Le secret personnel est obligatoire."
+msgstr ""
+
+#: app_group/services.py:62
+msgid "L'adresse email est obligatoire."
+msgstr ""
+
+#: app_group/services.py:69
+msgid "Utilisateur sans identifiant membre."
+msgstr ""
+
+#: app_group/services.py:91
+msgid "Accès refusé au groupe."
+msgstr ""
+
+#: app_group/services.py:100
+msgid "Le groupe commun est introuvable."
+msgstr ""
+
+#: app_group/services.py:114 app_group/services.py:126
+#: app_group/services.py:127
+msgid "Responsable impression"
+msgstr ""
+
+#: app_group/services.py:139
+msgid "Seul un membre avec compte peut recevoir ce droit."
+msgstr ""
+
+#: app_group/services.py:144
+msgid "Les objets doivent appartenir au même groupe."
+msgstr ""
+
+#: app_group/services.py:179
+msgid "Un groupe doit conserver au moins un Responsable."
+msgstr ""
+
+#: app_group/services.py:184 app_group/services.py:274
+msgid "L'appartenance commune est introuvable."
+msgstr ""
+
+#: app_group/services.py:247
+msgid "Le membre n'appartient pas au groupe commun."
+msgstr ""
+
+#: app_group/services.py:249
+msgid "Le membre possède déjà l'accès AM."
+msgstr ""
+
+#: app_group/services.py:306
+msgid "Seul un Responsable peut inviter un Membre AM."
+msgstr ""
+
+#: app_group/services.py:313
+msgid "Le nom et le prénom du Membre AM sont obligatoires."
+msgstr ""
+
+#: app_group/services.py:316
+msgid "La version du consentement est obligatoire."
+msgstr ""
+
+#: app_group/services.py:322
+msgid "La demande de Membre AM doit expirer sous 14 jours."
+msgstr ""
+
+#: app_group/services.py:405
+msgid "La demande n'est plus en attente."
+msgstr ""
+
+#: app_group/services.py:408
+msgid "La demande de Membre AM a expiré."
+msgstr ""
+
+#: app_group/services.py:410
+msgid "Le jeton de consentement est invalide."
+msgstr ""
+
+#: app_group/services.py:511
+msgid "Une date annuelle fixe requiert mois et jour."
+msgstr ""
+
+#: app_group/services.py:514
+msgid "Une date ponctuelle requiert une date exacte."
+msgstr ""
+
+#: app_group/services.py:518
+msgid "Une date récurrente requiert mois, jour de semaine et occurrence."
+msgstr ""
+
+#: app_group/services.py:521
+msgid "Type de règle spéciale non pris en charge."
+msgstr ""
+
+#: app_group/services.py:569 app_group/services.py:573
+msgid "La célébration liée doit appartenir à la même règle spéciale."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:12
+msgid "Groupe"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:14
+msgid "Tous les groupes"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:15
+#: app_group/templates/app_group/groups_manage.html:14
+msgid "Page publique"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:28
+msgid "Groupe commun ouvert."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:30
+msgid "Groupe commun privé."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:36
+#: app_group/templates/app_group/groups_manage.html:52
+msgid "Espace AM actif."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:37
+#, python-format
+msgid "%(members)s membres AM, %(requests)s demandes, %(songs)s chants."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:39
+msgid "Espace AM à activer pour utiliser les paramètres et les demandes."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:45
+msgid "Activation AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:49
+#: app_group/templates/app_group/group_detail.html:57
+#: app_group/templates/app_group/groups_manage.html:65
+msgid "Activer l’espace AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:50
+msgid ""
+"Le groupe commun existe déjà ; Animation Messe va seulement créer son "
+"extension AM."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:54
+#: app_group/templates/app_group/groups_manage.html:61
+msgid "Activer l’espace AM pour ce groupe ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:62
+msgid "Tableau de bord groupe"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:64
+msgid "Synthèse"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:65
+#, python-format
+msgid "%(functions)s fonctions configurées."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:66
+msgid "Le rôle Responsable reste porté par le groupe commun."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:69
+msgid "Responsables communs"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:73
+msgid "Responsable"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:74
+#: app_group/templates/app_group/group_detail.html:172
+msgid "Accès AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:76
+msgid "Modifier le rôle Responsable de ce membre ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:82
+msgid "Retirer Responsable"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:82
+msgid "Nommer Responsable"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:86
+msgid "Aucune appartenance commune trouvée."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:91
+msgid "Membres du groupe"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:93
+msgid "Membres et Membres AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:113
+msgid "Attribuer Responsable impression"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:115
+msgid "Retirer le droit Responsable impression ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:119
+msgid "Retirer Responsable impression"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:122
+msgid "Aucun droit applicatif ne peut être attribué à un Membre AM."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:125
+#: app_group/templates/app_group/group_detail.html:208
+msgid "Fonctions"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:134
+msgid "Retirer cette fonction ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:145
+msgid "Aucun membre AM actif pour l’instant."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:150
+msgid "Demandes"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:152
+msgid "Créer une demande d’accès AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:157
+msgid "Créer la demande"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:161
+msgid "Créer une demande Membre AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:166
+msgid "Créer l’invitation"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:170
+msgid "Demandes en cours"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:175
+#: app_group/templates/app_group/group_detail.html:190
+msgid "Accepter"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:177
+msgid "Refuser cette demande ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:179
+#: app_group/templates/app_group/group_detail.html:194
+msgid "Refuser"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:188
+msgid "Jeton"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:189
+msgid "Secret"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:192
+msgid "Refuser cette demande Membre AM ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:196
+msgid "Expirer cette demande Membre AM ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:198
+msgid "Expirer"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:201
+msgid "Aucune demande en cours."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:206
+msgid "Paramètres groupe"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:209
+msgid "inactive"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:213
+msgid "Enregistrer la fonction"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:217
+msgid "Titres Membre AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:222
+msgid "Enregistrer le titre"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:226
+msgid "Lieux"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:231
+msgid "Enregistrer le lieu"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:235
+msgid "États planning"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:240
+msgid "Enregistrer l’état"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:245
+msgid "Règles de célébration"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:247
+msgid "Règles régulières"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:252
+msgid "Créer la règle"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:256
+msgid "Dates particulières"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:261
+msgid "Créer la date"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:266
+msgid "Recueil"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:268
+msgid "Ajouter un chant LSS"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:272
+msgid "Ajouter au recueil"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:277
+msgid "Chant LSS"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:278
+msgid "Blocs"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:278
+msgid "aucun"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:288
+msgid "Associer le tag"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:301
+msgid "retirer défaut"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:301
+msgid "définir défaut"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:5
+#: app_group/templates/app_group/groups_home.html:7
+#: app_group/templates/app_group/groups_home.html:11
+#: app_group/templates/app_group/groups_home.html:26
+#: app_group/templates/app_group/groups_home.html:42
+#: app_group/templates/app_group/groups_home.html:46
+#: app_group/templates/app_group/groups_home.html:61
+#: app_group/templates/app_group/groups_home.html:77
+#: app_group/templates/app_group/groups_manage.html:6
+#: app_group/templates/app_group/groups_manage.html:16
+#: templates/includes/nav.html:11
+msgid "Groupes"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:34
+#: app_group/templates/app_group/groups_manage.html:12
+msgid "Accès"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:38
+msgid ""
+"Les demandes d’accès et la gestion des équipes seront disponibles dans cet "
+"espace."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:71
+msgid ""
+"La page des groupes est publique. Les actions sensibles resteront protégées "
+"par les droits AM."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:80
+msgid "Retrouvez ici les groupes Animation Messe et leurs accès."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:84
+msgid ""
+"La fondation technique des groupes est en place. Les écrans de gestion "
+"arriveront dans les prochaines étapes."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:88
+#: app_group/templates/app_group/groups_home.html:92
+#: app_group/templates/app_group/groups_manage.html:5
+#: app_group/templates/app_group/groups_manage.html:23
+msgid "Gestion des groupes"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:93
+msgid ""
+"Cette page accueillera la liste des groupes, les demandes d’accès et les "
+"paramètres propres aux équipes."
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:25
+msgid "Gérez les espaces AM des groupes communs dont vous êtes Responsable."
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:28
+msgid ""
+"Les groupes communs restent la source de vérité. Cette page active seulement "
+"leur environnement Animation Messe."
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:32
+msgid "Groupes accessibles"
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:41
+msgid "Groupe commun ouvert"
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:43
+msgid "Groupe commun privé"
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:54
+msgid "Espace AM non activé."
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:58
+msgid "Ouvrir"
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:74
+msgid "Aucun groupe accessible"
+msgstr ""
+
+#: app_group/templates/app_group/groups_manage.html:77
+msgid "Aucun groupe commun administrable n’est disponible pour votre compte."
+msgstr ""
+
+#: app_group/views.py:75 app_group/views.py:89 app_group/views.py:123
+#: app_main/views.py:602 app_main/views.py:638
+msgid "Accès refusé."
+msgstr ""
+
+#: app_group/views.py:95 app_group/views.py:112
+msgid "L'espace AM du groupe est activé."
+msgstr ""
+
+#: app_group/views.py:98
+msgid "Action groupe invalide."
+msgstr ""
+
+#: app_group/views.py:116
+msgid "Activez l'espace AM avant cette action."
+msgstr ""
+
+#: app_group/views.py:138
+msgid "Le droit Responsable impression est attribué."
+msgstr ""
+
+#: app_group/views.py:142
+msgid "Le droit Responsable impression est retiré."
+msgstr ""
+
+#: app_group/views.py:153
+msgid "Le rôle Responsable a été mis à jour."
+msgstr ""
+
+#: app_group/views.py:163
+msgid "La fonction est attribuée."
+msgstr ""
+
+#: app_group/views.py:166
+msgid "La fonction est retirée."
+msgstr ""
+
+#: app_group/views.py:179
+msgid "La demande d'accès AM est créée."
+msgstr ""
+
+#: app_group/views.py:190
+msgid "La demande d'accès AM est acceptée."
+msgstr ""
+
+#: app_group/views.py:193
+msgid "La demande d'accès AM est refusée."
+msgstr ""
+
+#: app_group/views.py:211
+msgid "Invitation Membre AM"
+msgstr ""
+
+#: app_group/views.py:214
+#, python-format
+msgid ""
+"Transmettre ce jeton à la personne invitée :\n"
+"\n"
+"`%(token)s`\n"
+"\n"
+"Il ne sera plus affiché après cette page."
+msgstr ""
+
+#: app_group/views.py:221
+msgid "La demande de Membre AM est créée."
+msgstr ""
+
+#: app_group/views.py:232
+msgid "La demande de Membre AM est refusée."
+msgstr ""
+
+#: app_group/views.py:235
+msgid "La demande de Membre AM est expirée."
+msgstr ""
+
+#: app_group/views.py:249
+msgid "Le Membre AM est créé."
+msgstr ""
+
+#: app_group/views.py:264
+msgid "La fonction est enregistrée."
+msgstr ""
+
+#: app_group/views.py:278
+msgid "Le titre Membre AM est enregistré."
+msgstr ""
+
+#: app_group/views.py:292
+msgid "Le lieu est enregistré."
+msgstr ""
+
+#: app_group/views.py:306
+msgid "L'état planning est enregistré."
+msgstr ""
+
+#: app_group/views.py:320
+msgid "La règle régulière est créée."
+msgstr ""
+
+#: app_group/views.py:338
+msgid "La date particulière est créée."
+msgstr ""
+
+#: app_group/views.py:349
+msgid "Le chant est ajouté au recueil."
+msgstr ""
+
+#: app_group/views.py:361
+msgid "Le tag est associé au chant."
+msgstr ""
+
+#: app_group/views.py:380
+msgid "La sélection du bloc est enregistrée."
+msgstr ""
+
+#: app_group/views.py:383
+msgid "Action groupe inconnue."
+msgstr ""
+
+#: app_group/views.py:504
+msgid "Action invalide."
+msgstr ""
+
+#: app_main/auth.py:44
+msgid "Cet utilisateur est désactivé dans Animation Messe."
+msgstr ""
+
+#: app_main/auth.py:46
+msgid ""
+"Aucun utilisateur correspondant n'a été trouvé dans Animation Messe. Si ce "
+"problème est toujours d'actualité au bout de 24 heures, contacter "
+"l'administrateur"
+msgstr ""
+
+#: app_main/auth.py:138
+#, python-format
+msgid "Identifiant SQL invalide : %(value)s"
+msgstr ""
+
+#: app_main/auth.py:176
+msgid ""
+"L'URL HOME_PROVISION_RETURN_URL doit être une URL HTTPS absolue pointant "
+"vers /provision/complete/."
+msgstr ""
+
+#: app_main/auth.py:203
+msgid "Le secret de provisioning Home est absent côté serveur Animation Messe."
+msgstr ""
+
+#: app_main/auth.py:208
+msgid "La configuration du provisioning Home est incomplète."
+msgstr ""
+
+#: app_main/auth.py:244
+#, python-format
+msgid "Champs de retour manquants : %(fields)s"
+msgstr ""
+
+#: app_main/auth.py:251
+msgid "Horodatage de retour invalide."
+msgstr ""
+
+#: app_main/auth.py:255
+msgid "Signature de retour expirée."
+msgstr ""
+
+#: app_main/auth.py:259
+msgid "Signature de retour invalide."
+msgstr ""
+
+#: app_main/auth.py:264
+msgid "Format d'identifiant externe invalide."
+msgstr ""
+
+#: app_main/auth.py:269
+#, python-format
+msgid "Champ trop long : %(field)s."
+msgstr ""
+
+#: app_main/auth.py:284
+msgid "Keycloak n'est pas configuré pour cet environnement."
+msgstr ""
+
+#: app_main/auth.py:292
+msgid "La configuration du client Keycloak est incomplète."
+msgstr ""
+
+#: app_main/auth.py:312
+msgid "La configuration de déconnexion Keycloak est incomplète."
+msgstr ""
+
+#: app_main/auth.py:407
+msgid "l'échange du code"
+msgstr ""
+
+#: app_main/auth.py:409
+msgid "la lecture du profil utilisateur"
+msgstr ""
+
+#: app_main/auth.py:410
+msgid "la requête"
+msgstr ""
+
+#: app_main/auth.py:416
+msgid ""
+"La connexion Keycloak a échoué pendant l'échange du code. Vérifiez la "
+"configuration du client AM côté Keycloak."
+msgstr ""
+
+#: app_main/auth.py:420
+msgid ""
+"La connexion Keycloak a échoué pendant la lecture du profil utilisateur."
+msgstr ""
+
+#: app_main/auth.py:422
+#, python-format
+msgid "La requête Keycloak a échoué pendant %(stage)s avec HTTP %(code)s."
+msgstr ""
+
+#: app_main/auth.py:463 app_main/auth.py:488
+msgid "La requête Keycloak a échoué."
+msgstr ""
+
+#: app_main/auth.py:477
+msgid "La requête Keycloak a expiré."
+msgstr ""
+
+#: app_main/auth.py:507
+msgid "La configuration d'échange de jeton Keycloak est incomplète."
+msgstr ""
+
+#: app_main/auth.py:534
+msgid "Keycloak n'a pas renvoyé de jeton d'accès."
+msgstr ""
+
+#: app_main/auth.py:550
+#, python-format
+msgid "La connexion Keycloak a échoué : %(error)s."
+msgstr ""
+
+#: app_main/auth.py:561
+msgid "Champs de retour Keycloak manquants."
+msgstr ""
+
+#: app_main/auth.py:563
+msgid "État Keycloak invalide."
+msgstr ""
+
+#: app_main/auth.py:571
+msgid "Format de sujet Keycloak invalide."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:5
+#: app_main/templates/main/connexion.html:81
+#: app_main/templates/main/connexion.html:190
+#: app_main/templates/main/connexion.html:413
+#: app_main/templates/main/homepage.html:55
+#: app_main/templates/main/homepage.html:56
+#: app_main/templates/main/homepage.html:88
+#: app_main/templates/main/homepage.html:89
+#: app_main/templates/main/privacy_policy.html:5
+#: app_main/templates/main/privacy_policy.html:7
+#: app_main/templates/main/privacy_policy.html:13
+#: app_main/templates/main/privacy_policy.html:28
+#: app_main/templates/main/privacy_policy.html:38
+#: app_main/templates/main/privacy_policy.html:44
+#: app_main/templates/main/privacy_policy.html:47
+#: app_main/templates/main/privacy_policy.html:62
+#: app_main/templates/main/privacy_policy.html:190
+msgid "Politique de confidentialité"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:11
+#: app_main/templates/main/connexion.html:22
+#: app_main/templates/main/connexion.html:69
+#: app_main/templates/main/connexion.html:148
+#: app_main/templates/main/keycloak_diagnostic.html:6
+#: app_main/templates/main/provision_complete.html:7
+#: app_main/templates/main/provision_redirect.html:7
+#: templates/includes/nav.html:8
+msgid "Connexion"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:20
+msgid "Mode dev"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:29
+msgid "Simulation Keycloak"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:30
+msgid "mock SSO"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:32
+msgid "Connexion sécurisée via Keycloak"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:65
+#: app_main/templates/main/connexion.html:94
+#: app_main/templates/main/keycloak_diagnostic.html:12
+#: app_main/templates/main/keycloak_diagnostic.html:23
+#: app_main/templates/main/provision_complete.html:38
+#: app_main/templates/main/provision_complete.html:49
+msgid "Actions"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:67
+msgid "Simulation"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:78
+#: app_main/templates/main/connexion.html:125 templates/base.html:104
+#: templates/includes/nav.html:7
+msgid "Déconnexion"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:86
+msgid "Ouvrir la simulation"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:88
+#: app_main/templates/main/connexion.html:130
+msgid "Continuer avec Keycloak"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:128
+msgid "Continuer avec le mock SSO"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:138
+msgid "Paramétrage"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:146
+msgid "Mon profil"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:155 app_member/forms.py:28
+msgid "Administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:164
+msgid ""
+"La connexion passe par la structure mère cARThographie, qui fournit "
+"l'identité utilisée ensuite dans l'application avec simplicité et continuité."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:170
+#: app_main/templates/main/connexion.html:403
+msgid "Informations du profil"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:174
+msgid "Données personnelles"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:177
+#: app_main/templates/main/connexion.html:405
+msgid ""
+"Les données personnelles demandées servent uniquement à la connexion et à la "
+"gestion des groupes."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:178
+#: app_main/templates/main/connexion.html:406
+msgid "Elles ne sont jamais affichées au grand public."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:179
+#: app_main/templates/main/connexion.html:407
+msgid ""
+"L'adresse e-mail est utilisée seulement pour la gestion du compte, par "
+"exemple pour la récupération du mot de passe, l'information en cas "
+"d'évolution des conditions générales d'utilisation, ou un avertissement "
+"avant suppression d'un compte inactif."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:185
+msgid "Confidentialité"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:197
+msgid "Rôles du site"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:201
+msgid "Vous êtes administrateur du site."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:203
+msgid "Vous êtes membre authentifié sans droit privilégié global."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:211
+#: app_main/templates/main/site_params.html:6
+#: app_main/templates/main/site_params.html:17
+msgid "Administration"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:214
+#: app_main/templates/main/site_params.html:5
+#: app_main/templates/main/site_params.html:10
+#: app_main/templates/main/site_params.html:13
+#: app_main/templates/main/site_params.html:24
+#: app_main/templates/main/site_params.html:27
+#: app_main/templates/main/site_params.html:32
+#: app_main/templates/main/site_params.html:38
+msgid "Paramètres du site"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:220
+msgid "Messages administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:224 app_member/forms.py:43
+msgid "Message global administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:225
+msgid "Ce message est public sur toutes les pages du site."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:229
+msgid ""
+"Les paramètres du site ne sont pas encore disponibles pour cette langue. "
+"L'édition du message administrateur est temporairement indisponible."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:245
+msgid "Enregistrer l'administration"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:251
+msgid "Administration du site"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:255
+msgid "Membres du site"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:256
+msgid ""
+"La recherche lit uniquement `users.users` et la gestion des rôles reste "
+"locale à Animation Messe."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:268
+msgid "Rechercher"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:272
+#, python-format
+msgid "Résultats pour « %(search)s »"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:281
+msgid "Rôle actuel : administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:283
+msgid "Rôle actuel : membre"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:288
+msgid "Compte actif dans users.users"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:290
+msgid "Compte désactivé dans users.users"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:303
+msgid "Retirer administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:305
+msgid "Attribuer administrateur"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:312
+msgid "Aucun membre ne correspond à cette recherche."
+msgstr ""
+
+#: app_main/templates/main/connexion.html:323
+msgid "Paramètres du profil"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:328
+#: app_main/templates/main/connexion.html:338
+#: app_main/templates/main/connexion.html:353
+msgid "Langue utilisée"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:331
+#: app_main/templates/main/language.html:98
+#: app_main/templates/main/language.html:127
+#: app_main/templates/main/site_params.html:49
+msgid "English"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:333
+#: app_main/templates/main/language.html:98
+#: app_main/templates/main/language.html:106
+#: app_main/templates/main/site_params.html:48 templates/includes/nav.html:139
+msgid "Français"
+msgstr ""
+
+#: app_main/templates/main/connexion.html:369
+#: app_main/templates/main/connexion.html:374
+#: app_main/templates/main/connexion.html:389
+msgid "Thème choisi"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:4 app_main/templates/main/heavy.html:35
+msgid "Page lourde"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:6 app_main/templates/main/heavy.html:29
+msgid "Debug"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:8
+msgid "Page réservée aux tests de chargement."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:12
+msgid "Source"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:16
+msgid "Images"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:21
+msgid "Charge"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:23
+msgid ""
+"Cette page n'est accessible qu'en saisissant son URL directement en mode "
+"DEBUG."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:26
+msgid "Aucun lien de navigation ne pointe vers cette page."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:31
+#, python-format
+msgid "%(count)s images depuis %(source)s."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:34
+msgid "debug uniquement"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:37
+msgid ""
+"Cette page charge volontairement beaucoup d'images pour tester le loader "
+"global et le comportement visuel au chargement."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:40
+#, python-format
+msgid "%(count)s images listées depuis %(source)s."
+msgstr ""
+
+#: app_main/templates/main/heavy.html:44
+msgid "Images de test de charge"
+msgstr ""
+
+#: app_main/templates/main/heavy.html:62
+msgid "Aucune image accessible dans AM ou static."
+msgstr ""
+
+#: app_main/templates/main/homepage.html:4
+msgid "Journal des versions sur GitHub"
+msgstr ""
+
+#: app_main/templates/main/homepage.html:5
+msgid "Dernière version publiée"
+msgstr ""
+
+#: app_main/templates/main/homepage.html:107
+msgid "Présentation de Animation Messe"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:4
+msgid "Diagnostic Keycloak"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:9
+msgid "Mode expert"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:16
+#: app_main/templates/main/keycloak_diagnostic.html:27
+#: app_main/templates/main/provision_complete.html:45
+#: app_main/templates/main/provision_complete.html:80
+#: app_main/templates/main/provision_complete.html:122
+msgid "Relancer la connexion Keycloak"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:19
+msgid "Retour à la connexion"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:33 templates/base.html:178
+msgid "Diagnostic expert Keycloak"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:36
+msgid ""
+"Cette page affiche uniquement des informations techniques non sensibles pour "
+"analyser la dernière tentative de connexion."
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:41
+msgid "Étape :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:42
+msgid "Statut HTTP :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:44
+msgid "Aucune tentative Keycloak récente n’est disponible dans cette session."
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:49
+msgid "Diagnostic Keycloak détaillé"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:54
+msgid "Dernière erreur"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:57
+msgid "Message :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:58
+msgid "URL appelée :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:59
+msgid "Erreur Keycloak :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:60
+msgid "Description Keycloak :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:61
+msgid "Date :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:67
+msgid "Configuration publique AM"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:70
+msgid "Serveur Keycloak :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:71
+msgid "Realm :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:72
+msgid "Client ID :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:73
+msgid "Redirect URI :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:74
+msgid "Secret client configuré :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:75
+msgid "Fichier secret client configuré :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:76
+msgid "Fichier secret client présent :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:77
+msgid "Secret Home présent :"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:83
+msgid "Causes probables"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:93
+msgid "Aucune cause ciblée n’a pu être déduite automatiquement."
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:100
+msgid "Aucun diagnostic en session"
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:103
+msgid "Relancez une connexion Keycloak pour générer un diagnostic expert."
+msgstr ""
+
+#: app_main/templates/main/keycloak_diagnostic.html:110
+msgid "Vérifications VPS"
+msgstr ""
+
+#: app_main/templates/main/language.html:5
+#: app_main/templates/main/language.html:7
+#: app_main/templates/main/site_params.html:42
+msgid "Langue"
+msgstr ""
+
+#: app_main/templates/main/language.html:14
+#: app_main/templates/main/language.html:29
+#: app_main/templates/main/language.html:56
+#: app_main/templates/main/language.html:71
+#: app_main/templates/main/language.html:91
+msgid "Choix de la langue"
+msgstr ""
+
+#: app_main/templates/main/language.html:41
+msgid "Portée"
+msgstr ""
+
+#: app_main/templates/main/language.html:45
+msgid ""
+"Ce choix change la langue de Animation Messe sur cet appareil et dans ce "
+"navigateur."
+msgstr ""
+
+#: app_main/templates/main/language.html:48
+msgid "Ce n’est pas un réglage du profil utilisateur."
+msgstr ""
+
+#: app_main/templates/main/language.html:52
+msgid "Réglage AM"
+msgstr ""
+
+#: app_main/templates/main/language.html:85
+msgid "La langue s’applique à toute l’interface AM."
+msgstr ""
+
+#: app_main/templates/main/language.html:94
+msgid ""
+"Passez simplement du français à l’anglais pour toute l’interface du site."
+msgstr ""
+
+#: app_main/templates/main/language.html:98
+msgid "Langue actuelle :"
+msgstr ""
+
+#: app_main/templates/main/language.html:102
+msgid "Choix de la langue de l’interface"
+msgstr ""
+
+#: app_main/templates/main/language.html:107
+msgid "Langue principale de Animation Messe."
+msgstr ""
+
+#: app_main/templates/main/language.html:116
+#: app_main/templates/main/language.html:137
+msgid "Langue active"
+msgstr ""
+
+#: app_main/templates/main/language.html:118
+msgid "Choisir le français"
+msgstr ""
+
+#: app_main/templates/main/language.html:128
+msgid "Version anglaise de l’interface de Animation Messe."
+msgstr ""
+
+#: app_main/templates/main/language.html:139
+msgid "Choisir l’anglais"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:41
+#: app_main/templates/main/privacy_policy.html:185
+msgid "Dernière mise à jour : 14 novembre 2025"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:71
+msgid "Politique de confidentialité détaillée"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:73
+msgid ""
+"Bienvenue sur ce site dédié à la création et à la projection de chants en "
+"diaporama “Animation Messe”."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:74
+msgid ""
+"Nous avons à cœur de respecter votre vie privée et de ne collecter que les "
+"données strictement nécessaires au fonctionnement du service."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:75
+msgid ""
+"Ce document vise à vous expliquer clairement quelles données sont "
+"collectées, dans quel but, et comment elles sont traitées."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:77
+msgid "Source CNIL :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:78
+msgid "Les durées de conservation des données - 28 juillet 2020"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:83
+msgid "1. Données collectées"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:84
+msgid ""
+"Lors de la création d’un compte, nous collectons les données suivantes :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:86
+msgid ""
+"<b>Adresse e-mail :</b> nécessaire pour la création du compte, la connexion "
+"et les relances en cas d’inactivité."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:87
+msgid ""
+"<b>Mot de passe :</b> stocké de manière cryptée (hachée et salée), jamais en "
+"clair."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:88
+msgid ""
+"<b>Nom et prénom :</b> affichés uniquement dans les groupes auxquels vous "
+"participez."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:89
+msgid ""
+"<b>Dernière connexion :</b> pour gérer la suppression automatique des "
+"comptes (voir section 5)."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:91
+msgid "Aucune autre donnée personnelle n’est demandée ni enregistrée."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:95
+msgid "2. Finalité du traitement"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:96
+msgid "Ces données sont utilisées uniquement pour :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:98
+msgid "Vous permettre de vous connecter."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:99
+msgid ""
+"Vous identifier au sein de vos groupes. Seul votre username y est visible."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:100
+msgid ""
+"Vous envoyer deux e-mails de rappel avant la suppression de votre compte "
+"(voir section 5)."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:102
+msgid ""
+"Aucune donnée n’est utilisée à des fins commerciales, publicitaires, "
+"statistiques ou analytiques, en interne ou en externe."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:103
+msgid ""
+"Seuls les administrateurs du site ont accès à l'ensemble de vos données. Les "
+"responsables de groupe ont accès aux username des membres ayant fait leur "
+"demande d'accès au groupe concerné."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:107
+msgid "3. Cookies"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:108
+msgid ""
+"Le site utilise uniquement des cookies strictement nécessaires au bon "
+"fonctionnement du service :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:110
+msgid "Connexion sécurisée."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:111
+msgid "Session utilisateur."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:113
+msgid ""
+"Aucun cookie tiers, cookie de suivi, cookie publicitaire ni analyse de "
+"fréquentation n’est mis en place. En conformité avec la réglementation en "
+"vigueur (CNIL / RGPD), aucun bandeau de consentement n’est requis."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:117
+msgid "4. Partage des données"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:118
+msgid "Vos données ne sont transmises à aucun tiers."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:119
+msgid ""
+"Elles sont hébergées sur un serveur sécurisé et ne sont utilisées que dans "
+"le cadre du fonctionnement technique du site."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:123
+msgid "5. Durée de conservation et suppression automatique"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:124
+msgid ""
+"Votre compte et ses données associées (email, nom, prénom, mot de passe "
+"crypté, date de la dernière connexion) sont supprimés automatiquement après "
+"14 mois d’inactivité."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:125
+msgid "Un e-mail de rappel est envoyé :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:127
+msgid "à 12 mois d’inactivité."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:128
+msgid "à 13 mois d’inactivité."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:130
+msgid ""
+"Si aucune action n’est effectuée suite à ces relances, le compte est "
+"définitivement supprimé et un email est envoyé pour confirmer cette action."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:131
+msgid ""
+"Les groupes et animations associés à ce compte peuvent également être "
+"archivés s’ils ne sont plus liés à aucun utilisateur actif."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:135
+msgid "6. Droit d’accès, de rectification et de suppression"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:136
+msgid ""
+"Conformément au Règlement Général sur la Protection des Données (RGPD), vous "
+"avez le droit :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:138
+msgid "D’accéder à vos données."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:139
+msgid "De les corriger."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:140
+msgid "De demander leur suppression à tout moment."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:142
+msgid ""
+"Vous pouvez exercer ces droits en vous connectant ou en nous contactant à "
+"l’adresse suivante : 📧 <i>carthographie@outlook.fr</i>"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:146
+msgid "7. Analyse des données collectives (sans suivi individuel)"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:147
+msgid ""
+"Le site peut procéder à une analyse ponctuelle des chants et des groupes "
+"créés (par exemple pour archiver les contenus anciens ou inutilisés), sans "
+"jamais analyser l’activité des utilisateurs individuellement."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:148
+msgid ""
+"Ces opérations sont réalisées uniquement à des fins d’amélioration du "
+"service, sans impact sur votre vie privée."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:152
+msgid "8. Contact"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:153
+msgid ""
+"Pour toute question concernant la protection de vos données personnelles, "
+"vous pouvez écrire à : 📧 <i>carthographie@outlook.fr</i>"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:157
+msgid "9. Modification de la politique de confidentialité"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:158
+msgid ""
+"En cas de modification significative de la présente politique de "
+"confidentialité (par exemple : changement de la durée de conservation, ajout "
+"de nouvelles données collectées, etc.), vous recevrez un e-mail "
+"d’information à l’adresse associée à votre compte."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:159
+msgid ""
+"Vous pourrez alors, si vous le souhaitez, supprimer votre compte avant "
+"l’entrée en vigueur des modifications."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:163
+msgid "10. Politique d’envoi des e-mails"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:164
+msgid ""
+"Le site applique une politique stricte de non-nuisance par e-mail. Les "
+"messages envoyés sont limités aux cas strictement nécessaires au bon "
+"fonctionnement du service :"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:165
+msgid "✅ <b>E-mails que vous pouvez recevoir :</b>"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:167
+msgid "Lors de la création de votre compte."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:168
+msgid "Pour récupérer votre mot de passe."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:169
+msgid ""
+"En cas de longue période d’inactivité (rappels à 12 mois et 13 mois, voir "
+"section 5)."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:170
+msgid "Lors de suppression automatique de votre compte (voir section 5)."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:171
+msgid "Si la politique de confidentialité évolue de manière significative."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:172
+msgid "Si une attaque est survenue et que les données sont impactées."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:173
+msgid ""
+"Si un comportement inaproprié de la part d'un membre sur le site est signalé."
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:175
+msgid "❌ <b>Aucun e-mail n’est envoyé pour :</b>"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:177
+msgid "Annoncer de nouvelles fonctionnalités"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:178
+msgid "Proposer des publicités"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:179
+msgid "Envoyer des newsletters, invitations, ou communications commerciales"
+msgstr ""
+
+#: app_main/templates/main/privacy_policy.html:181
+msgid ""
+"Vous ne recevrez donc aucun e-mail inutile ou non sollicité, conformément à "
+"notre engagement de simplicité, de respect et de discrétion."
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:5
+#: app_main/templates/main/provision_complete.html:15
+#: app_main/templates/main/provision_complete.html:30
+#: app_main/templates/main/provision_complete.html:52
+#: app_main/templates/main/provision_complete.html:67
+#: app_main/templates/main/provision_complete.html:86
+#: app_main/templates/main/provision_complete.html:97
+msgid "Finalisation de la synchronisation"
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:10
+msgid "Synchronisation en attente"
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:42
+#: app_main/templates/main/provision_complete.html:77
+#: app_main/templates/main/provision_complete.html:108
+msgid "Réessayer la synchronisation"
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:89
+msgid ""
+"Le compte Keycloak est bien connu, mais la fiche Animation Messe n'est pas "
+"encore visible dans la base locale."
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:93
+msgid ""
+"Vous pouvez réessayer maintenant ou relancer la connexion si la "
+"synchronisation vient juste de se terminer."
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:101
+msgid "Réessayer la reprise du compte"
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:102
+msgid ""
+"Animation Messe va recontrôler la présence de votre compte dans users.users."
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:105
+msgid ""
+"Utilisez ce bouton si cARThographie vient de terminer la synchronisation."
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:116
+msgid "Relancer la connexion"
+msgstr ""
+
+#: app_main/templates/main/provision_complete.html:117
+msgid ""
+"Si la synchronisation a pris trop de temps ou si la session a expiré, "
+"repartez d'une nouvelle connexion Keycloak."
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:5
+#: app_main/templates/main/provision_redirect.html:15
+#: app_main/templates/main/provision_redirect.html:30
+#: app_main/templates/main/provision_redirect.html:49
+#: app_main/templates/main/provision_redirect.html:64
+#: app_main/templates/main/provision_redirect.html:80
+#: app_main/templates/main/provision_redirect.html:91
+msgid "Synchronisation du compte"
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:10
+msgid "Compte à synchroniser"
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:38
+#: app_main/templates/main/provision_redirect.html:46
+msgid "Action"
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:42
+#: app_main/templates/main/provision_redirect.html:74
+#: app_main/templates/main/provision_redirect.html:102
+msgid "Continuer vers cARThographie"
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:83
+msgid ""
+"Votre identité Keycloak est valide, mais votre fiche Animation Messe doit "
+"encore être créée dans cARThographie."
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:87
+msgid "Vous allez être redirigé automatiquement vers cARThographie."
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:95
+msgid "Finaliser la création du compte"
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:96
+msgid "cARThographie va mettre à jour la fiche nécessaire à Animation Messe."
+msgstr ""
+
+#: app_main/templates/main/provision_redirect.html:99
+msgid ""
+"Si la redirection automatique ne démarre pas, utilisez le lien ci-dessous."
+msgstr ""
+
+#: app_main/templates/main/site_params.html:19
+msgid "Retour au profil"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:21
+msgid "Site params"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:34
+msgid "Les paramètres sont enregistrés par langue."
+msgstr ""
+
+#: app_main/templates/main/site_params.html:46
+msgid "Choisir la langue"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:51
+msgid "Charger"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:56
+msgid "Édition des paramètres"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:61 templates/includes/nav.html:6
+msgid "Accueil"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:68
+#: app_main/templates/main/site_params.html:116
+msgid "Enregistrer les paramètres"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:72
+msgid "Délais des messages popup"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:77
+msgid "Carte accueil 1"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:84
+msgid "Carte accueil 2"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:91
+msgid "Carte accueil 3"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:98
+msgid "Carte accueil 4"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:105
+msgid "Carte accueil 5"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:112
+msgid "Carte accueil 6"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:4
+msgid "Icône du thème"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:5
+msgid "Logo du thème"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:6
+#: app_main/templates/main/theme_preferences.html:106
+msgid "Choix du thème"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:8
+#: app_main/templates/main/theme_preferences.html:10
+#: templates/includes/nav.html:10
+msgid "Thèmes"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:39
+msgid "Les thèmes"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:72
+msgid "Aide"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:100
+msgid "Le thème visuel est indépendant du mode clair/sombre."
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:111
+msgid ""
+"Le thème agit uniquement sur l’aspect visuel du site, en modifiant les "
+"couleurs, les icônes et le style général, sans en changer le fonctionnement."
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:112
+msgid "Les changements sont appliqués immédiatement dès la sélection."
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:116
+msgid "Liste des thèmes"
+msgstr ""
+
+#: app_main/templates/main/theme_preferences.html:157
+msgid "Activer ce thème"
+msgstr ""
+
+#: app_main/views.py:65
+msgid "Normal"
+msgstr ""
+
+#: app_main/views.py:66
+msgid "Palette chaude et classique pour l'habillage principal."
+msgstr ""
+
+#: app_main/views.py:70
+msgid "Scout"
+msgstr ""
+
+#: app_main/views.py:72
+msgid "Palette plus fraîche, plus nette, avec une ambiance vert-bleu."
+msgstr ""
+
+#: app_main/views.py:77
+msgid "Taizé"
+msgstr ""
+
+#: app_main/views.py:79
+msgid ""
+"Palette rouge et ocre, inspirée du parchemin et de la lumière des bougies."
+msgstr ""
+
+#: app_main/views.py:84
+msgid "Me†al"
+msgstr ""
+
+#: app_main/views.py:85
+msgid "Palette métal avec des néons de couleurs"
+msgstr ""
+
+#: app_main/views.py:285
+#, python-format
+msgid "Compte de %(username)s"
+msgstr ""
+
+#: app_main/views.py:297
+msgid "La connexion interactive n'est pas configurée pour cet environnement."
+msgstr ""
+
+#: app_main/views.py:360
+msgid "Unsupported authentication mode."
+msgstr ""
+
+#: app_main/views.py:397
+msgid ""
+"Votre compte Animation Messe doit être synchronisé depuis cARThographie."
+msgstr ""
+
+#: app_main/views.py:429
+#, python-format
+msgid "Connecté en tant que %(username)s."
+msgstr ""
+
+#: app_main/views.py:449
+msgid "Secret client Keycloak invalide ou non monté dans le conteneur AM."
+msgstr ""
+
+#: app_main/views.py:450
+msgid "Client ID différent entre AM et Keycloak."
+msgstr ""
+
+#: app_main/views.py:451
+msgid "Client Keycloak non configuré comme client confidentiel."
+msgstr ""
+
+#: app_main/views.py:455
+msgid "URL de retour Keycloak différente de celle déclarée dans le client."
+msgstr ""
+
+#: app_main/views.py:456
+msgid "Code OAuth déjà consommé ou expiré."
+msgstr ""
+
+#: app_main/views.py:457
+msgid "Décalage d'horloge entre les services."
+msgstr ""
+
+#: app_main/views.py:461
+msgid "Jeton d'accès refusé par l'endpoint userinfo."
+msgstr ""
+
+#: app_main/views.py:462
+msgid "Realm ou endpoint userinfo incohérent avec le jeton reçu."
+msgstr ""
+
+#: app_main/views.py:466
+msgid "Consultez les logs AM autour de keycloak_http_error."
+msgstr ""
+
+#: app_main/views.py:467
+msgid "Vérifiez la configuration Keycloak non sensible affichée ci-dessous."
+msgstr ""
+
+#: app_main/views.py:477
+msgid ""
+"Vérifier que KEYCLOAK_CLIENT_SECRET_FILE pointe vers un fichier monté dans "
+"le conteneur AM."
+msgstr ""
+
+#: app_main/views.py:479
+msgid "Vérifier KEYCLOAK_CLIENT_ID et KEYCLOAK_REDIRECT_URI dans .env.prod."
+msgstr ""
+
+#: app_main/views.py:480
+msgid "Chercher keycloak_http_error dans les logs AM."
+msgstr ""
+
+#: app_main/views.py:481
+msgid ""
+"Vérifier le chemin du secret Home si le flux de provisioning est atteint."
+msgstr ""
+
+#: app_main/views.py:504
+msgid "Aucune synchronisation de compte n'est en attente."
+msgstr ""
+
+#: app_main/views.py:523
+msgid "Aucune finalisation de synchronisation n'est en attente."
+msgstr ""
+
+#: app_main/views.py:560
+#, python-format
+msgid "Connecté en tant que %(username)s après synchronisation du compte."
+msgstr ""
+
+#: app_main/views.py:578
+msgid "Vous êtes déconnecté."
+msgstr ""
+
+#: app_main/views.py:607
+msgid "Les paramètres du site sont introuvables pour cette langue."
+msgstr ""
+
+#: app_main/views.py:617
+msgid "Les réglages administrateur ont été enregistrés."
+msgstr ""
+
+#: app_main/views.py:648
+msgid "administrateur"
+msgstr ""
+
+#: app_main/views.py:652
+#, python-format
+msgid "Le rôle %(role)s a été attribué."
+msgstr ""
+
+#: app_main/views.py:657
+#, python-format
+msgid "Le rôle %(role)s a été retiré."
+msgstr ""
+
+#: app_main/views.py:664
+msgid "La demande de mise à jour des rôles est invalide."
+msgstr ""
+
+#: app_main/views.py:678
+msgid "Action de compte inconnue."
+msgstr ""
+
+#: app_main/views.py:765
+#, python-format
+msgid ""
+"Enregistrement impossible: informations manquantes ou invalides (%(fields)s)."
+msgstr ""
+
+#: app_main/views.py:774
+msgid "Enregistrement impossible: informations manquantes ou invalides."
+msgstr ""
+
+#: app_member/context_processors.py:36
+msgid "Message des administrateurs"
+msgstr ""
+
+#: app_member/context_processors.py:47
+msgid "Informations du site"
+msgstr ""
+
+#: app_member/forms.py:14
+msgid "Recherche membre"
+msgstr ""
+
+#: app_member/forms.py:19
+msgid "Username, prénom, nom ou e-mail"
+msgstr ""
+
+#: app_member/forms.py:45 app_member/forms.py:152
+msgid "Délai de réaffichage du message administrateur (minutes)"
+msgstr ""
+
+#: app_member/forms.py:55
+msgid "Carte accueil 1 - Titre"
+msgstr ""
+
+#: app_member/forms.py:58
+msgid "Carte accueil 1 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:63
+msgid "Carte accueil 1 - Image"
+msgstr ""
+
+#: app_member/forms.py:68
+msgid "Carte accueil 2 - Titre"
+msgstr ""
+
+#: app_member/forms.py:71
+msgid "Carte accueil 2 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:76
+msgid "Carte accueil 2 - Image"
+msgstr ""
+
+#: app_member/forms.py:81
+msgid "Carte accueil 3 - Titre"
+msgstr ""
+
+#: app_member/forms.py:84
+msgid "Carte accueil 3 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:89
+msgid "Carte accueil 3 - Image"
+msgstr ""
+
+#: app_member/forms.py:94
+msgid "Carte accueil 4 - Titre"
+msgstr ""
+
+#: app_member/forms.py:97
+msgid "Carte accueil 4 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:102
+msgid "Carte accueil 4 - Image"
+msgstr ""
+
+#: app_member/forms.py:107
+msgid "Carte accueil 5 - Titre"
+msgstr ""
+
+#: app_member/forms.py:110
+msgid "Carte accueil 5 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:115
+msgid "Carte accueil 5 - Image"
+msgstr ""
+
+#: app_member/forms.py:120
+msgid "Carte accueil 6 - Titre"
+msgstr ""
+
+#: app_member/forms.py:123
+msgid "Carte accueil 6 - Texte (markdown léger)"
+msgstr ""
+
+#: app_member/forms.py:128
+msgid "Carte accueil 6 - Image"
+msgstr ""
+
+#: app_member/forms.py:145
+msgid "Titre du site"
+msgstr ""
+
+#: app_member/forms.py:146
+msgid "Titre principal"
+msgstr ""
+
+#: app_member/forms.py:147
+msgid "URL d'inscription"
+msgstr ""
+
+#: app_member/forms.py:148
+msgid "Texte d'accueil"
+msgstr ""
+
+#: app_member/forms.py:149
+msgid "Texte du bloc 1"
+msgstr ""
+
+#: app_member/forms.py:150
+msgid "Texte du bloc 2"
+msgstr ""
+
+#: app_member/models.py:28
+msgid "song_search doit être un objet JSON."
+msgstr ""
+
+#: app_member/models.py:43
+#, python-format
+msgid "song_search contient des clés non prises en charge : %(keys)s."
+msgstr ""
+
+#: app_member/models.py:48
+msgid "song_search.text doit être une chaîne de caractères."
+msgstr ""
+
+#: app_member/models.py:53
+#, python-format
+msgid "song_search.%(key)s doit être un booléen."
+msgstr ""
+
+#: app_member/models.py:60
+#, python-format
+msgid "song_search.%(key)s doit être une liste."
+msgstr ""
+
+#: app_member/models.py:65
+#, python-format
+msgid "song_search.%(key)s doit contenir uniquement des identifiants entiers."
+msgstr ""
+
+#: app_member/models.py:74
+msgid ""
+"song_search.validation doit être l'une des valeurs suivantes : all, "
+"validated_only, non_validated_only."
+msgstr ""
+
+#: app_member/models.py:93
+msgid "Lundi"
+msgstr ""
+
+#: app_member/models.py:94
+msgid "Dimanche"
+msgstr ""
+
+#: app_member/services.py:87
+msgid "Rôle de membre non pris en charge."
+msgstr ""
+
+#: templates/base.html:3
+msgid "Chargement..."
+msgstr ""
+
+#: templates/base.html:4
+msgid "Préparation de la page."
+msgstr ""
+
+#: templates/base.html:98
+msgid "Fermer la fenêtre"
+msgstr ""
+
+#: templates/base.html:99
+msgid "OK"
+msgstr ""
+
+#: templates/base.html:100
+msgid "Oui"
+msgstr ""
+
+#: templates/base.html:101
+msgid "Non"
+msgstr ""
+
+#: templates/base.html:102
+msgid "Annuler"
+msgstr ""
+
+#: templates/base.html:103
+msgid "Confirmer"
+msgstr ""
+
+#: templates/base.html:105
+msgid "Voulez-vous vraiment vous déconnecter du site ?"
+msgstr ""
+
+#: templates/base.html:106
+msgid "Ce champ est obligatoire."
+msgstr ""
+
+#: templates/base.html:107
+msgid "Veuillez saisir une adresse e-mail valide."
+msgstr ""
+
+#: templates/base.html:108
+msgid "Fenêtre de dialogue"
+msgstr ""
+
+#: templates/base.html:109
+msgid "Copie"
+msgstr ""
+
+#: templates/base.html:110
+msgid "Confirmation"
+msgstr ""
+
+#: templates/base.html:169
+msgid "Messages"
+msgstr ""
+
+#: templates/base.html:176
+msgid "Diagnostic"
+msgstr ""
+
+#: templates/base.html:187
+msgid "Section"
+msgstr ""
+
+#: templates/base.html:195
+msgid "Outils"
+msgstr ""
+
+#: templates/base.html:206
+msgid "Structure de la page"
+msgstr ""
+
+#: templates/includes/footer.html:3
+msgid "Actions rapides"
+msgstr ""
+
+#: templates/includes/footer.html:11 templates/includes/footer.html:12
+msgid "Afficher le lien vers le wiki"
+msgstr ""
+
+#: templates/includes/footer.html:25 templates/includes/footer.html:26
+#: templates/includes/footer.html:28
+msgid "Cookies et Politique de confidentialité"
+msgstr ""
+
+#: templates/includes/footer.html:35 templates/includes/footer.html:36
+msgid "Ouvrir le wiki du projet"
+msgstr ""
+
+#: templates/includes/footer.html:45 templates/includes/footer.html:46
+msgid "Revenir en haut de la page"
+msgstr ""
+
+#: templates/includes/nav.html:4
+msgid "Rôle global administrateur"
+msgstr ""
+
+#: templates/includes/nav.html:5
+msgid "Fermer"
+msgstr ""
+
+#: templates/includes/nav.html:9
+msgid "Créer un compte"
+msgstr ""
+
+#: templates/includes/nav.html:12
+msgid "Cookies et politique de confidentialité"
+msgstr ""
+
+#: templates/includes/nav.html:13
+msgid "Navigation principale"
+msgstr ""
+
+#: templates/includes/nav.html:14
+msgid "Profil et préférences"
+msgstr ""
+
+#: templates/includes/nav.html:15
+msgid "Navigation générale"
+msgstr ""
+
+#: templates/includes/nav.html:16
+msgid "Ouvrir la navigation"
+msgstr ""
+
+#: templates/includes/nav.html:17
+msgid "Voir mon profil"
+msgstr ""
+
+#: templates/includes/nav.html:21
+msgid "Anglais"
+msgstr ""

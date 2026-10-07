@@ -140,6 +140,20 @@ La page compte est le point d’entrée partagé pour :
 - gérer les messages administrateur globaux ;
 - rechercher un membre du répertoire externe pour lui attribuer un rôle global AM.
 
+Pour un Administrateur global, la section Administration de la page compte doit
+proposer un lien vers la gestion des groupes AM (`/groups/manage/`).
+
+L'encadré résumé de la page d'accueil doit proposer le même lien vers
+`/groups/manage/` lorsqu'un utilisateur authentifié peut gérer au moins un
+groupe :
+
+- Administrateur global AM ;
+- Responsable d'au moins un groupe commun via
+  `common.g_group_user.is_group_admin = TRUE`.
+
+Ce lien n'ouvre aucun droit supplémentaire : la route cible reste protégée par
+les règles de `app_group`.
+
 ---
 
 # 6. Règles fonctionnelles
@@ -167,6 +181,8 @@ La page compte est le point d’entrée partagé pour :
 **MAIN-PAGE-01** — La page d’accueil reste accessible sans compte.
 
 **MAIN-PAGE-02** — Les préférences de thème et de langue sont des préférences navigateur tant qu’aucune synchronisation serveur n’est spécifiée.
+
+**MAIN-PAGE-03** — La page d'accueil expose un accès vers la gestion des groupes uniquement aux Administrateurs globaux et aux Responsables d'au moins un groupe.
 
 **MAIN-ADMIN-01** — La gestion complète des paramètres globaux est réservée aux administrateurs globaux AM.
 
