@@ -148,10 +148,15 @@ afficher, avec des éléments séparés et lisibles :
 - l'état de l'espace AM, actif ou inactif ;
 - le statut public ou privé du groupe commun ;
 - le nombre de membres avec compte ;
-- le nombre de demandes, avec un lien vers la page ou l'action dédiée lorsque
-  ce nombre est supérieur à zéro ;
+- le nombre de demandes, avec un lien contextuel `🆕` vers
+  `/groups/<id>/members/` lorsque ce nombre est supérieur à zéro ;
 - le nombre de Membres AM ;
 - le nombre de chants dans le recueil du groupe.
+
+Le lien contextuel des demandes doit aussi être affiché sous le titre du groupe
+sur `/groups/<id>/` lorsqu'au moins une demande est en attente. Il pointe vers
+la page `Membres`, car cette page centralise les demandes de rattachement au
+groupe commun et les demandes d'accès AM des membres avec compte.
 
 Le panneau outils de `/groups/<id>/` doit proposer un accès vers la gestion des
 chants ou du recueil du groupe.
@@ -182,8 +187,8 @@ présence dans ce document ne signifie pas qu'elles existent déjà dans le code
 
 Le découpage cible est volontairement fin afin que chaque écran reste lisible :
 
-- `/groups/<id>/members/` : membres avec compte, accès AM et actions liées aux
-  membres ;
+- `/groups/<id>/members/` : membres avec compte, demandes de rattachement au
+  groupe commun, demandes d'accès AM et actions liées aux membres ;
 - `/groups/<id>/responsables/` : Responsables communs portés par
   `common.g_group_user.is_group_admin` ;
 - `/groups/<id>/am-members/` : Membres AM, demandes de création, consentements,

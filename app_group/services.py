@@ -22,6 +22,7 @@ from app_group.models import (
     AmMemberTitle,
     CelebrationRule,
     CommonGroup,
+    CommonGroupJoinRequest,
     CommonGroupTag,
     CommonGroupUser,
     Group,
@@ -264,6 +265,47 @@ def create_access_request(
         },
     )
     return request
+
+
+def create_common_join_request(
+    common_group_id: int,
+    member_id: str,
+) -> CommonGroupJoinRequest:
+    if not Group.objects.filter(pk=common_group_id).exists():
+        raise ValidationError(_("Le groupe AM est introuvable."))
+
+    if CommonGroupUser.objects.filter(
+        group_id=common_group_id,
+        member_id=member_id,
+    ).exists():
+        raise ValidationError(_("Vous faites déjà partie de ce groupe."))
+
+    request, _created = CommonGroupJoinRequest.objects.get_or_create(
+        group_id=common_group_id,
+        member_id=member_id,
+    )
+    return request
+
+
+def accept_common_join_request(join_request: CommonGroupJoinRequest) -> CommonGroupUser:
+    with transaction.atomic():
+        membership, _created = CommonGroupUser.objects.get_or_create(
+            group_id=join_request.group_id,
+            member_id=join_request.member_id,
+            defaults={
+                "is_group_admin": False,
+                "am_access": True,
+            },
+        )
+        if not membership.am_access:
+            membership.am_access = True
+            membership.save(update_fields=["am_access"])
+        join_request.delete()
+        return membership
+
+
+def refuse_common_join_request(join_request: CommonGroupJoinRequest) -> None:
+    join_request.delete()
 
 
 def accept_access_request(access_request: AccessRequest) -> GroupMember:

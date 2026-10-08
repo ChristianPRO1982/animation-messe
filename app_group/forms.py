@@ -15,6 +15,10 @@ class ActivateGroupForm(ActionForm):
     common_group_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
 
+class JoinGroupRequestForm(ActionForm):
+    common_group_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
+
+
 class GroupSettingsForm(ActionForm):
     celebration_retention_months = forms.IntegerField(
         label=_("Conservation des célébrations"),
@@ -48,6 +52,10 @@ class AccessRequestForm(ActionForm):
 
 class AccessRequestDecisionForm(ActionForm):
     access_request_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
+
+
+class CommonJoinRequestDecisionForm(ActionForm):
+    member_id = forms.UUIDField(widget=forms.HiddenInput())
 
 
 class AmMemberRequestForm(ActionForm):

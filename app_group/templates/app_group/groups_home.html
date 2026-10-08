@@ -3,97 +3,88 @@
 {% load i18n %}
 
 {% block title %}{% trans "Groupes" %} | Animation Messe{% endblock %}
-
 {% block section_title %}{% trans "Groupes" %}{% endblock %}
-
 {% block section_nav %}
     <div class="site-home-media">
         <picture data-theme-icon="groups" data-theme-alt="{% trans 'Groupes' %}">
-            <source
-                data-theme-size="512"
-                data-theme-mode="dark"
-                srcset="{% static 'icons/ui/normal/512/dark/groups.png' %}"
-                media="(prefers-color-scheme: dark)"
-            >
-            <source
-                data-theme-size="512"
-                data-theme-mode="light"
-                srcset="{% static 'icons/ui/normal/512/light/groups.png' %}"
-                media="(prefers-color-scheme: light)"
-            >
-            <img
-                src="{% static 'icons/ui/normal/512/light/groups.png' %}"
-                alt="{% trans 'Groupes' %}"
-                data-theme-size="512"
-                data-theme-mode="light"
-            >
+            <source data-theme-size="512" data-theme-mode="dark" srcset="{% static 'icons/ui/normal/512/dark/groups.png' %}" media="(prefers-color-scheme: dark)">
+            <source data-theme-size="512" data-theme-mode="light" srcset="{% static 'icons/ui/normal/512/light/groups.png' %}" media="(prefers-color-scheme: light)">
+            <img src="{% static 'icons/ui/normal/512/light/groups.png' %}" alt="{% trans 'Groupes' %}" data-theme-size="512" data-theme-mode="light">
         </picture>
     </div>
 {% endblock %}
-
 {% block tools_title %}{% trans "Accès" %}{% endblock %}
-
 {% block page_tools %}
-    <div>
-        <p>{% trans "Les demandes d’accès et la gestion des équipes seront disponibles dans cet espace." %}</p>
-    </div>
+    {% if is_authenticated %}
+        <p>{% trans "Sélectionnez un groupe pour demander votre rattachement." %}</p>
+    {% else %}
+        <p><a class="site-action site-action--primary" href="{% url 'login' %}">{% trans "Se connecter pour demander un rattachement" %}</a></p>
+    {% endif %}
 {% endblock %}
-
 {% block mobile_side_title %}{% trans "Groupes" %}{% endblock %}
-
 {% block mobile_side_visual %}
     <div class="site-home-media">
         <picture data-theme-icon="groups" data-theme-alt="{% trans 'Groupes' %}">
-            <source
-                data-theme-size="512"
-                data-theme-mode="dark"
-                srcset="{% static 'icons/ui/normal/512/dark/groups.png' %}"
-                media="(prefers-color-scheme: dark)"
-            >
-            <source
-                data-theme-size="512"
-                data-theme-mode="light"
-                srcset="{% static 'icons/ui/normal/512/light/groups.png' %}"
-                media="(prefers-color-scheme: light)"
-            >
-            <img
-                src="{% static 'icons/ui/normal/512/light/groups.png' %}"
-                alt="{% trans 'Groupes' %}"
-                data-theme-size="512"
-                data-theme-mode="light"
-            >
+            <source data-theme-size="512" data-theme-mode="dark" srcset="{% static 'icons/ui/normal/512/dark/groups.png' %}" media="(prefers-color-scheme: dark)">
+            <source data-theme-size="512" data-theme-mode="light" srcset="{% static 'icons/ui/normal/512/light/groups.png' %}" media="(prefers-color-scheme: light)">
+            <img src="{% static 'icons/ui/normal/512/light/groups.png' %}" alt="{% trans 'Groupes' %}" data-theme-size="512" data-theme-mode="light">
         </picture>
     </div>
 {% endblock %}
-
 {% block mobile_side_content %}
-    <div>
-        <p>{% trans "La page des groupes est publique. Les actions sensibles resteront protégées par les droits AM." %}</p>
-    </div>
+    <p>{% trans "Les groupes affichés disposent déjà d’un espace Animation Messe actif." %}</p>
 {% endblock %}
-
 {% block page_kicker %}Animation Messe{% endblock %}
-
 {% block page_title %}{% trans "Groupes" %}{% endblock %}
-
 {% block page_intro %}
-    <p>{% trans "Retrouvez ici les groupes Animation Messe et leurs accès." %}</p>
+    <p>{% trans "Retrouvez les groupes Animation Messe actifs et demandez un rattachement si nécessaire." %}</p>
 {% endblock %}
-
 {% block page_summary %}
-    <p>{% trans "La fondation technique des groupes est en place. Les écrans de gestion arriveront dans les prochaines étapes." %}</p>
+    <p>{% trans "Les demandes sont transmises aux Responsables du groupe, qui les acceptent ou les refusent." %}</p>
 {% endblock %}
 
 {% block content %}
-    <section class="site-theme-selection" aria-label="{% trans 'Gestion des groupes' %}">
-        <article class="site-theme-card">
-            <header class="site-theme-card-header">
-                <div>
-                    <h2>{% trans "Gestion des groupes" %}</h2>
-                    <p>{% trans "Cette page accueillera la liste des groupes, les demandes d’accès et les paramètres propres aux équipes." %}</p>
-                </div>
-                {% include "includes/themed_icon.html" with picture_class="site-theme-card-icon" img_class="" icon_name="groups" icon_alt="" %}
-            </header>
-        </article>
+    <section class="site-theme-selection" aria-label="{% trans 'Groupes Animation Messe actifs' %}">
+        {% for row in rows %}
+            <article class="site-theme-card{% if row.is_member %} is-active{% endif %}">
+                <header class="site-theme-card-header">
+                    <div>
+                        <h2>{{ row.common_group.name }}</h2>
+                        <p>
+                            {% if row.common_group.status == "open" %}
+                                {% trans "Groupe ouvert" %}
+                            {% else %}
+                                {% trans "Groupe privé" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% include "includes/themed_icon.html" with picture_class="site-theme-card-icon" img_class="" icon_name="groups" icon_alt="" %}
+                </header>
+                {% if row.common_group.info %}<p>{{ row.common_group.info }}</p>{% endif %}
+                {% if row.is_member %}
+                    <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre de ce groupe." %}</span></p>
+                {% elif row.has_pending_request %}
+                    <p><span class="site-role-banner">{% trans "Demande de rattachement en attente." %}</span></p>
+                {% elif row.can_request_join %}
+                    <form method="post" data-app-group-confirm="{% trans 'Envoyer une demande de rattachement à ce groupe ?' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="request_common_group_join">
+                        <input type="hidden" name="common_group_id" value="{{ row.common_group.group_id }}">
+                        <button class="site-action site-action--primary" type="submit">{% trans "Demander le rattachement" %}</button>
+                    </form>
+                {% else %}
+                    <p>{% trans "Connectez-vous pour demander un rattachement." %}</p>
+                {% endif %}
+            </article>
+        {% empty %}
+            <article class="site-theme-card">
+                <header class="site-theme-card-header"><div><h2>{% trans "Aucun groupe actif" %}</h2></div></header>
+                <p>{% trans "Aucun groupe Animation Messe actif n’est disponible pour l’instant." %}</p>
+            </article>
+        {% endfor %}
     </section>
+{% endblock %}
+
+{% block page_scripts %}
+    <script src="{% static 'js/app_group.js' %}"></script>
 {% endblock %}

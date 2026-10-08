@@ -23,7 +23,11 @@
 {% endblock %}
 {% block page_kicker %}Animation Messe{% endblock %}
 {% block page_title %}{{ common_group.name }}{% endblock %}
-{% block page_intro %}{% endblock %}
+{% block page_intro %}
+    {% if group and metrics.requests > 0 %}
+        <p><a href="{% url 'group_members' common_group.group_id %}">🆕 {% blocktrans with requests=metrics.requests %}{{ requests }} demandes en cours.{% endblocktrans %}</a></p>
+    {% endif %}
+{% endblock %}
 {% block page_summary %}
     {% if group %}
         <p>{% trans "Espace AM actif." %}</p>
@@ -37,7 +41,7 @@
         <p>{% blocktrans with members=metrics.account_members %}{{ members }} membres avec compte.{% endblocktrans %}</p>
         <p>
             {% if metrics.requests > 0 %}
-                <a href="{% url 'group_am_members' common_group.group_id %}">{% blocktrans with requests=metrics.requests %}{{ requests }} demandes en cours.{% endblocktrans %}</a>
+                <a href="{% url 'group_members' common_group.group_id %}">🆕 {% blocktrans with requests=metrics.requests %}{{ requests }} demandes en cours.{% endblocktrans %}</a>
             {% else %}
                 {% trans "Aucune demande en cours." %}
             {% endif %}
@@ -93,9 +97,6 @@
                     <p>{% trans "Aucun Membre AM actif." %}</p>
                 {% endfor %}
             </article>
-        </section>
-
-        <section class="site-theme-selection" aria-label="{% trans 'Actions de gestion' %}">
             <article class="site-theme-card">
                 <header class="site-theme-card-header"><div><h2>{% trans "Modifier les personnes" %}</h2></div></header>
                 <p><a class="site-action site-action--secondary" href="{% url 'group_members' common_group.group_id %}">{% trans "Membres" %}</a></p>
@@ -104,6 +105,9 @@
                 <p><a class="site-action site-action--secondary" href="{% url 'group_functions' common_group.group_id %}">{% trans "Fonctions" %}</a></p>
                 <p><a class="site-action site-action--secondary" href="{% url 'group_am_member_titles' common_group.group_id %}">{% trans "Titres Membre AM" %}</a></p>
             </article>
+        </section>
+
+        <section class="site-theme-selection" aria-label="{% trans 'Actions de gestion' %}">
             <article class="site-theme-card">
                 <header class="site-theme-card-header"><div><h2>{% trans "Paramètres du calendrier" %}</h2></div></header>
                 <p><a class="site-action site-action--secondary" href="{% url 'group_calendar_states' common_group.group_id %}">{% trans "États planning" %}</a></p>

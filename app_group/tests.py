@@ -69,18 +69,128 @@ def build_user(*, authenticated=True, admin=False):
 
 
 class AppGroupPublicPageTests(SimpleTestCase):
-    def test_groups_home_is_public(self):
-        response = self.client.get(reverse("groups_home"))
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    @patch("app_group.views._build_groups_home_context")
+    def test_groups_home_is_public(self, home_context):
+        home_context.return_value = {
+            "rows": [],
+            "selected_group": None,
+            "is_authenticated": False,
+        }
+        request = build_request(
+            self.factory,
+            path="/groups/",
+            user=build_user(authenticated=False),
+        )
+
+        response = group_views.groups_home(request)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Groupes")
 
-    def test_groups_home_uses_themed_groups_icon(self):
-        response = self.client.get(reverse("groups_home"))
+    @patch("app_group.views._build_groups_home_context")
+    def test_groups_home_uses_themed_groups_icon(self, home_context):
+        home_context.return_value = {
+            "rows": [],
+            "selected_group": None,
+            "is_authenticated": False,
+        }
+        request = build_request(
+            self.factory,
+            path="/groups/",
+            user=build_user(authenticated=False),
+        )
+
+        response = group_views.groups_home(request)
 
         self.assertContains(response, 'data-theme-icon="groups"')
         self.assertContains(response, "icons/ui/normal/512/light/groups.png")
         self.assertContains(response, "icons/ui/normal/512/dark/groups.png")
+
+    @patch("app_group.views.CommonGroupJoinRequest")
+    @patch("app_group.views.CommonGroupUser")
+    @patch("app_group.views.CommonGroup")
+    @patch("app_group.views.Group")
+    def test_groups_home_context_lists_active_groups_with_requested_order(
+        self, group_model, common_group_model, common_group_user, join_request_model
+    ):
+        groups = [
+            group_models.CommonGroup(
+                group_id=1,
+                name="Zulu privé",
+                status=group_models.CommonGroup.STATUS_PRIVATE,
+            ),
+            group_models.CommonGroup(
+                group_id=2,
+                name="Alpha ouvert",
+                status=group_models.CommonGroup.STATUS_OPEN,
+            ),
+            group_models.CommonGroup(
+                group_id=3,
+                name="Beta membre",
+                status=group_models.CommonGroup.STATUS_PRIVATE,
+            ),
+        ]
+        group_model.objects.values_list.return_value = [1, 2, 3]
+        common_group_model.objects.filter.return_value.order_by.return_value = groups
+        common_group_user.objects.filter.return_value.values_list.return_value = [3]
+        join_request_model.objects.filter.return_value.values_list.return_value = [1]
+        request = build_request(self.factory, path="/groups/", user=build_user())
+
+        context = group_views._build_groups_home_context(request)
+
+        self.assertEqual(
+            [row["common_group"].group_id for row in context["rows"]],
+            [3, 2, 1],
+        )
+        self.assertTrue(context["rows"][0]["is_member"])
+        self.assertTrue(context["rows"][2]["has_pending_request"])
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.create_common_join_request")
+    def test_groups_home_post_creates_join_request_for_authenticated_user(
+        self, create_join_request, _messages
+    ):
+        request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={
+                "action": "request_common_group_join",
+                "common_group_id": "7",
+            },
+            user=build_user(),
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("groups_home"))
+        create_join_request.assert_called_once_with(
+            7,
+            "11111111-1111-1111-1111-111111111111",
+        )
+
+    @patch("app_group.views.services.create_common_join_request")
+    def test_groups_home_post_requires_authentication(self, create_join_request):
+        request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={
+                "action": "request_common_group_join",
+                "common_group_id": "7",
+            },
+            user=build_user(authenticated=False),
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("login"))
+        create_join_request.assert_not_called()
 
 
 class AppGroupManagementViewTests(SimpleTestCase):
@@ -111,6 +221,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "celebration_rules": [],
             "special_date_rules": [],
             "access_requests": [],
+            "common_join_requests": [],
             "am_member_requests": [],
             "group_tags": [],
             "songs": [],
@@ -213,10 +324,18 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "celebration_rules": [],
             "special_date_rules": [],
             "access_requests": [],
+            "common_join_requests": [],
             "am_member_requests": [],
             "group_tags": [],
             "songs": [],
-            "metrics": {"members": 0, "requests": 0, "songs": 0, "functions": 0},
+            "metrics": {
+                "members": 0,
+                "account_members": 0,
+                "am_members": 0,
+                "requests": 2,
+                "songs": 0,
+                "functions": 0,
+            },
             "invitation_notice_json": "{}",
             "forms": {
                 "settings": group_forms.GroupSettingsForm(),
@@ -239,6 +358,11 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertContains(response, "Liste des responsables")
         self.assertContains(response, "Liste des Membres AM")
         self.assertContains(response, reverse("group_songs", kwargs={"group_id": 7}))
+        self.assertContains(response, "🆕 2 demandes en cours.", count=2)
+        self.assertContains(
+            response,
+            reverse("group_members", kwargs={"group_id": 7}),
+        )
         self.assertContains(response, "static/js/app_group.js")
         self.assertNotContains(response, "Créer une demande d’accès AM")
         self.assertNotContains(response, "Ajouter au recueil")
@@ -838,6 +962,42 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         refuse_access_request.assert_called_once_with(access_request)
 
     @patch("app_group.views.messages")
+    @patch("app_group.views.services.refuse_common_join_request")
+    @patch("app_group.views.services.accept_common_join_request")
+    @patch("app_group.views.CommonGroupJoinRequest")
+    def test_dispatch_common_join_request_decisions(
+        self,
+        join_request_model,
+        accept_join_request,
+        refuse_join_request,
+        _messages,
+    ):
+        join_request = object()
+        join_request_model.objects.get.return_value = join_request
+        accept_request = self.post_request(
+            {
+                "action": "accept_common_join_request",
+                "member_id": "22222222-2222-2222-2222-222222222222",
+            }
+        )
+        refuse_request = self.post_request(
+            {
+                "action": "refuse_common_join_request",
+                "member_id": "22222222-2222-2222-2222-222222222222",
+            }
+        )
+
+        group_views._dispatch_group_action(
+            accept_request, self.group, "accept_common_join_request"
+        )
+        group_views._dispatch_group_action(
+            refuse_request, self.group, "refuse_common_join_request"
+        )
+
+        accept_join_request.assert_called_once_with(join_request)
+        refuse_join_request.assert_called_once_with(join_request)
+
+    @patch("app_group.views.messages")
     @patch("app_group.views.services.expire_am_member_request")
     @patch("app_group.views.services.refuse_am_member_request")
     def test_dispatch_am_member_request_refuse_and_expire(
@@ -1038,10 +1198,11 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         tag_song.assert_called_once_with(song, tag)
         set_selection.assert_called_once_with(song_tag, verse, selected_by_default=True)
 
+    @patch("app_group.views.CommonGroupJoinRequest")
     @patch("app_group.views.CommonGroupTag")
     @patch("app_group.views.CommonGroupUser")
     def test_build_group_context_for_inactive_and_active_group(
-        self, common_group_user, common_group_tag
+        self, common_group_user, common_group_tag, common_join_request
     ):
         request = self.post_request({})
         request.session[group_views.INVITATION_NOTICE_SESSION_KEY] = {
@@ -1078,6 +1239,8 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
             am_member_requests=manager,
         )
         common_group_tag.objects.filter.return_value = []
+        common_join_request.objects.filter.return_value.order_by.return_value = []
+        common_join_request.objects.filter.return_value.count.return_value = 0
 
         active_context = group_views._build_group_context(
             request, self.common_group, group
@@ -1544,6 +1707,78 @@ class AppGroupServiceTests(SimpleTestCase):
         )
         with self.assertRaises(ValidationError):
             group_services.create_access_request(group, member, consent_version="v1")
+
+    @patch("app_group.services.CommonGroupJoinRequest")
+    @patch("app_group.services.CommonGroupUser")
+    @patch("app_group.services.Group")
+    def test_common_join_request_requires_active_group_and_no_existing_membership(
+        self,
+        group_model,
+        common_group_user,
+        join_request_model,
+    ):
+        group_model.objects.filter.return_value.exists.return_value = False
+
+        with self.assertRaises(ValidationError):
+            group_services.create_common_join_request(
+                7,
+                "11111111-1111-1111-1111-111111111111",
+            )
+
+        group_model.objects.filter.return_value.exists.return_value = True
+        common_group_user.objects.filter.return_value.exists.return_value = True
+        with self.assertRaises(ValidationError):
+            group_services.create_common_join_request(
+                7,
+                "11111111-1111-1111-1111-111111111111",
+            )
+
+        common_group_user.objects.filter.return_value.exists.return_value = False
+        join_request = object()
+        join_request_model.objects.get_or_create.return_value = (join_request, True)
+
+        self.assertIs(
+            group_services.create_common_join_request(
+                7,
+                "11111111-1111-1111-1111-111111111111",
+            ),
+            join_request,
+        )
+
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_accept_common_join_request_creates_membership_and_deletes_request(
+        self,
+        common_group_user,
+        atomic,
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        membership = Mock(am_access=False)
+        common_group_user.objects.get_or_create.return_value = (membership, True)
+        join_request = Mock(
+            group_id=7,
+            member_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        )
+
+        self.assertIs(
+            group_services.accept_common_join_request(join_request), membership
+        )
+
+        common_group_user.objects.get_or_create.assert_called_once_with(
+            group_id=7,
+            member_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+            defaults={"is_group_admin": False, "am_access": True},
+        )
+        membership.save.assert_called_once_with(update_fields=["am_access"])
+        join_request.delete.assert_called_once()
+
+    def test_refuse_common_join_request_deletes_request(self):
+        join_request = Mock()
+
+        group_services.refuse_common_join_request(join_request)
+
+        join_request.delete.assert_called_once()
 
     @patch("app_group.services.transaction.atomic")
     @patch("app_group.services.GroupMember")

@@ -16,6 +16,7 @@ from app_group.models import (
     AmMemberRequest,
     AmMemberTitle,
     CommonGroup,
+    CommonGroupJoinRequest,
     CommonGroupTag,
     CommonGroupUser,
     Group,
@@ -41,6 +42,8 @@ GROUP_PAGE_CONFIG = {
             "create_access_request",
             "accept_access_request",
             "refuse_access_request",
+            "accept_common_join_request",
+            "refuse_common_join_request",
         },
     },
     "responsables": {
@@ -112,7 +115,91 @@ GROUP_PAGE_CONFIG = {
 
 
 def groups_home(request):
-    return render(request, "app_group/groups_home.html")
+    if request.method == "POST":
+        return _handle_groups_home_post(request)
+
+    return render(
+        request,
+        "app_group/groups_home.html",
+        _build_groups_home_context(request),
+    )
+
+
+def _handle_groups_home_post(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    form = forms.JoinGroupRequestForm(request.POST)
+    if (
+        not form.is_valid()
+        or form.cleaned_data["action"] != "request_common_group_join"
+    ):
+        messages.error(request, _("Demande de rattachement invalide."))
+        return redirect("groups_home")
+
+    try:
+        services.create_common_join_request(
+            form.cleaned_data["common_group_id"],
+            str(getattr(request.user, "external_id", "") or "").strip(),
+        )
+    except (PermissionDenied, ValidationError, ValueError) as exc:
+        messages.error(request, _validation_message(exc))
+    else:
+        messages.success(request, _("Votre demande de rattachement est envoyée."))
+    return redirect("groups_home")
+
+
+def _build_groups_home_context(request):
+    active_group_ids = list(Group.objects.values_list("gg_id", flat=True))
+    common_groups = list(
+        CommonGroup.objects.filter(group_id__in=active_group_ids).order_by("name")
+    )
+    member_group_ids: set[int] = set()
+    pending_group_ids: set[int] = set()
+    is_authenticated = getattr(request.user, "is_authenticated", False)
+    if is_authenticated:
+        member_id = str(getattr(request.user, "external_id", "") or "").strip()
+        if member_id:
+            member_group_ids = set(
+                CommonGroupUser.objects.filter(member_id=member_id).values_list(
+                    "group_id", flat=True
+                )
+            )
+            pending_group_ids = set(
+                CommonGroupJoinRequest.objects.filter(member_id=member_id).values_list(
+                    "group_id", flat=True
+                )
+            )
+
+    def sort_key(common_group):
+        if common_group.group_id in member_group_ids:
+            priority = 0
+        elif common_group.status == CommonGroup.STATUS_OPEN:
+            priority = 1
+        else:
+            priority = 2
+        return priority, common_group.name.lower(), common_group.group_id
+
+    rows = []
+    for common_group in sorted(common_groups, key=sort_key):
+        is_member = common_group.group_id in member_group_ids
+        has_pending_request = common_group.group_id in pending_group_ids
+        rows.append(
+            {
+                "common_group": common_group,
+                "is_member": is_member,
+                "has_pending_request": has_pending_request,
+                "can_request_join": (
+                    is_authenticated and not is_member and not has_pending_request
+                ),
+            }
+        )
+
+    return {
+        "rows": rows,
+        "selected_group": None,
+        "is_authenticated": is_authenticated,
+    }
 
 
 def groups_manage(request):
@@ -374,6 +461,21 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         else:
             services.refuse_access_request(access_request)
             messages.success(request, _("La demande d'accès AM est refusée."))
+        return
+
+    if action in {"accept_common_join_request", "refuse_common_join_request"}:
+        form = forms.CommonJoinRequestDecisionForm(request.POST)
+        _validate_action_form(form, action)
+        join_request = CommonGroupJoinRequest.objects.get(
+            group_id=group.gg_id,
+            member_id=form.cleaned_data["member_id"],
+        )
+        if action == "accept_common_join_request":
+            services.accept_common_join_request(join_request)
+            messages.success(request, _("La demande de rattachement est acceptée."))
+        else:
+            services.refuse_common_join_request(join_request)
+            messages.success(request, _("La demande de rattachement est refusée."))
         return
 
     if action == "create_am_member_request":
@@ -667,6 +769,11 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
             "celebration_rules": list(group.celebration_rules.all()),
             "special_date_rules": list(group.special_date_rules.all()),
             "access_requests": list(group.access_requests.all()),
+            "common_join_requests": list(
+                CommonGroupJoinRequest.objects.filter(group_id=group.gg_id).order_by(
+                    "member_id"
+                )
+            ),
             "am_member_requests": list(group.am_member_requests.all()),
             "group_tags": list(
                 CommonGroupTag.objects.filter(group_id=group.gg_id, is_active=True)
@@ -690,6 +797,7 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
                 ),
                 "functions": group.functions.count(),
                 "requests": group.access_requests.count()
+                + CommonGroupJoinRequest.objects.filter(group_id=group.gg_id).count()
                 + group.am_member_requests.filter(
                     status=AmMemberRequest.STATUS_PENDING
                 ).count(),
