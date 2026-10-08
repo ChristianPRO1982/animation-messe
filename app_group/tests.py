@@ -452,6 +452,103 @@ class AppGroupPublicPageTests(SimpleTestCase):
         self.assertEqual(response.url, reverse("login"))
         create_join_request.assert_not_called()
 
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.create_common_join_request")
+    def test_groups_home_post_reports_join_request_errors(
+        self, create_join_request, message_api
+    ):
+        create_join_request.side_effect = ValidationError("refused")
+        request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={
+                "action": "request_common_group_join",
+                "common_group_id": "7",
+            },
+            user=build_user(),
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertEqual(response.status_code, 302)
+        message_api.error.assert_called_once()
+
+    @patch("app_group.views.messages")
+    def test_groups_home_post_rejects_invalid_actions_and_forms(self, message_api):
+        invalid_join_request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={"action": "request_common_group_join"},
+            user=build_user(),
+        )
+        invalid_am_request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={"action": "request_am_access"},
+            user=build_user(),
+        )
+        unknown_request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={"action": "nope"},
+            user=build_user(),
+        )
+
+        self.assertEqual(group_views.groups_home(invalid_join_request).status_code, 302)
+        self.assertEqual(group_views.groups_home(invalid_am_request).status_code, 302)
+        self.assertEqual(group_views.groups_home(unknown_request).status_code, 302)
+        self.assertEqual(message_api.error.call_count, 3)
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.Group")
+    def test_groups_home_post_am_access_reports_missing_group(
+        self, group_model, messages
+    ):
+        group_model.objects.filter.return_value.first.return_value = None
+        request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={
+                "action": "request_am_access",
+                "common_group_id": "7",
+            },
+            user=build_user(),
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertEqual(response.status_code, 302)
+        messages.error.assert_called_once()
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.create_access_request")
+    @patch("app_group.views.Group")
+    def test_groups_home_post_am_access_reports_service_error(
+        self, group_model, create_access_request, messages
+    ):
+        group_model.objects.filter.return_value.first.return_value = build_group(7)
+        create_access_request.side_effect = ValidationError("already active")
+        request = build_request(
+            self.factory,
+            method="post",
+            path="/groups/",
+            data={
+                "action": "request_am_access",
+                "common_group_id": "7",
+            },
+            user=build_user(),
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertEqual(response.status_code, 302)
+        messages.error.assert_called_once()
+
 
 class AppGroupManagementViewTests(SimpleTestCase):
     def setUp(self):
@@ -1216,6 +1313,21 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         messages.error.assert_called_once()
 
     @patch("app_group.views.messages")
+    def test_group_post_rejects_action_not_allowed_on_page(self, message_api):
+        request = self.post_request({"action": "save_function"})
+
+        response = group_views._handle_group_post(
+            request,
+            self.common_group,
+            self.group,
+            redirect_name="group_members",
+            allowed_actions={"remove_member_am_access"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        message_api.error.assert_called_once()
+
+    @patch("app_group.views.messages")
     def test_detail_post_requires_active_am_group_for_other_actions(self, message_api):
         request = self.post_request({"action": "save_function", "name": "Chantre"})
 
@@ -1247,6 +1359,18 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 302)
         message_api.error.assert_called_once()
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.save_group_settings")
+    def test_dispatch_saves_group_settings(self, save_group_settings, _messages):
+        request = self.post_request(
+            {"action": "save_group_settings", "celebration_retention_months": "12"}
+        )
+
+        group_views._dispatch_group_action(request, self.group, "save_group_settings")
+
+        self.assertEqual(self.group.celebration_retention_months, 12)
+        save_group_settings.assert_called_once_with(self.group)
 
     def test_repertoire_song_form_rejects_invalid_verse_ids(self):
         bad_text = group_forms.RepertoireSongForm(
@@ -1668,6 +1792,91 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         self.assertEqual(active_context["metrics"]["members"], 0)
         self.assertEqual(active_context["metrics"]["requests"], 0)
 
+    @patch("app_group.views.DirectoryUserRecord")
+    def test_directory_member_profile_map_and_display_name_fallbacks(
+        self, directory_model
+    ):
+        member_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
+        directory_model.objects.filter.return_value = [
+            SimpleNamespace(
+                id=member_id,
+                first_name="Alice",
+                last_name="Martin",
+                username="alice",
+            )
+        ]
+
+        profile_map = group_views._directory_member_profile_map([member_id])
+
+        self.assertEqual(
+            group_views._directory_display_name(member_id, profile_map),
+            "Alice Martin",
+        )
+        self.assertEqual(group_views._directory_member_profile_map([]), {})
+
+        directory_model.objects.filter.side_effect = RuntimeError("missing table")
+        self.assertEqual(group_views._directory_member_profile_map([member_id]), {})
+
+        self.assertEqual(
+            group_views._directory_display_name(
+                member_id,
+                {str(member_id): {"username": "fallback"}},
+            ),
+            "fallback",
+        )
+        self.assertEqual(
+            str(group_views._directory_display_name(member_id, {})), "Membre"
+        )
+
+    def test_member_row_helpers_cover_roles_and_functions(self):
+        active_function = SimpleNamespace(name="Chantre", is_active=True)
+        inactive_function = SimpleNamespace(name="Archive", is_active=False)
+        role = SimpleNamespace(
+            code=group_models.ROLE_RESPONSABLE_IMPRESSION,
+            is_active=True,
+        )
+        group_member = SimpleNamespace(
+            member_kind=group_models.MEMBER_KIND_ACCOUNT,
+            member_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+            function_assignments=Mock(
+                all=Mock(
+                    return_value=[
+                        SimpleNamespace(function=active_function),
+                        SimpleNamespace(function=inactive_function),
+                    ]
+                )
+            ),
+            role_assignments=Mock(all=Mock(return_value=[SimpleNamespace(role=role)])),
+        )
+        am_member = SimpleNamespace(
+            member_kind=group_models.MEMBER_KIND_AM,
+            am_profile=SimpleNamespace(first_name="Bob", last_name="Durand"),
+            function_assignments=Mock(all=Mock(return_value=[])),
+        )
+        profile_map = {
+            "11111111-1111-1111-1111-111111111111": {
+                "first_name": "Alice",
+                "last_name": "Martin",
+            }
+        }
+
+        self.assertEqual(
+            group_views._member_function_names(group_member),
+            ["Chantre"],
+        )
+        self.assertTrue(group_views._has_responsable_impression_role(group_member))
+        self.assertEqual(group_views._member_function_names(None), [])
+        self.assertFalse(group_views._has_responsable_impression_role(None))
+
+        rows = group_views._build_function_member_rows(
+            [group_member, am_member],
+            profile_map,
+        )
+
+        self.assertEqual(rows[0]["display_name"], "Alice Martin")
+        self.assertEqual(rows[0]["function_names"], ["Chantre"])
+        self.assertEqual(rows[1]["display_name"], "Bob Durand")
+
     @patch("app_group.views.CommonGroup")
     @patch("app_group.views.CommonGroupUser")
     def test_group_access_helpers_cover_admin_and_responsable_paths(
@@ -1973,6 +2182,52 @@ class AppGroupServiceTests(SimpleTestCase):
             member_kind=group_models.MEMBER_KIND_ACCOUNT,
         )
         group_member_model.objects.filter.return_value.delete.assert_called_once()
+
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_remove_member_am_access_accepts_missing_anchor_and_inactive_access(
+        self, common_group_user, atomic, group_member_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        membership = Mock(is_group_admin=False, am_access=False)
+        memberships = Mock()
+        memberships.filter.return_value.first.return_value = membership
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+        group_member_model.objects.filter.return_value.delete.return_value = (0, {})
+
+        group_services.remove_member_am_access(
+            1, "11111111-1111-1111-1111-111111111111"
+        )
+
+        membership.save.assert_not_called()
+        group_member_model.objects.filter.return_value.delete.assert_called_once()
+
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_member_removals_require_existing_common_membership(
+        self, common_group_user, atomic, _group_member_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        memberships = Mock()
+        memberships.filter.return_value.first.return_value = None
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+
+        with self.assertRaisesMessage(ValidationError, "introuvable"):
+            group_services.remove_member_am_access(
+                1, "11111111-1111-1111-1111-111111111111"
+            )
+        with self.assertRaisesMessage(ValidationError, "introuvable"):
+            group_services.remove_common_group_member(
+                1, "11111111-1111-1111-1111-111111111111"
+            )
 
     @patch("app_group.services.GroupMember")
     @patch("app_group.services.transaction.atomic")
