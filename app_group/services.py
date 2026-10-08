@@ -305,6 +305,7 @@ def create_access_request(
     if membership.am_access:
         raise ValidationError(_("Le membre possède déjà l'accès AM."))
 
+    member, _created = Member.objects.get_or_create(mm_id=member.mm_id)
     request, _created = AccessRequest.objects.get_or_create(
         group=group,
         member=member,
@@ -351,7 +352,7 @@ def accept_common_join_request(join_request: CommonGroupJoinRequest) -> CommonGr
             membership.am_access = True
             membership.save(update_fields=["am_access"])
         group = Group.objects.get(pk=join_request.group_id)
-        member = Member(mm_id=join_request.member_id)
+        member, _created = Member.objects.get_or_create(mm_id=join_request.member_id)
         GroupMember.objects.get_or_create(
             group=group,
             member=member,

@@ -169,6 +169,93 @@
     white-space: nowrap;
 }
 
+.group-member-grid {
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--site-line, rgba(0, 0, 0, 0.12));
+    border-radius: 0.35rem;
+    overflow: hidden;
+}
+
+.group-member-grid-header,
+.group-member-grid-row {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) repeat(4, minmax(2.75rem, 3.5rem));
+    align-items: stretch;
+}
+
+.group-member-grid-header {
+    font-weight: 700;
+    background: var(--site-soft-bg, rgba(0, 0, 0, 0.04));
+}
+
+.group-member-grid-header > div,
+.group-member-main,
+.group-member-grid-cell {
+    padding: 0.35rem 0.45rem;
+    border-right: 1px solid var(--site-line, rgba(0, 0, 0, 0.12));
+    border-bottom: 1px solid var(--site-line, rgba(0, 0, 0, 0.12));
+}
+
+.group-member-grid-header > div:last-child,
+.group-member-grid-cell:last-child {
+    border-right: 0;
+}
+
+.group-member-grid-row:last-child .group-member-main,
+.group-member-grid-row:last-child .group-member-grid-cell {
+    border-bottom: 0;
+}
+
+.group-member-grid-header > div:not(:first-child),
+.group-member-grid-cell {
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.group-member-main {
+    min-width: 0;
+}
+
+.group-member-main p {
+    margin: 0;
+}
+
+.group-member-grid-cell form {
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+}
+
+.group-member-checkbox {
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.group-member-checkbox input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+}
+
+.group-member-checkbox-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.group-member-icon-action {
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.2rem 0.35rem;
+    line-height: 1;
+}
+
 .group-settings-actions {
     margin-top: 1rem;
 }
@@ -215,6 +302,41 @@
 
     .group-person-row {
         grid-template-columns: 1fr;
+    }
+
+    .group-member-grid {
+        border: 0;
+        border-radius: 0;
+        gap: 0.75rem;
+        overflow: visible;
+    }
+
+    .group-member-grid-header {
+        display: none;
+    }
+
+    .group-member-grid-row {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        border: 1px solid var(--site-line, rgba(0, 0, 0, 0.12));
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .group-member-main {
+        grid-column: 1 / -1;
+        border-right: 0;
+    }
+
+    .group-member-grid-cell {
+        gap: 0.35rem;
+        border-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .group-member-grid-cell::before {
+        content: attr(data-label);
+        font-size: 0.8rem;
+        opacity: 0.75;
     }
 
     .group-card-actions,

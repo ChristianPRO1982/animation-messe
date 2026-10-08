@@ -294,6 +294,10 @@ class AppGroupPublicPageTests(SimpleTestCase):
 
         context = group_views._build_groups_home_context(request)
 
+        access_request_model.objects.filter.assert_called_once_with(
+            member_id="11111111-1111-1111-1111-111111111111",
+            request_type=group_models.REQUEST_TYPE_AM_ACCESS,
+        )
         self.assertEqual(
             [row["common_group"].group_id for row in context["rows"]],
             [3, 2, 1],
@@ -772,7 +776,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
                 "membership": SimpleNamespace(
                     member_id="11111111-1111-1111-1111-111111111111"
                 ),
-                "group_member": None,
+                "group_member": SimpleNamespace(ggm_id=5),
                 "display_name": "Alice Martin",
                 "has_am_access": True,
                 "is_responsable": False,
@@ -956,7 +960,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
                 "membership": SimpleNamespace(
                     member_id="11111111-1111-1111-1111-111111111111"
                 ),
-                "group_member": None,
+                "group_member": SimpleNamespace(ggm_id=5),
                 "display_name": "Alice Martin",
                 "has_am_access": True,
                 "is_responsable": False,
@@ -973,11 +977,20 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
         self.assertContains(response, "1 membres avec compte.")
         self.assertContains(response, "0 demandes en attente.")
-        self.assertContains(response, "❌ AM")
-        self.assertContains(response, "❌ Gr")
-        self.assertContains(response, 'class="group-person-row"')
+        self.assertContains(response, "⚖️")
+        self.assertContains(response, "🖨️")
+        self.assertContains(response, "⛪")
+        self.assertContains(response, "👥")
+        self.assertContains(response, 'class="group-member-grid"')
+        self.assertContains(response, 'class="group-member-grid-row"')
+        self.assertContains(response, 'type="checkbox"')
+        self.assertContains(
+            response, 'class="site-action site-action--danger group-member-icon-action"'
+        )
         self.assertContains(response, 'data-app-group-confirm="')
         self.assertNotContains(response, "Créer une demande d’accès AM")
+        self.assertNotContains(response, "Accès AM</span>")
+        self.assertNotContains(response, "Fonctions :")
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.ensure_group_environment")
@@ -2430,14 +2443,17 @@ class AppGroupServiceTests(SimpleTestCase):
                 instance.save.assert_called_once()
 
     @patch("app_group.services.AccessRequest")
+    @patch("app_group.services.Member")
     @patch("app_group.services.CommonGroupUser")
     def test_access_request_requires_common_membership_without_am_access(
         self,
         common_group_user,
+        member_model,
         access_request_model,
     ):
         group = build_group(1)
         member = build_member()
+        member_model.objects.get_or_create.return_value = (member, False)
         common_group_user.objects.filter.return_value.first.return_value = (
             SimpleNamespace(am_access=False)
         )
@@ -2452,6 +2468,9 @@ class AppGroupServiceTests(SimpleTestCase):
             ),
             request,
         )
+        member_model.objects.get_or_create.assert_called_once_with(mm_id=member.mm_id)
+        _args, kwargs = access_request_model.objects.get_or_create.call_args
+        self.assertIs(kwargs["member"], member)
 
         common_group_user.objects.filter.return_value.first.return_value = None
         with self.assertRaises(ValidationError):
@@ -2501,6 +2520,7 @@ class AppGroupServiceTests(SimpleTestCase):
         )
 
     @patch("app_group.services.GroupMember")
+    @patch("app_group.services.Member")
     @patch("app_group.services.Group")
     @patch("app_group.services.transaction.atomic")
     @patch("app_group.services.CommonGroupUser")
@@ -2509,6 +2529,7 @@ class AppGroupServiceTests(SimpleTestCase):
         common_group_user,
         atomic,
         group_model,
+        member_model,
         group_member_model,
     ):
         atomic.return_value.__enter__ = Mock(return_value=None)
@@ -2517,6 +2538,8 @@ class AppGroupServiceTests(SimpleTestCase):
         common_group_user.objects.get_or_create.return_value = (membership, True)
         group = group_models.Group(gg_id=7)
         group_model.objects.get.return_value = group
+        member = build_member()
+        member_model.objects.get_or_create.return_value = (member, True)
         join_request = Mock(
             group_id=7,
             member_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
@@ -2533,10 +2556,13 @@ class AppGroupServiceTests(SimpleTestCase):
         )
         membership.save.assert_called_once_with(update_fields=["am_access"])
         group_model.objects.get.assert_called_once_with(pk=7)
+        member_model.objects.get_or_create.assert_called_once_with(
+            mm_id=uuid.UUID("11111111-1111-1111-1111-111111111111")
+        )
         group_member_model.objects.get_or_create.assert_called_once()
         _args, kwargs = group_member_model.objects.get_or_create.call_args
         self.assertIs(kwargs["group"], group)
-        self.assertEqual(str(kwargs["member"].mm_id), str(join_request.member_id))
+        self.assertIs(kwargs["member"], member)
         self.assertEqual(kwargs["member_kind"], group_models.MEMBER_KIND_ACCOUNT)
         join_request.delete.assert_called_once()
 

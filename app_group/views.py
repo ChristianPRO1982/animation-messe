@@ -219,7 +219,6 @@ def _build_groups_home_context(request):
                 AccessRequest.objects.filter(
                     member_id=member_id,
                     request_type=REQUEST_TYPE_AM_ACCESS,
-                    is_active=True,
                 ).values_list("group_id", flat=True)
             )
 
