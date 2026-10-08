@@ -18,6 +18,7 @@ urlpatterns = [
         views.group_am_member_titles,
         name="group_am_member_titles",
     ),
+    path("<int:group_id>/consent/", views.group_consent, name="group_consent"),
     path(
         "<int:group_id>/calendar/states/",
         views.group_calendar_states,

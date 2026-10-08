@@ -32,6 +32,17 @@ class GroupSettingsForm(ActionForm):
     )
 
 
+class ConsentDraftForm(ActionForm):
+    body_markdown = forms.CharField(
+        label=_("Message de consentement"),
+        widget=forms.Textarea(attrs={"rows": 14}),
+        help_text=_(
+            "Markdown léger : gras, italique, ligne horizontale, titres h1 à h3 "
+            "et liens URL."
+        ),
+    )
+
+
 class GroupMemberActionForm(ActionForm):
     group_member_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
@@ -55,6 +66,10 @@ class AccessRequestForm(ActionForm):
         label=_("Version du consentement"),
         max_length=64,
         initial="v1",
+        help_text=_(
+            "Identifiant du texte de consentement accepté, par exemple v1. "
+            "À modifier quand ce texte évolue."
+        ),
     )
 
 
@@ -70,11 +85,6 @@ class AmMemberRequestForm(ActionForm):
     first_name = forms.CharField(label=_("Prénom"), max_length=255)
     last_name = forms.CharField(label=_("Nom"), max_length=255)
     email = forms.EmailField(label=_("Adresse e-mail"))
-    consent_version = forms.CharField(
-        label=_("Version du consentement"),
-        max_length=64,
-        initial="v1",
-    )
 
 
 class AmMemberRequestDecisionForm(ActionForm):

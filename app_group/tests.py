@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import migrations
+from django.db import DatabaseError, migrations
 from django.http import Http404
 from django.test import RequestFactory, SimpleTestCase
 from django.urls import reverse
@@ -15,6 +15,7 @@ from app_group import forms as group_forms
 from app_group import models as group_models
 from app_group import services as group_services
 from app_group import views as group_views
+from app_group.consent_markdown import render_consent_markdown
 from app_member.models import Member
 
 initial_migration = importlib.import_module("app_group.migrations.0001_initial")
@@ -26,6 +27,9 @@ third_migration = importlib.import_module(
 )
 fourth_migration = importlib.import_module(
     "app_group.migrations.0004_group_contract_constraints"
+)
+fifth_migration = importlib.import_module(
+    "app_group.migrations.0005_group_consent_messages"
 )
 
 
@@ -602,10 +606,13 @@ class AppGroupManagementViewTests(SimpleTestCase):
                 "functions": 0,
             },
             "invitation_notice_json": "{}",
+            "current_consent": group_services.default_consent_snapshot(),
+            "current_consent_rendered": "",
             "forms": {
                 "settings": group_forms.GroupSettingsForm(),
                 "access_request": group_forms.AccessRequestForm(),
                 "am_member_request": group_forms.AmMemberRequestForm(),
+                "consent_draft": group_forms.ConsentDraftForm(),
                 "function": group_forms.GroupFunctionForm(),
                 "title": group_forms.AmMemberTitleForm(),
                 "location": group_forms.GroupLocationForm(),
@@ -979,6 +986,80 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
+    def test_am_members_page_hides_request_list_and_aligns_creation_form(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_am_members", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
+        build_context.return_value = self.empty_group_context()
+
+        response = group_views.group_am_members(request, 7)
+
+        self.assertContains(response, "Créer une demande Membre AM")
+        self.assertContains(response, "group-am-member-request-form")
+        self.assertContains(response, "Consentement utilisé : v1")
+        self.assertContains(response, reverse("group_consent", kwargs={"group_id": 7}))
+        self.assertNotContains(response, "<h2>Demandes Membre AM</h2>")
+        self.assertNotContains(response, 'name="consent_version"')
+        self.assertNotContains(response, "accept_am_member_request")
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views.services.get_or_create_group_consent_draft")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_consent_page_renders_current_version_and_draft(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        get_draft,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_consent", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        draft = SimpleNamespace(body_markdown="# Brouillon")
+        context = self.empty_group_context()
+        context["current_consent"] = group_services.ConsentSnapshot(
+            version=2,
+            version_label="v2",
+            body_markdown="# Version active",
+        )
+        context["current_consent_rendered"] = render_consent_markdown(
+            context["current_consent"].body_markdown
+        )
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
+        get_draft.return_value = draft
+        build_context.return_value = context
+
+        response = group_views.group_consent(request, 7)
+
+        self.assertContains(response, "Version utilisée pour les nouvelles invitations")
+        self.assertContains(response, "v2")
+        self.assertContains(response, "<h1>Version active</h1>")
+        self.assertContains(response, "<h1>Brouillon</h1>")
+        self.assertContains(response, "save_consent_draft")
+        self.assertContains(response, "publish_consent_draft")
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
     def test_members_page_summary_and_removal_actions(
         self,
         get_common_group,
@@ -1143,6 +1224,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.create_am_member_request")
+    @patch("app_group.views.services.get_current_group_consent")
     @patch("app_group.views.secrets.token_urlsafe", return_value="token-public")
     @patch("app_group.views._current_group_member")
     @patch("app_group.views.services.require_group_manager")
@@ -1157,10 +1239,23 @@ class AppGroupManagementViewTests(SimpleTestCase):
         _require_manager,
         current_group_member,
         _token,
+        get_current_consent,
         create_request,
         _messages,
     ):
         requested_by = build_group_member(group=self.group, member=build_member())
+        consent_message = group_models.GroupConsentMessage(
+            group=self.group,
+            version=2,
+            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+            body_markdown="Consentement",
+        )
+        get_current_consent.return_value = group_services.ConsentSnapshot(
+            version=2,
+            version_label="v2",
+            body_markdown="Consentement",
+            message=consent_message,
+        )
         current_group_member.return_value = requested_by
         request = build_request(
             self.factory,
@@ -1171,7 +1266,6 @@ class AppGroupManagementViewTests(SimpleTestCase):
                 "first_name": "Alice",
                 "last_name": "Martin",
                 "email": "alice@example.test",
-                "consent_version": "v1",
             },
             user=self.user,
         )
@@ -1188,6 +1282,10 @@ class AppGroupManagementViewTests(SimpleTestCase):
         create_request.assert_called_once()
         self.assertEqual(
             create_request.call_args.kwargs["consent_token"], "token-public"
+        )
+        self.assertEqual(create_request.call_args.kwargs["consent_version"], "v2")
+        self.assertIs(
+            create_request.call_args.kwargs["consent_message"], consent_message
         )
         self.assertIn(
             "token-public",
@@ -1423,6 +1521,34 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
 
         self.assertEqual(self.group.celebration_retention_months, 12)
         save_group_settings.assert_called_once_with(self.group)
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.save_group_consent_draft")
+    @patch("app_group.views.services.get_or_create_group_consent_draft")
+    def test_dispatch_saves_consent_draft(self, get_draft, save_draft, _messages):
+        draft = SimpleNamespace(body_markdown="old")
+        get_draft.return_value = draft
+        request = self.post_request(
+            {
+                "action": "save_consent_draft",
+                "body_markdown": "# Nouveau consentement",
+            }
+        )
+
+        group_views._dispatch_group_action(request, self.group, "save_consent_draft")
+
+        self.assertEqual(draft.body_markdown, "# Nouveau consentement")
+        save_draft.assert_called_once_with(draft)
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.publish_group_consent_draft")
+    def test_dispatch_publishes_consent_draft(self, publish_draft, _messages):
+        publish_draft.return_value = SimpleNamespace(version_label="v4")
+        request = self.post_request({"action": "publish_consent_draft"})
+
+        group_views._dispatch_group_action(request, self.group, "publish_consent_draft")
+
+        publish_draft.assert_called_once_with(self.group)
 
     def test_repertoire_song_form_rejects_invalid_verse_ids(self):
         bad_text = group_forms.RepertoireSongForm(
@@ -2058,6 +2184,61 @@ class AppGroupModelContractTests(SimpleTestCase):
         self.assertIn("g_special_date_rule_day_valid", special_date_constraints)
         self.assertIn("g_special_date_rule_weekday_valid", special_date_constraints)
 
+    def test_consent_message_model_contract(self):
+        fields = {
+            field.name: field for field in group_models.GroupConsentMessage._meta.fields
+        }
+        constraint_names = {
+            constraint.name
+            for constraint in group_models.GroupConsentMessage._meta.constraints
+        }
+
+        self.assertEqual(
+            group_models.GroupConsentMessage._meta.db_table,
+            'am"."g_consent_message',
+        )
+        self.assertEqual(fields["group"].column, "gg_id")
+        self.assertEqual(fields["version"].null, True)
+        self.assertEqual(fields["status"].default, group_models.CONSENT_STATUS_DRAFT)
+        self.assertIn("g_consent_message_one_draft_per_group", constraint_names)
+        self.assertIn("g_consent_message_published_version_unique", constraint_names)
+        self.assertEqual(
+            group_models.GroupConsentMessage(version=3).version_label,
+            "v3",
+        )
+
+    def test_am_member_consent_message_links_are_nullable(self):
+        self.assertTrue(group_models.AmMember._meta.get_field("consent_message").null)
+        self.assertTrue(
+            group_models.AmMemberRequest._meta.get_field("consent_message").null
+        )
+
+
+class AppGroupConsentMarkdownTests(SimpleTestCase):
+    def test_renders_allowed_markdown_and_escapes_html(self):
+        rendered = str(
+            render_consent_markdown(
+                "# Titre\n## Sous titre\n### Niveau 3\n"
+                "Bonjour **fort** et *doux* [site](/privacy-policy/)\n"
+                "---\n<script>alert(1)</script>"
+            )
+        )
+
+        self.assertIn("<h1>Titre</h1>", rendered)
+        self.assertIn("<h2>Sous titre</h2>", rendered)
+        self.assertIn("<h3>Niveau 3</h3>", rendered)
+        self.assertIn("<strong>fort</strong>", rendered)
+        self.assertIn("<em>doux</em>", rendered)
+        self.assertIn('<a href="/privacy-policy/">site</a>', rendered)
+        self.assertIn("<hr>", rendered)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", rendered)
+
+    def test_rejects_unsafe_links(self):
+        rendered = str(render_consent_markdown("[bad](javascript:alert(1))"))
+
+        self.assertIn("bad", rendered)
+        self.assertNotIn("javascript:", rendered)
+
 
 class AppGroupServiceTests(SimpleTestCase):
     def test_secret_and_email_helpers_never_return_raw_values(self):
@@ -2074,6 +2255,131 @@ class AppGroupServiceTests(SimpleTestCase):
             group_services.hash_personal_secret("")
         with self.assertRaises(ValidationError):
             group_services.email_fingerprint("")
+
+    def test_group_consent_snapshots_use_published_or_default(self):
+        manager = Mock()
+        group = SimpleNamespace(consent_messages=manager)
+        manager.filter.return_value.order_by.return_value.first.return_value = None
+
+        fallback = group_services.get_current_group_consent(group)
+
+        self.assertEqual(fallback.version_label, "v1")
+        self.assertTrue(fallback.is_fallback)
+        self.assertIn("Consentement Membre AM", fallback.body_markdown)
+
+        published = group_models.GroupConsentMessage(
+            group=build_group(7),
+            version=3,
+            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+            body_markdown="# Texte v3",
+        )
+        manager.filter.return_value.order_by.return_value.first.return_value = published
+
+        snapshot = group_services.get_current_group_consent(group)
+
+        self.assertEqual(snapshot.version_label, "v3")
+        self.assertIs(snapshot.message, published)
+
+    def test_group_consent_snapshot_falls_back_when_table_is_not_migrated(self):
+        manager = Mock()
+        group = SimpleNamespace(consent_messages=manager)
+        manager.filter.side_effect = DatabaseError(
+            'relation "am.g_consent_message" does not exist'
+        )
+
+        snapshot = group_services.get_current_group_consent(group)
+
+        self.assertEqual(snapshot.version_label, "v1")
+        self.assertTrue(snapshot.is_fallback)
+
+    @patch("app_group.services.GroupConsentMessage")
+    def test_group_consent_draft_uses_existing_or_current_text(self, consent_model):
+        existing_draft = object()
+        manager = Mock()
+        group = SimpleNamespace(consent_messages=manager)
+        manager.filter.return_value.first.return_value = existing_draft
+
+        self.assertIs(
+            group_services.get_or_create_group_consent_draft(group), existing_draft
+        )
+
+        manager.filter.return_value.first.return_value = None
+        manager.filter.return_value.order_by.return_value.first.return_value = None
+        consent_model.STATUS_PUBLISHED = (
+            group_models.GroupConsentMessage.STATUS_PUBLISHED
+        )
+        consent_model.STATUS_DRAFT = group_models.GroupConsentMessage.STATUS_DRAFT
+        created_draft = object()
+        consent_model.objects.create.return_value = created_draft
+
+        self.assertIs(
+            group_services.get_or_create_group_consent_draft(group), created_draft
+        )
+        create_kwargs = consent_model.objects.create.call_args.kwargs
+        self.assertEqual(
+            create_kwargs["status"], group_models.GroupConsentMessage.STATUS_DRAFT
+        )
+        self.assertIn("Consentement Membre AM", create_kwargs["body_markdown"])
+
+    def test_save_group_consent_draft_rejects_published_messages(self):
+        draft = group_models.GroupConsentMessage(
+            group=build_group(7),
+            status=group_models.GroupConsentMessage.STATUS_DRAFT,
+            body_markdown="Texte",
+        )
+        draft.full_clean = Mock()
+        draft.save = Mock()
+
+        self.assertIs(group_services.save_group_consent_draft(draft), draft)
+        draft.full_clean.assert_called_once()
+        draft.save.assert_called_once()
+
+        published = group_models.GroupConsentMessage(
+            group=build_group(7),
+            version=1,
+            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+            body_markdown="Texte",
+        )
+        with self.assertRaises(ValidationError):
+            group_services.save_group_consent_draft(published)
+
+    @patch("app_group.services.GroupConsentMessage")
+    @patch("app_group.services.Group")
+    @patch("app_group.services.transaction.atomic")
+    def test_publish_group_consent_draft_assigns_next_version(
+        self, atomic, group_model, consent_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        group = build_group(7)
+        locked_group = build_group(7)
+        draft = Mock(
+            status=group_models.GroupConsentMessage.STATUS_DRAFT,
+            version=None,
+            published_at=None,
+            body_markdown="Texte",
+        )
+        group_model.objects.select_for_update.return_value.get.return_value = (
+            locked_group
+        )
+        draft_queryset = consent_model.objects.select_for_update.return_value.filter
+        draft_queryset.return_value.first.return_value = draft
+        consent_model.objects.filter.return_value.aggregate.return_value = {
+            "version__max": 2
+        }
+        consent_model.STATUS_DRAFT = group_models.GroupConsentMessage.STATUS_DRAFT
+        consent_model.STATUS_PUBLISHED = (
+            group_models.GroupConsentMessage.STATUS_PUBLISHED
+        )
+
+        self.assertIs(group_services.publish_group_consent_draft(group), draft)
+
+        self.assertEqual(
+            draft.status, group_models.GroupConsentMessage.STATUS_PUBLISHED
+        )
+        self.assertEqual(draft.version, 3)
+        draft.full_clean.assert_called_once()
+        draft.save.assert_called_once()
 
     @patch("app_group.services.is_common_group_responsable")
     def test_group_management_permissions_accept_admin_or_responsable(
@@ -2678,6 +2984,12 @@ class AppGroupServiceTests(SimpleTestCase):
     ):
         group = build_group(1)
         requested_by = build_group_member(group=group, member=build_member())
+        consent_message = group_models.GroupConsentMessage(
+            group=group,
+            version=1,
+            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+            body_markdown="Consentement",
+        )
         request = object()
         request_model.objects.create.return_value = request
 
@@ -2690,6 +3002,7 @@ class AppGroupServiceTests(SimpleTestCase):
                 email="alice@example.test",
                 consent_token="token-123",
                 consent_version="v1",
+                consent_message=consent_message,
             ),
             request,
         )
@@ -2697,6 +3010,7 @@ class AppGroupServiceTests(SimpleTestCase):
         create_kwargs = request_model.objects.create.call_args.kwargs
         self.assertNotEqual(create_kwargs["consent_token_hash"], "token-123")
         self.assertEqual(create_kwargs["email"], "alice@example.test")
+        self.assertIs(create_kwargs["consent_message"], consent_message)
 
     @patch("app_group.services.is_common_group_responsable", return_value=True)
     @patch("app_group.services.AmMemberRequest")
@@ -2862,6 +3176,23 @@ class AppGroupServiceTests(SimpleTestCase):
                 consent_version="v1",
             )
 
+        with self.assertRaises(ValidationError):
+            group_services.create_am_member_request(
+                group,
+                build_group_member(group=group, member=build_member()),
+                first_name="Alice",
+                last_name="Doe",
+                email="alice@example.test",
+                consent_token="token-123",
+                consent_version="v1",
+                consent_message=group_models.GroupConsentMessage(
+                    group=other_group,
+                    version=1,
+                    status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+                    body_markdown="Consentement",
+                ),
+            )
+
     def test_expire_and_refuse_am_member_request_purge_identifying_data(self):
         now = timezone.now()
         request = Mock(
@@ -2931,6 +3262,12 @@ class AppGroupServiceTests(SimpleTestCase):
             group=group, member_kind=group_models.MEMBER_KIND_AM
         )
         function = group_models.GroupFunction(group=group, name="Chantre")
+        consent_message = group_models.GroupConsentMessage(
+            group=group,
+            version=1,
+            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
+            body_markdown="Consentement",
+        )
         am_member = object()
         request = Mock(
             status=group_models.AmMemberRequest.STATUS_PENDING,
@@ -2941,6 +3278,7 @@ class AppGroupServiceTests(SimpleTestCase):
             last_name="Doe",
             email="alice@example.test",
             consent_version="v1",
+            consent_message=consent_message,
         )
         group_member_model.objects.create.return_value = group_member
         am_member_model.objects.create.return_value = am_member
@@ -2957,6 +3295,7 @@ class AppGroupServiceTests(SimpleTestCase):
         )
 
         profile_kwargs = am_member_model.objects.create.call_args.kwargs
+        self.assertIs(profile_kwargs["consent_message"], consent_message)
         self.assertNotEqual(profile_kwargs["withdrawal_secret_hash"], "withdraw-me")
         self.assertNotEqual(
             profile_kwargs["consent_email_fingerprint"],
@@ -3435,3 +3774,26 @@ class AppGroupMigrationContractTests(SimpleTestCase):
                 "g_special_date_rule_weekday_valid",
             ],
         )
+
+    def test_fifth_migration_adds_group_consent_model_and_links(self):
+        create_models = [
+            operation.name
+            for operation in fifth_migration.Migration.operations
+            if isinstance(operation, migrations.CreateModel)
+        ]
+        added_fields = [
+            (operation.model_name, operation.name)
+            for operation in fifth_migration.Migration.operations
+            if isinstance(operation, migrations.AddField)
+        ]
+        constraint_names = [
+            operation.constraint.name
+            for operation in fifth_migration.Migration.operations
+            if isinstance(operation, migrations.AddConstraint)
+        ]
+
+        self.assertIn("GroupConsentMessage", create_models)
+        self.assertIn(("ammember", "consent_message"), added_fields)
+        self.assertIn(("ammemberrequest", "consent_message"), added_fields)
+        self.assertIn("g_consent_message_one_draft_per_group", constraint_names)
+        self.assertIn("g_consent_message_published_version_unique", constraint_names)

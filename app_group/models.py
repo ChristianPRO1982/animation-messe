@@ -12,6 +12,8 @@ ROLE_RESPONSABLE_IMPRESSION = "responsable_impression"
 REQUEST_TYPE_AM_ACCESS = "am_access"
 PLANNING_STATE_SELECTION = "selection"
 PLANNING_STATE_DEFAULT = "default"
+CONSENT_STATUS_DRAFT = "draft"
+CONSENT_STATUS_PUBLISHED = "published"
 
 
 class CommonGroup(models.Model):
@@ -88,6 +90,69 @@ class Group(models.Model):
                 name="g_group_retention_months_valid",
             ),
         ]
+
+
+class GroupConsentMessage(models.Model):
+    STATUS_DRAFT = CONSENT_STATUS_DRAFT
+    STATUS_PUBLISHED = CONSENT_STATUS_PUBLISHED
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, _("Brouillon")),
+        (STATUS_PUBLISHED, _("Publie")),
+    )
+
+    gcm_id = models.BigAutoField(primary_key=True)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        db_column="gg_id",
+        related_name="consent_messages",
+    )
+    version = models.PositiveIntegerField(blank=True, null=True)
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
+    )
+    body_markdown = models.TextField()
+    published_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'am"."g_consent_message'
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    status__in=[
+                        CONSENT_STATUS_DRAFT,
+                        CONSENT_STATUS_PUBLISHED,
+                    ]
+                ),
+                name="g_consent_message_status_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(status=CONSENT_STATUS_DRAFT, version__isnull=True)
+                    | Q(status=CONSENT_STATUS_PUBLISHED, version__isnull=False)
+                ),
+                name="g_consent_message_version_status_valid",
+            ),
+            models.UniqueConstraint(
+                fields=["group", "status"],
+                condition=Q(status=CONSENT_STATUS_DRAFT),
+                name="g_consent_message_one_draft_per_group",
+            ),
+            models.UniqueConstraint(
+                fields=["group", "version"],
+                condition=Q(status=CONSENT_STATUS_PUBLISHED),
+                name="g_consent_message_published_version_unique",
+            ),
+        ]
+        ordering = ["-status", "-version", "-gcm_id"]
+
+    @property
+    def version_label(self) -> str:
+        return f"v{self.version}" if self.version else _("Brouillon")
 
 
 class GroupMember(models.Model):
@@ -175,6 +240,14 @@ class AmMember(models.Model):
     )
     consented_at = models.DateTimeField()
     consent_version = models.CharField(max_length=64)
+    consent_message = models.ForeignKey(
+        GroupConsentMessage,
+        on_delete=models.SET_NULL,
+        db_column="gcm_id",
+        related_name="am_members",
+        blank=True,
+        null=True,
+    )
     consent_email_fingerprint = models.CharField(max_length=255)
     withdrawal_secret_hash = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -382,6 +455,14 @@ class AmMemberRequest(models.Model):
     email = models.EmailField(blank=True)
     consent_token_hash = models.CharField(max_length=255)
     consent_version = models.CharField(max_length=64)
+    consent_message = models.ForeignKey(
+        GroupConsentMessage,
+        on_delete=models.SET_NULL,
+        db_column="gcm_id",
+        related_name="am_member_requests",
+        blank=True,
+        null=True,
+    )
     status = models.CharField(
         max_length=16,
         choices=STATUS_CHOICES,

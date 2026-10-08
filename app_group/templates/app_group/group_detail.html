@@ -153,6 +153,7 @@
                     <header class="site-theme-card-header"><div><h2>{% trans "Paramètres du groupe" %}</h2></div></header>
                     <p><a class="site-action site-action--secondary" href="{% url 'group_settings' common_group.group_id %}">{% trans "Paramètres généraux" %}</a></p>
                     <p><a class="site-action site-action--secondary" href="{% url 'group_locations' common_group.group_id %}">{% trans "Lieux" %}</a></p>
+                    <p><a class="site-action site-action--secondary" href="{% url 'group_consent' common_group.group_id %}">{% trans "Consentement" %}</a></p>
                 </article>
             </section>
         {% endif %}

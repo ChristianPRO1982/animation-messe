@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 from datetime import timedelta
+from pathlib import Path
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import validate_email
-from django.db import transaction
+from django.db import DatabaseError, transaction
+from django.db.models import Max
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext_lazy as _
@@ -26,6 +29,7 @@ from app_group.models import (
     CommonGroupTag,
     CommonGroupUser,
     Group,
+    GroupConsentMessage,
     GroupFunction,
     GroupLocation,
     GroupMember,
@@ -44,6 +48,123 @@ from app_member.models import Member
 
 AM_MEMBER_REQUEST_TTL_DAYS = 14
 REFUSED_REQUEST_PURGE_DAYS = 14
+DEFAULT_CONSENT_VERSION = 1
+DEFAULT_CONSENT_PATH = Path(__file__).resolve().parent / "defaults" / "consentement.md"
+
+
+@dataclass(frozen=True)
+class ConsentSnapshot:
+    version: int
+    version_label: str
+    body_markdown: str
+    message: GroupConsentMessage | None = None
+    is_fallback: bool = False
+
+
+def default_consent_markdown() -> str:
+    return DEFAULT_CONSENT_PATH.read_text(encoding="utf-8").strip()
+
+
+def _consent_snapshot_from_message(message: GroupConsentMessage) -> ConsentSnapshot:
+    return ConsentSnapshot(
+        version=int(message.version or DEFAULT_CONSENT_VERSION),
+        version_label=f"v{message.version or DEFAULT_CONSENT_VERSION}",
+        body_markdown=message.body_markdown,
+        message=message,
+        is_fallback=False,
+    )
+
+
+def default_consent_snapshot() -> ConsentSnapshot:
+    return ConsentSnapshot(
+        version=DEFAULT_CONSENT_VERSION,
+        version_label=f"v{DEFAULT_CONSENT_VERSION}",
+        body_markdown=default_consent_markdown(),
+        message=None,
+        is_fallback=True,
+    )
+
+
+def _is_missing_consent_table_error(exc: DatabaseError) -> bool:
+    return "g_consent_message" in str(exc)
+
+
+def get_current_group_consent(group: Group) -> ConsentSnapshot:
+    if not hasattr(group, "consent_messages"):
+        return default_consent_snapshot()
+    try:
+        message = (
+            group.consent_messages.filter(status=GroupConsentMessage.STATUS_PUBLISHED)
+            .order_by("-version")
+            .first()
+        )
+    except DatabaseError as exc:
+        if _is_missing_consent_table_error(exc):
+            return default_consent_snapshot()
+        raise
+    if message is None:
+        return default_consent_snapshot()
+    return _consent_snapshot_from_message(message)
+
+
+def get_or_create_group_consent_draft(group: Group) -> GroupConsentMessage:
+    draft = group.consent_messages.filter(
+        status=GroupConsentMessage.STATUS_DRAFT
+    ).first()
+    if draft is not None:
+        return draft
+
+    current_consent = get_current_group_consent(group)
+    return GroupConsentMessage.objects.create(
+        group=group,
+        status=GroupConsentMessage.STATUS_DRAFT,
+        body_markdown=current_consent.body_markdown,
+    )
+
+
+def save_group_consent_draft(draft: GroupConsentMessage) -> GroupConsentMessage:
+    if draft.status != GroupConsentMessage.STATUS_DRAFT:
+        raise ValidationError(_("Seul le brouillon de consentement est modifiable."))
+    draft.version = None
+    draft.published_at = None
+    draft.full_clean()
+    draft.save(update_fields=["body_markdown", "version", "published_at", "updated_at"])
+    return draft
+
+
+def publish_group_consent_draft(group: Group, *, now=None) -> GroupConsentMessage:
+    now = now or timezone.now()
+    with transaction.atomic():
+        locked_group = Group.objects.select_for_update().get(pk=group.pk)
+        draft = (
+            GroupConsentMessage.objects.select_for_update()
+            .filter(group=locked_group, status=GroupConsentMessage.STATUS_DRAFT)
+            .first()
+        )
+        if draft is None:
+            raise ValidationError(_("Aucun brouillon de consentement à publier."))
+
+        latest_version = (
+            GroupConsentMessage.objects.filter(
+                group=locked_group,
+                status=GroupConsentMessage.STATUS_PUBLISHED,
+            ).aggregate(Max("version"))["version__max"]
+            or 0
+        )
+        draft.status = GroupConsentMessage.STATUS_PUBLISHED
+        draft.version = latest_version + 1
+        draft.published_at = now
+        draft.full_clean()
+        draft.save(
+            update_fields=[
+                "status",
+                "version",
+                "published_at",
+                "body_markdown",
+                "updated_at",
+            ]
+        )
+        return draft
 
 
 def hash_personal_secret(raw_secret: str) -> str:
@@ -403,11 +524,14 @@ def create_am_member_request(
     email: str,
     consent_token: str,
     consent_version: str,
+    consent_message: GroupConsentMessage | None = None,
     expires_at=None,
     now=None,
 ) -> AmMemberRequest:
     _ensure_same_group(requested_by.group_id, group.gg_id)
     _ensure_account_group_member(requested_by)
+    if consent_message is not None:
+        _ensure_same_group(group.gg_id, consent_message.group_id)
     if not is_common_group_responsable(group.gg_id, requested_by.member_id):
         raise PermissionDenied(_("Seul un Responsable peut inviter un Membre AM."))
 
@@ -435,6 +559,7 @@ def create_am_member_request(
         email=email,
         consent_token_hash=hash_personal_secret(consent_token),
         consent_version=consent_version,
+        consent_message=consent_message,
         expires_at=expires_at,
     )
     return request
@@ -531,6 +656,7 @@ def accept_am_member_request(
             title=title,
             consented_at=now,
             consent_version=request.consent_version,
+            consent_message=request.consent_message,
             consent_email_fingerprint=email_fingerprint(request.email),
             withdrawal_secret_hash=hash_personal_secret(withdrawal_secret),
         )

@@ -353,6 +353,39 @@ Le retrait de consentement ne doit jamais être déclenché par une simple ouver
 
 La fusion future d’un Membre AM vers un compte CARThographie doit conserver l’ancre `g_group_member.ggm_id`.
 
+## Messages de consentement par groupe
+
+Chaque groupe AM gère son propre texte de consentement pour les Membres AM.
+
+Un Responsable peut gérer ce texte depuis `/groups/<id>/consent/`. La page :
+
+- affiche la version active utilisée pour les nouvelles invitations ;
+- affiche un aperçu du Markdown rendu ;
+- permet d'éditer un brouillon ;
+- permet de publier le brouillon comme nouvelle version.
+
+Les versions publiées sont immuables et numérotées `v1`, `v2`, `v3`, etc. Le
+brouillon n'a pas de numéro de version tant qu'il n'est pas publié.
+
+Tant qu'un groupe n'a publié aucune version, le site propose un texte commun
+`v1` lu depuis `app_group/defaults/consentement.md`. Lorsqu'un groupe publie son
+premier brouillon, cette publication devient la version `v1` propre au groupe.
+
+Le Markdown autorisé pour un consentement est volontairement limité :
+
+- gras ;
+- italique ;
+- ligne horizontale ;
+- titres `h1`, `h2`, `h3` ;
+- liens URL sûrs.
+
+Le HTML brut n'est pas autorisé et doit être échappé.
+
+Lorsqu'une invitation Membre AM est créée, le système utilise automatiquement la
+version active du consentement. La version texte (`vN`) et, si elle existe, la
+référence au message publié du groupe sont conservées sur la demande puis copiées
+sur le Membre AM créé.
+
 ---
 
 # 5. Paramètres durables pour le planning
@@ -455,6 +488,12 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-AM-04** — Le Membre AM doit pouvoir retirer son consentement via un secret personnel vérifiable.
 
 **GROUP-AM-05** — Une fusion Membre AM vers compte CARThographie conserve l’ancre `g_group_member.ggm_id`.
+
+**GROUP-AM-06** — Chaque groupe AM possède un historique de messages de consentement publiés, versionnés `v1`, `v2`, `v3`, etc., et un seul brouillon éditable.
+
+**GROUP-AM-07** — Si un groupe n'a pas encore publié de message de consentement, les nouvelles invitations Membres AM utilisent le modèle commun site `v1`.
+
+**GROUP-AM-08** — Une demande Membre AM et le Membre AM créé conservent la version de consentement utilisée au moment de l'invitation ou de l'acceptation.
 
 **GROUP-PLAN-01** — Les états, fonctions, lieux, règles régulières et dates particulières sont des paramètres durables du groupe.
 

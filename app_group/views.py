@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from app_group import forms, services
+from app_group.consent_markdown import render_consent_markdown
 from app_group.models import (
     MEMBER_KIND_ACCOUNT,
     REQUEST_TYPE_AM_ACCESS,
@@ -80,6 +81,12 @@ GROUP_PAGE_CONFIG = {
         "title": _("Titres Membre AM"),
         "route": "group_am_member_titles",
         "actions": {"save_am_member_title"},
+    },
+    "consent": {
+        "template": "app_group/group_consent.html",
+        "title": _("Consentement"),
+        "route": "group_consent",
+        "actions": {"save_consent_draft", "publish_consent_draft"},
     },
     "calendar_states": {
         "template": "app_group/group_calendar_states.html",
@@ -347,6 +354,10 @@ def group_am_member_titles(request, group_id: int):
     return _group_management_page(request, group_id, "am_member_titles")
 
 
+def group_consent(request, group_id: int):
+    return _group_management_page(request, group_id, "consent")
+
+
 def group_calendar_states(request, group_id: int):
     return _group_management_page(request, group_id, "calendar_states")
 
@@ -434,6 +445,25 @@ def _group_management_page(request, group_id: int, page_key: str):
             "page_title": config["title"],
         }
     )
+    if page_key == "consent":
+        consent_draft = services.get_or_create_group_consent_draft(group)
+        context.update(
+            {
+                "consent_draft": consent_draft,
+                "consent_draft_rendered": render_consent_markdown(
+                    consent_draft.body_markdown
+                ),
+                "forms": {
+                    **context["forms"],
+                    "consent_draft": forms.ConsentDraftForm(
+                        initial={
+                            "action": "save_consent_draft",
+                            "body_markdown": consent_draft.body_markdown,
+                        }
+                    ),
+                },
+            }
+        )
     return render(request, config["template"], context)
 
 
@@ -574,6 +604,7 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         _validate_action_form(form, action)
         requested_by = _current_group_member(group, request.user)
         token = secrets.token_urlsafe(24)
+        current_consent = services.get_current_group_consent(group)
         services.create_am_member_request(
             group,
             requested_by,
@@ -581,7 +612,8 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
             last_name=form.cleaned_data["last_name"],
             email=form.cleaned_data["email"],
             consent_token=token,
-            consent_version=form.cleaned_data["consent_version"],
+            consent_version=current_consent.version_label,
+            consent_message=current_consent.message,
         )
         request.session[INVITATION_NOTICE_SESSION_KEY] = {
             "title": str(_("Invitation Membre AM")),
@@ -595,6 +627,26 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         }
         request.session.modified = True
         messages.success(request, _("La demande de Membre AM est créée."))
+        return
+
+    if action == "save_consent_draft":
+        form = forms.ConsentDraftForm(request.POST)
+        _validate_action_form(form, action)
+        consent_draft = services.get_or_create_group_consent_draft(group)
+        consent_draft.body_markdown = form.cleaned_data["body_markdown"]
+        services.save_group_consent_draft(consent_draft)
+        messages.success(request, _("Le brouillon de consentement est enregistré."))
+        return
+
+    if action == "publish_consent_draft":
+        form = forms.ActionForm(request.POST)
+        _validate_action_form(form, action)
+        published = services.publish_group_consent_draft(group)
+        messages.success(
+            request,
+            _("Le consentement %(version)s est publié.")
+            % {"version": published.version_label},
+        )
         return
 
     if action in {"refuse_am_member_request", "expire_am_member_request"}:
@@ -840,6 +892,9 @@ def _build_group_context(
             "am_member_request": forms.AmMemberRequestForm(
                 initial={"action": "create_am_member_request"}
             ),
+            "consent_draft": forms.ConsentDraftForm(
+                initial={"action": "save_consent_draft"}
+            ),
             "function": forms.GroupFunctionForm(initial={"action": "save_function"}),
             "title": forms.AmMemberTitleForm(
                 initial={"action": "save_am_member_title"}
@@ -859,6 +914,16 @@ def _build_group_context(
     }
     if group is None:
         return context
+
+    current_consent = services.get_current_group_consent(group)
+    context.update(
+        {
+            "current_consent": current_consent,
+            "current_consent_rendered": render_consent_markdown(
+                current_consent.body_markdown
+            ),
+        }
+    )
 
     members = list(
         group.members.select_related("member", "am_profile")
