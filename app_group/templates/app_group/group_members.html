@@ -5,20 +5,22 @@
     <section class="site-theme-selection" aria-label="{% trans 'Membres avec compte' %}">
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Membres avec compte" %}</h2></div></header>
-            {% for member in account_members %}
-                <p><code>{{ member.member_id }}</code></p>
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="assign_responsable_impression">
-                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                    <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
-                </form>
-                <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="remove_responsable_impression">
-                    <input type="hidden" name="group_member_id" value="{{ member.ggm_id }}">
-                    <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
-                </form>
+            {% for row in account_member_rows %}
+                <p><code>{{ row.membership.member_id }}</code></p>
+                {% if row.group_member %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="assign_responsable_impression">
+                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
+                        <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
+                    </form>
+                    <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove_responsable_impression">
+                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
+                        <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
+                    </form>
+                {% endif %}
             {% empty %}
                 <p>{% trans "Aucun membre avec compte actif." %}</p>
             {% endfor %}

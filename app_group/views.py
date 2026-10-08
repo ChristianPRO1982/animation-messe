@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import secrets
+from types import SimpleNamespace
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -155,16 +156,19 @@ def _build_groups_home_context(request):
         CommonGroup.objects.filter(group_id__in=active_group_ids).order_by("name")
     )
     member_group_ids: set[int] = set()
+    am_access_group_ids: set[int] = set()
     pending_group_ids: set[int] = set()
     is_authenticated = getattr(request.user, "is_authenticated", False)
     if is_authenticated:
         member_id = str(getattr(request.user, "external_id", "") or "").strip()
         if member_id:
-            member_group_ids = set(
-                CommonGroupUser.objects.filter(member_id=member_id).values_list(
-                    "group_id", flat=True
-                )
-            )
+            memberships = list(CommonGroupUser.objects.filter(member_id=member_id))
+            member_group_ids = {membership.group_id for membership in memberships}
+            am_access_group_ids = {
+                membership.group_id
+                for membership in memberships
+                if membership.am_access
+            }
             pending_group_ids = set(
                 CommonGroupJoinRequest.objects.filter(member_id=member_id).values_list(
                     "group_id", flat=True
@@ -188,6 +192,7 @@ def _build_groups_home_context(request):
             {
                 "common_group": common_group,
                 "is_member": is_member,
+                "has_am_access": common_group.group_id in am_access_group_ids,
                 "has_pending_request": has_pending_request,
                 "can_request_join": (
                     is_authenticated and not is_member and not has_pending_request
@@ -238,7 +243,8 @@ def group_detail(request, group_id: int):
 
     common_group = _get_common_group(group_id)
     group = Group.objects.filter(gg_id=group_id).first()
-    if not _can_manage_common_group(request.user, group_id):
+    access_context = _build_group_access_context(request.user, common_group, group)
+    if not access_context.can_enter_group:
         return HttpResponseForbidden(_("Accès refusé."))
 
     if request.method == "POST":
@@ -250,7 +256,12 @@ def group_detail(request, group_id: int):
             allowed_actions={"activate_group"},
         )
 
-    context = _build_group_context(request, common_group, group)
+    context = _build_group_context(
+        request,
+        common_group,
+        group,
+        access_context=access_context,
+    )
     return render(request, "app_group/group_detail.html", context)
 
 
@@ -331,7 +342,8 @@ def _group_management_page(request, group_id: int, page_key: str):
 
     common_group = _get_common_group(group_id)
     group = Group.objects.filter(gg_id=group_id).first()
-    if not _can_manage_common_group(request.user, group_id):
+    access_context = _build_group_access_context(request.user, common_group, group)
+    if not access_context.can_manage_group:
         return HttpResponseForbidden(_("Accès refusé."))
 
     config = GROUP_PAGE_CONFIG[page_key]
@@ -348,7 +360,12 @@ def _group_management_page(request, group_id: int, page_key: str):
             allowed_actions=config["actions"],
         )
 
-    context = _build_group_context(request, common_group, group)
+    context = _build_group_context(
+        request,
+        common_group,
+        group,
+        access_context=access_context,
+    )
     context.update(
         {
             "page_key": page_key,
@@ -678,9 +695,46 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
     messages.error(request, _("Action groupe inconnue."))
 
 
-def _build_group_context(request, common_group: CommonGroup, group: Group | None):
+def _build_group_access_context(user, common_group: CommonGroup, group: Group | None):
+    is_authenticated = getattr(user, "is_authenticated", False)
+    is_global_admin = bool(getattr(user, "is_admin", False))
+    member_id = str(getattr(user, "external_id", "") or "").strip()
+    membership = None
+    if is_authenticated and member_id:
+        membership = CommonGroupUser.objects.filter(
+            group_id=common_group.group_id,
+            member_id=member_id,
+        ).first()
+
+    has_am_access = bool(membership and membership.am_access)
+    is_common_responsable = bool(membership and membership.is_group_admin)
+    can_manage_group = is_global_admin or is_common_responsable
+    can_enter_group = bool((group and has_am_access) or can_manage_group)
+    return SimpleNamespace(
+        membership=membership,
+        member_id=member_id,
+        has_am_access=has_am_access,
+        is_common_responsable=is_common_responsable,
+        is_global_admin=is_global_admin,
+        can_manage_group=can_manage_group,
+        can_enter_group=can_enter_group,
+    )
+
+
+def _build_group_context(
+    request,
+    common_group: CommonGroup,
+    group: Group | None,
+    *,
+    access_context=None,
+):
     invitation_notice = request.session.pop(INVITATION_NOTICE_SESSION_KEY, None)
     request.session.modified = True
+    access_context = access_context or _build_group_access_context(
+        request.user,
+        common_group,
+        group,
+    )
     common_memberships = list(
         CommonGroupUser.objects.filter(group_id=common_group.group_id).order_by(
             "-is_group_admin",
@@ -693,6 +747,7 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
         "group": group,
         "selected_group": common_group,
         "common_memberships": common_memberships,
+        "access_context": access_context,
         "invitation_notice_json": json.dumps(invitation_notice or {}),
         "forms": {
             "settings": forms.GroupSettingsForm(
@@ -752,6 +807,10 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
                 for member in members
                 if member.member_kind == MEMBER_KIND_ACCOUNT
             ],
+            "account_member_rows": _build_account_member_rows(
+                common_memberships,
+                members,
+            ),
             "am_members": [
                 member
                 for member in members
@@ -783,9 +842,9 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
                 "members": len(members),
                 "account_members": len(
                     [
-                        member
-                        for member in members
-                        if member.member_kind == MEMBER_KIND_ACCOUNT
+                        membership
+                        for membership in common_memberships
+                        if membership.am_access
                     ]
                 ),
                 "am_members": len(
@@ -806,6 +865,22 @@ def _build_group_context(request, common_group: CommonGroup, group: Group | None
         }
     )
     return context
+
+
+def _build_account_member_rows(common_memberships, members):
+    account_members_by_member_id = {
+        str(member.member_id): member
+        for member in members
+        if member.member_kind == MEMBER_KIND_ACCOUNT and member.member_id is not None
+    }
+    return [
+        {
+            "membership": membership,
+            "group_member": account_members_by_member_id.get(str(membership.member_id)),
+        }
+        for membership in common_memberships
+        if membership.am_access
+    ]
 
 
 def _manageable_common_groups(user):

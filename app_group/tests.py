@@ -68,6 +68,18 @@ def build_user(*, authenticated=True, admin=False):
     )
 
 
+def build_access_context(*, can_enter=True, can_manage=True, has_am_access=True):
+    return SimpleNamespace(
+        membership=None,
+        member_id="11111111-1111-1111-1111-111111111111",
+        has_am_access=has_am_access,
+        is_common_responsable=can_manage,
+        is_global_admin=False,
+        can_manage_group=can_manage,
+        can_enter_group=can_enter,
+    )
+
+
 class AppGroupPublicPageTests(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -109,6 +121,34 @@ class AppGroupPublicPageTests(SimpleTestCase):
         self.assertContains(response, "icons/ui/normal/512/light/groups.png")
         self.assertContains(response, "icons/ui/normal/512/dark/groups.png")
 
+    @patch("app_group.views._build_groups_home_context")
+    def test_groups_home_shows_enter_button_for_am_access_member(self, home_context):
+        common_group = group_models.CommonGroup(
+            group_id=7,
+            name="Chorale",
+            status=group_models.CommonGroup.STATUS_PRIVATE,
+        )
+        home_context.return_value = {
+            "rows": [
+                {
+                    "common_group": common_group,
+                    "is_member": True,
+                    "has_am_access": True,
+                    "has_pending_request": False,
+                    "can_request_join": False,
+                }
+            ],
+            "selected_group": None,
+            "is_authenticated": True,
+        }
+        request = build_request(self.factory, path="/groups/", user=build_user())
+
+        response = group_views.groups_home(request)
+
+        self.assertContains(response, "Entrer dans le groupe")
+        self.assertContains(response, reverse("group_detail", kwargs={"group_id": 7}))
+        self.assertNotContains(response, "Demander le rattachement")
+
     @patch("app_group.views.CommonGroupJoinRequest")
     @patch("app_group.views.CommonGroupUser")
     @patch("app_group.views.CommonGroup")
@@ -135,7 +175,9 @@ class AppGroupPublicPageTests(SimpleTestCase):
         ]
         group_model.objects.values_list.return_value = [1, 2, 3]
         common_group_model.objects.filter.return_value.order_by.return_value = groups
-        common_group_user.objects.filter.return_value.values_list.return_value = [3]
+        common_group_user.objects.filter.return_value = [
+            SimpleNamespace(group_id=3, am_access=True)
+        ]
         join_request_model.objects.filter.return_value.values_list.return_value = [1]
         request = build_request(self.factory, path="/groups/", user=build_user())
 
@@ -146,6 +188,7 @@ class AppGroupPublicPageTests(SimpleTestCase):
             [3, 2, 1],
         )
         self.assertTrue(context["rows"][0]["is_member"])
+        self.assertTrue(context["rows"][0]["has_am_access"])
         self.assertTrue(context["rows"][2]["has_pending_request"])
 
     @patch("app_group.views.messages")
@@ -210,9 +253,11 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "group": self.group,
             "selected_group": self.common_group,
             "common_memberships": [],
+            "access_context": build_access_context(),
             "responsable_memberships": [],
             "members": [],
             "account_members": [],
+            "account_member_rows": [],
             "am_members": [],
             "functions": [],
             "titles": [],
@@ -275,11 +320,11 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertContains(response, reverse("group_detail", kwargs={"group_id": 7}))
         self.assertContains(response, 'data-app-group-confirm="')
 
-    @patch("app_group.views._can_manage_common_group", return_value=False)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
-    def test_detail_forbids_non_responsable(
-        self, get_common_group, group_model, _can_manage
+    def test_detail_forbids_user_without_group_access(
+        self, get_common_group, group_model, build_access
     ):
         request = build_request(
             self.factory,
@@ -288,20 +333,25 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context(
+            can_enter=False,
+            can_manage=False,
+            has_am_access=False,
+        )
 
         response = group_views.group_detail(request, 7)
 
         self.assertEqual(response.status_code, 403)
 
     @patch("app_group.views._build_group_context")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_template_contains_management_sections_and_popup_hooks(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         build_context,
     ):
         request = build_request(
@@ -311,12 +361,15 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
         build_context.return_value = {
             "common_group": self.common_group,
             "group": self.group,
             "selected_group": self.common_group,
             "common_memberships": [],
+            "access_context": build_access.return_value,
             "members": [],
+            "account_member_rows": [],
             "functions": [],
             "titles": [],
             "locations": [],
@@ -367,6 +420,50 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertNotContains(response, "Créer une demande d’accès AM")
         self.assertNotContains(response, "Ajouter au recueil")
 
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_detail_for_member_hides_management_actions(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path="/groups/7/",
+            user=self.user,
+        )
+        access_context = build_access_context(can_manage=False, has_am_access=True)
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = access_context
+        context = self.empty_group_context()
+        context["access_context"] = access_context
+        context["metrics"]["requests"] = 2
+        context["account_member_rows"] = [
+            {
+                "membership": SimpleNamespace(
+                    member_id="11111111-1111-1111-1111-111111111111"
+                ),
+                "group_member": None,
+            }
+        ]
+        build_context.return_value = context
+
+        response = group_views.group_detail(request, 7)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Liste des membres")
+        self.assertContains(response, "11111111-1111-1111-1111-111111111111")
+        self.assertNotContains(response, "Modifier les personnes")
+        self.assertNotContains(response, "Paramètres du calendrier")
+        self.assertNotContains(response, "Paramètres du groupe")
+        self.assertNotContains(response, "Gestion des chants")
+        self.assertNotContains(response, "🆕 2 demandes en cours.")
+
     @patch("app_group.views._get_common_group")
     def test_dedicated_pages_redirect_anonymous_user(self, get_common_group):
         dedicated_views = [
@@ -398,11 +495,11 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
         get_common_group.assert_not_called()
 
-    @patch("app_group.views._can_manage_common_group", return_value=False)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_dedicated_page_forbids_non_responsable(
-        self, get_common_group, group_model, _can_manage
+        self, get_common_group, group_model, build_access
     ):
         request = build_request(
             self.factory,
@@ -411,17 +508,18 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context(can_manage=False)
 
         response = group_views.group_members(request, 7)
 
         self.assertEqual(response.status_code, 403)
 
     @patch("app_group.views.messages")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_dedicated_page_redirects_to_dashboard_when_am_inactive(
-        self, get_common_group, group_model, _can_manage, message_api
+        self, get_common_group, group_model, build_access, message_api
     ):
         request = build_request(
             self.factory,
@@ -430,6 +528,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = None
+        build_access.return_value = build_access_context(can_manage=True)
 
         response = group_views.group_members(request, 7)
 
@@ -438,14 +537,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
         message_api.error.assert_called_once()
 
     @patch("app_group.views._build_group_context")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_dedicated_pages_render_expected_templates(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         build_context,
     ):
         pages = [
@@ -483,6 +582,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         ]
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         for view_func, route_name, expected_text in pages:
             with self.subTest(route=route_name):
@@ -504,14 +604,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.ensure_group_environment")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_activates_group_environment(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         ensure_environment,
         _messages,
     ):
@@ -524,6 +624,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = None
+        build_access.return_value = build_access_context(can_manage=True)
 
         response = group_views.group_detail(request, 7)
 
@@ -534,14 +635,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views.services.assign_responsable_impression")
     @patch("app_group.views.services.require_group_manager")
     @patch("app_group.views._get_group_member")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_assigns_responsable_impression_via_service(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         get_group_member,
         _require_manager,
         assign_responsable,
@@ -561,6 +662,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         response = group_views.group_members(request, 7)
 
@@ -571,14 +673,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views.messages")
     @patch("app_group.views.services.set_common_responsable")
     @patch("app_group.views.services.require_group_manager")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_updates_common_responsable_via_service(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         _require_manager,
         set_common_responsable,
         _messages,
@@ -596,6 +698,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         response = group_views.group_responsables(request, 7)
 
@@ -614,14 +717,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views.secrets.token_urlsafe", return_value="token-public")
     @patch("app_group.views._current_group_member")
     @patch("app_group.views.services.require_group_manager")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_creates_am_member_request_without_storing_raw_token_in_form(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         _require_manager,
         current_group_member,
         _token,
@@ -645,6 +748,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         response = group_views.group_am_members(request, 7)
 
@@ -666,14 +770,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views.services.require_group_manager")
     @patch("app_group.views._get_group_function")
     @patch("app_group.views._get_group_member")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_assigns_functions_to_am_members_via_service(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         get_group_member,
         get_group_function,
         _require_manager,
@@ -699,6 +803,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         response = group_views.group_functions(request, 7)
 
@@ -711,14 +816,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views.messages")
     @patch("app_group.views.services.add_song_to_repertoire")
     @patch("app_group.views.services.require_group_manager")
-    @patch("app_group.views._can_manage_common_group", return_value=True)
+    @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
     def test_detail_post_adds_song_to_repertoire_via_service(
         self,
         get_common_group,
         group_model,
-        _can_manage,
+        build_access,
         _require_manager,
         add_song,
         _messages,
@@ -736,6 +841,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
         get_common_group.return_value = self.common_group
         group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
 
         response = group_views.group_songs(request, 7)
 
@@ -1745,17 +1851,23 @@ class AppGroupServiceTests(SimpleTestCase):
             join_request,
         )
 
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.Group")
     @patch("app_group.services.transaction.atomic")
     @patch("app_group.services.CommonGroupUser")
     def test_accept_common_join_request_creates_membership_and_deletes_request(
         self,
         common_group_user,
         atomic,
+        group_model,
+        group_member_model,
     ):
         atomic.return_value.__enter__ = Mock(return_value=None)
         atomic.return_value.__exit__ = Mock(return_value=False)
         membership = Mock(am_access=False)
         common_group_user.objects.get_or_create.return_value = (membership, True)
+        group = group_models.Group(gg_id=7)
+        group_model.objects.get.return_value = group
         join_request = Mock(
             group_id=7,
             member_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
@@ -1771,6 +1883,12 @@ class AppGroupServiceTests(SimpleTestCase):
             defaults={"is_group_admin": False, "am_access": True},
         )
         membership.save.assert_called_once_with(update_fields=["am_access"])
+        group_model.objects.get.assert_called_once_with(pk=7)
+        group_member_model.objects.get_or_create.assert_called_once()
+        _args, kwargs = group_member_model.objects.get_or_create.call_args
+        self.assertIs(kwargs["group"], group)
+        self.assertEqual(str(kwargs["member"].mm_id), str(join_request.member_id))
+        self.assertEqual(kwargs["member_kind"], group_models.MEMBER_KIND_ACCOUNT)
         join_request.delete.assert_called_once()
 
     def test_refuse_common_join_request_deletes_request(self):

@@ -300,6 +300,13 @@ def accept_common_join_request(join_request: CommonGroupJoinRequest) -> CommonGr
         if not membership.am_access:
             membership.am_access = True
             membership.save(update_fields=["am_access"])
+        group = Group.objects.get(pk=join_request.group_id)
+        member = Member(mm_id=join_request.member_id)
+        GroupMember.objects.get_or_create(
+            group=group,
+            member=member,
+            member_kind=MEMBER_KIND_ACCOUNT,
+        )
         join_request.delete()
         return membership
 

@@ -61,8 +61,11 @@
                     {% include "includes/themed_icon.html" with picture_class="site-theme-card-icon" img_class="" icon_name="groups" icon_alt="" %}
                 </header>
                 {% if row.common_group.info %}<p>{{ row.common_group.info }}</p>{% endif %}
-                {% if row.is_member %}
-                    <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre de ce groupe." %}</span></p>
+                {% if row.has_am_access %}
+                    <p><span class="site-role-banner song-tag-badge">{% trans "Vous avez accès à ce groupe." %}</span></p>
+                    <p><a class="site-action site-action--primary" href="{% url 'group_detail' row.common_group.group_id %}">{% trans "Entrer dans le groupe" %}</a></p>
+                {% elif row.is_member %}
+                    <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre commun de ce groupe." %}</span></p>
                 {% elif row.has_pending_request %}
                     <p><span class="site-role-banner">{% trans "Demande de rattachement en attente." %}</span></p>
                 {% elif row.can_request_join %}
