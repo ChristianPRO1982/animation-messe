@@ -157,8 +157,10 @@ def _build_groups_home_context(request):
     )
     member_group_ids: set[int] = set()
     am_access_group_ids: set[int] = set()
+    responsable_group_ids: set[int] = set()
     pending_group_ids: set[int] = set()
     is_authenticated = getattr(request.user, "is_authenticated", False)
+    is_global_admin = bool(getattr(request.user, "is_admin", False))
     if is_authenticated:
         member_id = str(getattr(request.user, "external_id", "") or "").strip()
         if member_id:
@@ -168,6 +170,11 @@ def _build_groups_home_context(request):
                 membership.group_id
                 for membership in memberships
                 if membership.am_access
+            }
+            responsable_group_ids = {
+                membership.group_id
+                for membership in memberships
+                if membership.is_group_admin
             }
             pending_group_ids = set(
                 CommonGroupJoinRequest.objects.filter(member_id=member_id).values_list(
@@ -187,12 +194,16 @@ def _build_groups_home_context(request):
     rows = []
     for common_group in sorted(common_groups, key=sort_key):
         is_member = common_group.group_id in member_group_ids
+        has_am_access = common_group.group_id in am_access_group_ids
+        is_responsable = common_group.group_id in responsable_group_ids
         has_pending_request = common_group.group_id in pending_group_ids
         rows.append(
             {
                 "common_group": common_group,
                 "is_member": is_member,
-                "has_am_access": common_group.group_id in am_access_group_ids,
+                "has_am_access": has_am_access,
+                "is_responsable": is_responsable,
+                "can_enter_group": has_am_access or is_responsable or is_global_admin,
                 "has_pending_request": has_pending_request,
                 "can_request_join": (
                     is_authenticated and not is_member and not has_pending_request

@@ -122,7 +122,7 @@ class AppGroupPublicPageTests(SimpleTestCase):
         self.assertContains(response, "icons/ui/normal/512/dark/groups.png")
 
     @patch("app_group.views._build_groups_home_context")
-    def test_groups_home_shows_enter_button_for_am_access_member(self, home_context):
+    def test_groups_home_shows_access_button_for_am_access_member(self, home_context):
         common_group = group_models.CommonGroup(
             group_id=7,
             name="Chorale",
@@ -134,6 +134,8 @@ class AppGroupPublicPageTests(SimpleTestCase):
                     "common_group": common_group,
                     "is_member": True,
                     "has_am_access": True,
+                    "is_responsable": False,
+                    "can_enter_group": True,
                     "has_pending_request": False,
                     "can_request_join": False,
                 }
@@ -145,9 +147,42 @@ class AppGroupPublicPageTests(SimpleTestCase):
 
         response = group_views.groups_home(request)
 
-        self.assertContains(response, "Entrer dans le groupe")
+        self.assertContains(response, "Vous êtes membre de ce groupe.")
+        self.assertContains(response, "Accéder au groupe")
         self.assertContains(response, reverse("group_detail", kwargs={"group_id": 7}))
+        self.assertNotContains(response, "membre commun")
         self.assertNotContains(response, "Demander le rattachement")
+
+    @patch("app_group.views._build_groups_home_context")
+    def test_groups_home_shows_access_button_for_responsable_without_am_access(
+        self, home_context
+    ):
+        common_group = group_models.CommonGroup(
+            group_id=7,
+            name="Chorale",
+            status=group_models.CommonGroup.STATUS_PRIVATE,
+        )
+        home_context.return_value = {
+            "rows": [
+                {
+                    "common_group": common_group,
+                    "is_member": True,
+                    "has_am_access": False,
+                    "is_responsable": True,
+                    "can_enter_group": True,
+                    "has_pending_request": False,
+                    "can_request_join": False,
+                }
+            ],
+            "selected_group": None,
+            "is_authenticated": True,
+        }
+        request = build_request(self.factory, path="/groups/", user=build_user())
+
+        response = group_views.groups_home(request)
+
+        self.assertContains(response, "Accéder au groupe")
+        self.assertContains(response, reverse("group_detail", kwargs={"group_id": 7}))
 
     @patch("app_group.views.CommonGroupJoinRequest")
     @patch("app_group.views.CommonGroupUser")
@@ -176,7 +211,7 @@ class AppGroupPublicPageTests(SimpleTestCase):
         group_model.objects.values_list.return_value = [1, 2, 3]
         common_group_model.objects.filter.return_value.order_by.return_value = groups
         common_group_user.objects.filter.return_value = [
-            SimpleNamespace(group_id=3, am_access=True)
+            SimpleNamespace(group_id=3, am_access=True, is_group_admin=False)
         ]
         join_request_model.objects.filter.return_value.values_list.return_value = [1]
         request = build_request(self.factory, path="/groups/", user=build_user())
@@ -189,7 +224,36 @@ class AppGroupPublicPageTests(SimpleTestCase):
         )
         self.assertTrue(context["rows"][0]["is_member"])
         self.assertTrue(context["rows"][0]["has_am_access"])
+        self.assertTrue(context["rows"][0]["can_enter_group"])
         self.assertTrue(context["rows"][2]["has_pending_request"])
+
+    @patch("app_group.views.CommonGroupJoinRequest")
+    @patch("app_group.views.CommonGroupUser")
+    @patch("app_group.views.CommonGroup")
+    @patch("app_group.views.Group")
+    def test_groups_home_context_allows_responsable_to_enter_without_am_access(
+        self, group_model, common_group_model, common_group_user, join_request_model
+    ):
+        common_group = group_models.CommonGroup(
+            group_id=7,
+            name="Chorale",
+            status=group_models.CommonGroup.STATUS_PRIVATE,
+        )
+        group_model.objects.values_list.return_value = [7]
+        common_group_model.objects.filter.return_value.order_by.return_value = [
+            common_group
+        ]
+        common_group_user.objects.filter.return_value = [
+            SimpleNamespace(group_id=7, am_access=False, is_group_admin=True)
+        ]
+        join_request_model.objects.filter.return_value.values_list.return_value = []
+        request = build_request(self.factory, path="/groups/", user=build_user())
+
+        context = group_views._build_groups_home_context(request)
+
+        self.assertFalse(context["rows"][0]["has_am_access"])
+        self.assertTrue(context["rows"][0]["is_responsable"])
+        self.assertTrue(context["rows"][0]["can_enter_group"])
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.create_common_join_request")
