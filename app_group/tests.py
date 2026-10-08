@@ -940,6 +940,45 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
+    def test_responsables_page_uses_full_width_inline_rows(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_responsables", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        context = self.empty_group_context()
+        context["common_member_rows"] = [
+            {
+                "membership": SimpleNamespace(
+                    member_id="11111111-1111-1111-1111-111111111111"
+                ),
+                "display_name": "Alice Martin",
+                "is_responsable": False,
+                "has_am_access": True,
+            }
+        ]
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
+        build_context.return_value = context
+
+        response = group_views.group_responsables(request, 7)
+
+        self.assertContains(response, "group-single-column")
+        self.assertContains(response, 'class="group-responsable-row"')
+        self.assertContains(response, "Alice Martin")
+        self.assertContains(response, "Nommer Responsable")
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
     def test_members_page_summary_and_removal_actions(
         self,
         get_common_group,
