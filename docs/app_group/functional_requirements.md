@@ -174,8 +174,12 @@ Depuis `/groups/`, un utilisateur authentifié peut :
 
 - accéder à un groupe lorsqu'il possède `am_access = TRUE`, lorsqu'il est
   Responsable du groupe ou lorsqu'il est Administrateur global ;
+- demander l'accès AM lorsqu'il est déjà membre du groupe commun, que
+  `am_access = FALSE` et qu'aucune demande d'accès AM n'est en attente ;
 - demander son rattachement lorsqu'il n'est pas encore membre et qu'aucune
   demande n'est en attente ;
+- voir l'état `Demande d'accès AM en attente` lorsqu'une demande d'accès AM
+  existe ;
 - voir l'état `Demande de rattachement en attente` lorsqu'une demande existe.
 
 Les visiteurs anonymes peuvent consulter la liste des groupes AM actifs, mais
@@ -276,6 +280,21 @@ rapide, et les boutons de navigation vers ces écrans.
 5. En cas d'acceptation, `common.g_group_user` est créé ou mis à jour avec
    `am_access = TRUE`, et l'ancre technique `am.g_group_member` est créée si
    elle manque.
+
+Après un refus, une suppression du groupe global ou une suppression de la
+demande en attente, l'utilisateur peut refaire une demande de rattachement.
+
+### Demande d'accès AM pour un membre existant
+
+1. Un membre du groupe commun sans accès AM ouvre `/groups/`.
+2. Il voit le bouton `Demander l'accès AM`.
+3. La demande crée une demande active `am.g_access_request`.
+4. Un Responsable traite la demande depuis `/groups/<id>/members/`.
+5. En cas d'acceptation, `common.g_group_user.am_access` passe à `TRUE` et
+   l'ancre technique `am.g_group_member` est créée si elle manque.
+
+Après un refus, un retrait de l'espace AM ou une suppression de la demande en
+attente, le membre peut refaire une demande d'accès AM.
 
 ### Retrait d'un membre
 
@@ -416,6 +435,10 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-ACCESS-06** — Retirer un membre de l'espace AM désactive `am_access` et supprime son ancre `am.g_group_member`, sans supprimer son appartenance commune.
 
 **GROUP-ACCESS-07** — Retirer un membre du groupe supprime son appartenance `common.g_group_user` et son ancre `am.g_group_member` éventuelle.
+
+**GROUP-ACCESS-08** — Un membre du groupe commun sans accès AM peut demander l'accès AM depuis `/groups/` tant qu'aucune demande d'accès AM active n'existe pour lui dans ce groupe.
+
+**GROUP-ACCESS-09** — Les demandes de rattachement et les demandes d'accès AM peuvent être refaites après refus, retrait ou suppression de la demande active.
 
 **GROUP-UI-01** — Les formulaires longs et les listes éditables de gestion d'un groupe doivent vivre dans des pages dédiées sous `/groups/<id>/.../`, afin que le tableau de bord groupe reste synthétique.
 

@@ -37,7 +37,7 @@
 {% block page_kicker %}Animation Messe{% endblock %}
 {% block page_title %}{% trans "Groupes" %}{% endblock %}
 {% block page_intro %}
-    <p>{% trans "Retrouvez les groupes Animation Messe actifs et demandez un rattachement si nécessaire." %}</p>
+    <p>{% trans "Retrouvez les groupes Animation Messe actifs et demandez un rattachement ou un accès AM si nécessaire." %}</p>
 {% endblock %}
 {% block page_summary %}
     <p>{% trans "Les demandes sont transmises aux Responsables du groupe, qui les acceptent ou les refusent." %}</p>
@@ -64,8 +64,19 @@
                 {% if row.can_enter_group %}
                     <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre de ce groupe." %}</span></p>
                     <p><a class="site-action site-action--primary" href="{% url 'group_detail' row.common_group.group_id %}">{% trans "Accéder au groupe" %}</a></p>
+                {% elif row.can_request_am_access %}
+                    <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre de ce groupe." %}</span></p>
+                    <form method="post" data-app-group-confirm="{% trans 'Envoyer une demande d’accès AM pour ce groupe ?' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="request_am_access">
+                        <input type="hidden" name="common_group_id" value="{{ row.common_group.group_id }}">
+                        <button class="site-action site-action--primary" type="submit">{% trans "Demander l’accès AM" %}</button>
+                    </form>
                 {% elif row.is_member %}
                     <p><span class="site-role-banner song-tag-badge">{% trans "Vous êtes membre de ce groupe." %}</span></p>
+                    {% if row.has_pending_am_access_request %}
+                        <p><span class="site-role-banner">{% trans "Demande d’accès AM en attente." %}</span></p>
+                    {% endif %}
                 {% elif row.has_pending_request %}
                     <p><span class="site-role-banner">{% trans "Demande de rattachement en attente." %}</span></p>
                 {% elif row.can_request_join %}

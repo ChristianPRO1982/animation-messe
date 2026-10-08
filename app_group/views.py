@@ -14,7 +14,9 @@ from django.utils.translation import gettext_lazy as _
 from app_group import forms, services
 from app_group.models import (
     MEMBER_KIND_ACCOUNT,
+    REQUEST_TYPE_AM_ACCESS,
     ROLE_RESPONSABLE_IMPRESSION,
+    AccessRequest,
     AmMemberRequest,
     AmMemberTitle,
     CommonGroup,
@@ -133,23 +135,51 @@ def _handle_groups_home_post(request):
     if not request.user.is_authenticated:
         return redirect("login")
 
-    form = forms.JoinGroupRequestForm(request.POST)
-    if (
-        not form.is_valid()
-        or form.cleaned_data["action"] != "request_common_group_join"
-    ):
-        messages.error(request, _("Demande de rattachement invalide."))
+    action = request.POST.get("action", "").strip()
+    if action == "request_common_group_join":
+        form = forms.JoinGroupRequestForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, _("Demande de rattachement invalide."))
+            return redirect("groups_home")
+
+        try:
+            services.create_common_join_request(
+                form.cleaned_data["common_group_id"],
+                str(getattr(request.user, "external_id", "") or "").strip(),
+            )
+        except (PermissionDenied, ValidationError, ValueError) as exc:
+            messages.error(request, _validation_message(exc))
+        else:
+            messages.success(request, _("Votre demande de rattachement est envoyée."))
         return redirect("groups_home")
 
-    try:
-        services.create_common_join_request(
-            form.cleaned_data["common_group_id"],
-            str(getattr(request.user, "external_id", "") or "").strip(),
-        )
-    except (PermissionDenied, ValidationError, ValueError) as exc:
-        messages.error(request, _validation_message(exc))
-    else:
-        messages.success(request, _("Votre demande de rattachement est envoyée."))
+    if action == "request_am_access":
+        form = forms.PublicAccessRequestForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, _("Demande d'accès AM invalide."))
+            return redirect("groups_home")
+
+        common_group_id = form.cleaned_data["common_group_id"]
+        member = Member(mm_id=str(getattr(request.user, "external_id", "") or ""))
+        group = Group.objects.filter(gg_id=common_group_id).first()
+        if group is None:
+            messages.error(request, _("L'espace AM du groupe est introuvable."))
+            return redirect("groups_home")
+
+        try:
+            services.create_access_request(
+                group,
+                member,
+                consent_version="v1",
+                consented_at=timezone.now(),
+            )
+        except (PermissionDenied, ValidationError, ValueError) as exc:
+            messages.error(request, _validation_message(exc))
+        else:
+            messages.success(request, _("Votre demande d'accès AM est envoyée."))
+        return redirect("groups_home")
+
+    messages.error(request, _("Demande groupe invalide."))
     return redirect("groups_home")
 
 
@@ -162,6 +192,7 @@ def _build_groups_home_context(request):
     am_access_group_ids: set[int] = set()
     responsable_group_ids: set[int] = set()
     pending_group_ids: set[int] = set()
+    pending_am_access_group_ids: set[int] = set()
     is_authenticated = getattr(request.user, "is_authenticated", False)
     is_global_admin = bool(getattr(request.user, "is_admin", False))
     if is_authenticated:
@@ -184,6 +215,13 @@ def _build_groups_home_context(request):
                     "group_id", flat=True
                 )
             )
+            pending_am_access_group_ids = set(
+                AccessRequest.objects.filter(
+                    member_id=member_id,
+                    request_type=REQUEST_TYPE_AM_ACCESS,
+                    is_active=True,
+                ).values_list("group_id", flat=True)
+            )
 
     def sort_key(common_group):
         if common_group.group_id in member_group_ids:
@@ -200,6 +238,9 @@ def _build_groups_home_context(request):
         has_am_access = common_group.group_id in am_access_group_ids
         is_responsable = common_group.group_id in responsable_group_ids
         has_pending_request = common_group.group_id in pending_group_ids
+        has_pending_am_access_request = (
+            common_group.group_id in pending_am_access_group_ids
+        )
         rows.append(
             {
                 "common_group": common_group,
@@ -208,8 +249,16 @@ def _build_groups_home_context(request):
                 "is_responsable": is_responsable,
                 "can_enter_group": has_am_access or is_responsable or is_global_admin,
                 "has_pending_request": has_pending_request,
+                "has_pending_am_access_request": has_pending_am_access_request,
                 "can_request_join": (
                     is_authenticated and not is_member and not has_pending_request
+                ),
+                "can_request_am_access": (
+                    is_authenticated
+                    and is_member
+                    and not has_am_access
+                    and not is_responsable
+                    and not has_pending_am_access_request
                 ),
             }
         )
