@@ -3,6 +3,9 @@
 {% load i18n %}
 
 {% block title %}{{ page_title }} | {{ common_group.name }} | Animation Messe{% endblock %}
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/app_group.css' %}">
+{% endblock %}
 {% block section_title %}{{ common_group.name }}{% endblock %}
 {% block section_nav %}
     <div class="site-home-media">

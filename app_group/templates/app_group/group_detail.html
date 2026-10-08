@@ -89,15 +89,27 @@
             <article class="site-theme-card">
                 <header class="site-theme-card-header"><div><h2>{% trans "Liste des membres" %}</h2></div></header>
                 {% for row in account_member_rows %}
-                    <p><code>{{ row.membership.member_id }}</code></p>
+                    <p>
+                        {{ row.display_name }}
+                        {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
+                        {% if row.is_responsable %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
+                        {% if row.has_responsable_impression %}<span class="site-role-banner">{% trans "Responsable impression" %}</span>{% endif %}
+                    </p>
+                    {% if row.function_names %}
+                        <p>{% trans "Fonctions" %} : {{ row.function_names|join:", " }}</p>
+                    {% endif %}
                 {% empty %}
                     <p>{% trans "Aucun membre avec compte actif." %}</p>
                 {% endfor %}
             </article>
             <article class="site-theme-card">
                 <header class="site-theme-card-header"><div><h2>{% trans "Liste des responsables" %}</h2></div></header>
-                {% for membership in responsable_memberships %}
-                    <p><code>{{ membership.member_id }}</code></p>
+                {% for row in responsable_member_rows %}
+                    <p>
+                        {{ row.display_name }}
+                        <span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>
+                        {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
+                    </p>
                 {% empty %}
                     <p>{% trans "Aucun Responsable commun trouvé." %}</p>
                 {% endfor %}
@@ -106,6 +118,13 @@
                 <header class="site-theme-card-header"><div><h2>{% trans "Liste des Membres AM" %}</h2></div></header>
                 {% for member in am_members %}
                     <p>{{ member.am_profile.first_name }} {{ member.am_profile.last_name }}</p>
+                    {% if member.am_profile.title %}<p>{{ member.am_profile.title.label }}</p>{% endif %}
+                    {% if member.function_assignments.all %}
+                        <p>
+                            {% trans "Fonctions" %} :
+                            {% for assignment in member.function_assignments.all %}{{ assignment.function.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        </p>
+                    {% endif %}
                 {% empty %}
                     <p>{% trans "Aucun Membre AM actif." %}</p>
                 {% endfor %}

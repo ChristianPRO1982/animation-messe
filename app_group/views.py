@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from app_group import forms, services
 from app_group.models import (
     MEMBER_KIND_ACCOUNT,
+    ROLE_RESPONSABLE_IMPRESSION,
     AmMemberRequest,
     AmMemberTitle,
     CommonGroup,
@@ -28,6 +29,7 @@ from app_group.models import (
     SongTag,
     Verse,
 )
+from app_main.models import DirectoryUserRecord
 from app_member.models import Member
 
 INVITATION_NOTICE_SESSION_KEY = "app_group_invitation_notice"
@@ -40,11 +42,12 @@ GROUP_PAGE_CONFIG = {
         "actions": {
             "assign_responsable_impression",
             "remove_responsable_impression",
-            "create_access_request",
             "accept_access_request",
             "refuse_access_request",
             "accept_common_join_request",
             "refuse_common_join_request",
+            "remove_member_am_access",
+            "remove_common_group_member",
         },
     },
     "responsables": {
@@ -451,6 +454,18 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         messages.success(request, _("Le rôle Responsable a été mis à jour."))
         return
 
+    if action in {"remove_member_am_access", "remove_common_group_member"}:
+        form = forms.MemberMembershipActionForm(request.POST)
+        _validate_action_form(form, action)
+        member_id = str(form.cleaned_data["member_id"])
+        if action == "remove_member_am_access":
+            services.remove_member_am_access(group.gg_id, member_id)
+            messages.success(request, _("L'accès AM du membre est retiré."))
+        else:
+            services.remove_common_group_member(group.gg_id, member_id)
+            messages.success(request, _("Le membre est retiré du groupe."))
+        return
+
     if action in {"assign_function", "remove_function"}:
         form = forms.FunctionAssignmentForm(request.POST)
         _validate_action_form(form, action)
@@ -809,6 +824,24 @@ def _build_group_context(
             "song_tags__verse_selections__verse",
         ).order_by("song_id")
     )
+    common_join_requests = list(
+        CommonGroupJoinRequest.objects.filter(group_id=group.gg_id).order_by(
+            "member_id"
+        )
+    )
+    access_requests = list(group.access_requests.all())
+    member_profile_map = _directory_member_profile_map(
+        [
+            *(membership.member_id for membership in common_memberships),
+            *(join_request.member_id for join_request in common_join_requests),
+            *(access_request.member_id for access_request in access_requests),
+        ]
+    )
+    account_member_rows = _build_account_member_rows(
+        common_memberships,
+        members,
+        member_profile_map,
+    )
 
     context.update(
         {
@@ -818,9 +851,14 @@ def _build_group_context(
                 for member in members
                 if member.member_kind == MEMBER_KIND_ACCOUNT
             ],
-            "account_member_rows": _build_account_member_rows(
+            "account_member_rows": account_member_rows,
+            "common_member_rows": _build_common_member_rows(
                 common_memberships,
+                member_profile_map,
+            ),
+            "function_member_rows": _build_function_member_rows(
                 members,
+                member_profile_map,
             ),
             "am_members": [
                 member
@@ -832,17 +870,25 @@ def _build_group_context(
                 for membership in common_memberships
                 if membership.is_group_admin
             ],
+            "responsable_member_rows": _build_responsable_member_rows(
+                common_memberships,
+                member_profile_map,
+            ),
             "functions": list(group.functions.all()),
             "titles": list(group.am_member_titles.all()),
             "locations": list(group.locations.all()),
             "planning_states": list(group.planning_states.all()),
             "celebration_rules": list(group.celebration_rules.all()),
             "special_date_rules": list(group.special_date_rules.all()),
-            "access_requests": list(group.access_requests.all()),
-            "common_join_requests": list(
-                CommonGroupJoinRequest.objects.filter(group_id=group.gg_id).order_by(
-                    "member_id"
-                )
+            "access_requests": access_requests,
+            "access_request_rows": _build_member_request_rows(
+                access_requests,
+                member_profile_map,
+            ),
+            "common_join_requests": common_join_requests,
+            "common_join_request_rows": _build_member_request_rows(
+                common_join_requests,
+                member_profile_map,
             ),
             "am_member_requests": list(group.am_member_requests.all()),
             "group_tags": list(
@@ -878,7 +924,73 @@ def _build_group_context(
     return context
 
 
-def _build_account_member_rows(common_memberships, members):
+def _directory_member_profile_map(member_ids):
+    normalized_ids = sorted({str(member_id) for member_id in member_ids if member_id})
+    if not normalized_ids:
+        return {}
+
+    try:
+        records = list(DirectoryUserRecord.objects.filter(id__in=normalized_ids))
+    except Exception:
+        return {}
+
+    return {
+        str(record.id): {
+            "first_name": record.first_name or "",
+            "last_name": record.last_name or "",
+            "username": record.username or "",
+        }
+        for record in records
+    }
+
+
+def _directory_display_name(member_id, profile_map):
+    profile = profile_map.get(str(member_id), {})
+    first_name = str(profile.get("first_name") or "").strip()
+    last_name = str(profile.get("last_name") or "").strip()
+    full_name = " ".join(part for part in [first_name, last_name] if part)
+    if full_name:
+        return full_name
+
+    username = str(profile.get("username") or "").strip()
+    if username:
+        return username
+
+    return _("Membre")
+
+
+def _member_function_names(group_member):
+    if group_member is None:
+        return []
+
+    assignments = getattr(group_member, "function_assignments", None)
+    if assignments is None:
+        return []
+
+    return [
+        assignment.function.name
+        for assignment in assignments.all()
+        if assignment.function and assignment.function.is_active
+    ]
+
+
+def _has_responsable_impression_role(group_member):
+    if group_member is None:
+        return False
+
+    assignments = getattr(group_member, "role_assignments", None)
+    if assignments is None:
+        return False
+
+    return any(
+        assignment.role
+        and assignment.role.code == ROLE_RESPONSABLE_IMPRESSION
+        and assignment.role.is_active
+        for assignment in assignments.all()
+    )
+
+
+def _build_account_member_rows(common_memberships, members, profile_map):
     account_members_by_member_id = {
         str(member.member_id): member
         for member in members
@@ -888,9 +1000,80 @@ def _build_account_member_rows(common_memberships, members):
         {
             "membership": membership,
             "group_member": account_members_by_member_id.get(str(membership.member_id)),
+            "display_name": _directory_display_name(membership.member_id, profile_map),
+            "is_responsable": membership.is_group_admin,
+            "has_am_access": membership.am_access,
+            "has_responsable_impression": _has_responsable_impression_role(
+                account_members_by_member_id.get(str(membership.member_id))
+            ),
+            "function_names": _member_function_names(
+                account_members_by_member_id.get(str(membership.member_id))
+            ),
         }
         for membership in common_memberships
         if membership.am_access
+    ]
+
+
+def _build_responsable_member_rows(common_memberships, profile_map):
+    return [
+        {
+            "membership": membership,
+            "display_name": _directory_display_name(membership.member_id, profile_map),
+            "has_am_access": membership.am_access,
+        }
+        for membership in common_memberships
+        if membership.is_group_admin
+    ]
+
+
+def _build_common_member_rows(common_memberships, profile_map):
+    return [
+        {
+            "membership": membership,
+            "display_name": _directory_display_name(membership.member_id, profile_map),
+            "has_am_access": membership.am_access,
+            "is_responsable": membership.is_group_admin,
+        }
+        for membership in common_memberships
+    ]
+
+
+def _build_function_member_rows(members, profile_map):
+    rows = []
+    for member in members:
+        if member.member_kind == MEMBER_KIND_ACCOUNT:
+            display_name = _directory_display_name(member.member_id, profile_map)
+            kind_label = _("Membre")
+        else:
+            display_name = " ".join(
+                part
+                for part in [
+                    getattr(member.am_profile, "first_name", ""),
+                    getattr(member.am_profile, "last_name", ""),
+                ]
+                if part
+            )
+            kind_label = _("Membre AM")
+
+        rows.append(
+            {
+                "group_member": member,
+                "display_name": display_name or kind_label,
+                "kind_label": kind_label,
+                "function_names": _member_function_names(member),
+            }
+        )
+    return rows
+
+
+def _build_member_request_rows(requests, profile_map):
+    return [
+        {
+            "request": request,
+            "display_name": _directory_display_name(request.member_id, profile_map),
+        }
+        for request in requests
     ]
 
 

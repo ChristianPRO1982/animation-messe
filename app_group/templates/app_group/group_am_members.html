@@ -7,6 +7,14 @@
             <header class="site-theme-card-header"><div><h2>{% trans "Membres AM" %}</h2></div></header>
             {% for member in am_members %}
                 <p>{{ member.am_profile.first_name }} {{ member.am_profile.last_name }}</p>
+                <p><span class="site-role-banner">{% trans "Membre AM" %}</span> <span class="site-role-banner">{% trans "Consentement enregistré" %}</span></p>
+                {% if member.am_profile.title %}<p>{{ member.am_profile.title.label }}</p>{% endif %}
+                {% if member.function_assignments.all %}
+                    <p>
+                        {% trans "Fonctions" %} :
+                        {% for assignment in member.function_assignments.all %}{{ assignment.function.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                {% endif %}
                 <p>{% trans "Aucun droit applicatif ne peut être attribué à un Membre AM." %}</p>
             {% empty %}
                 <p>{% trans "Aucun Membre AM actif." %}</p>

@@ -32,6 +32,10 @@ class GroupMemberActionForm(ActionForm):
     group_member_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
 
+class MemberMembershipActionForm(ActionForm):
+    member_id = forms.UUIDField(widget=forms.HiddenInput())
+
+
 class CommonResponsableForm(ActionForm):
     member_id = forms.UUIDField(widget=forms.HiddenInput())
     enabled = forms.BooleanField(required=False, widget=forms.HiddenInput())

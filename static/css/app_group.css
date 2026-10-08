@@ -154,8 +154,19 @@
 }
 
 .group-person-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     justify-content: flex-end;
     align-items: center;
+}
+
+.group-person-actions form {
+    display: inline-flex;
+}
+
+.group-person-actions .site-action {
+    white-space: nowrap;
 }
 
 .group-settings-actions {

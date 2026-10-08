@@ -129,6 +129,7 @@
         }
     </style>
     <link id="site-theme-stylesheet" rel="stylesheet" href="{% static 'css/normal.css' %}">
+    {% block head_extra %}{% endblock %}
     <script>
         (() => {
             const config = window.LSS_THEME_CONFIG;

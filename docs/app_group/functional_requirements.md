@@ -114,6 +114,23 @@ Un Responsable impression peut gérer les feuilles de messe selon les règles de
 
 Les rôles de groupe sont distincts du rôle global Administrateur de `app_member`.
 
+Dans l'interface, un Membre avec compte doit être affiché par son prénom et son
+nom issus de l'annuaire utilisateur lorsque ces informations sont disponibles.
+L'UUID technique `member_id` ne doit pas être affiché dans les listes de
+consultation ou de gestion. Il peut rester présent dans les champs techniques
+nécessaires aux formulaires POST. L'email n'est pas affiché dans `app_group`.
+
+Les listes de personnes doivent rendre lisibles les statuts utiles :
+
+- accès AM ;
+- Responsable ;
+- Responsable impression ;
+- fonctions affectées.
+
+Un Membre AM est affiché par son prénom, son nom, son titre éventuel, son état
+de consentement et ses fonctions. Il ne reçoit jamais de badge donnant des
+droits applicatifs.
+
 Une demande de rejoindre le groupe depuis AM utilise le workflow commun
 `common.g_group_user_ask_to_join`. Si elle est acceptée depuis AM, elle crée
 l’appartenance commune et active aussi `am_access`.
@@ -121,6 +138,18 @@ l’appartenance commune et active aussi `am_access`.
 Une personne déjà membre du groupe commun mais sans accès AM peut demander
 uniquement l’accès AM. Cette demande relève de `app_group` et sa validation met
 à jour `common.g_group_user.am_access`.
+
+Depuis la page de gestion des membres, un Responsable peut retirer un membre de
+l'espace AM sans supprimer son appartenance au groupe commun. Ce retrait met
+`common.g_group_user.am_access` à `FALSE` et supprime l'ancre technique
+`am.g_group_member` du membre avec compte si elle existe.
+
+Depuis la même page, un Responsable peut retirer un membre du groupe global.
+Ce retrait supprime l'appartenance `common.g_group_user` et supprime aussi
+l'ancre `am.g_group_member` du membre avec compte si elle existe.
+
+Ces deux retraits protègent le dernier Responsable : un groupe doit toujours
+conserver au moins une appartenance `is_group_admin = TRUE`.
 
 L'espace de gestion des groupes AM est exposé sous `/groups/manage/`.
 Cette route est réservée aux utilisateurs authentifiés pouvant gérer au moins
@@ -137,10 +166,36 @@ Le lien vers cet espace peut être présenté par `app_main` :
 
 La page publique `/groups/` reste distincte de l'espace de gestion.
 
+Elle affiche les groupes disposant d'un espace AM actif, triés avec les groupes
+de l'utilisateur en premier, puis les groupes ouverts, puis les autres groupes,
+chaque bloc étant ordonné alphabétiquement.
+
+Depuis `/groups/`, un utilisateur authentifié peut :
+
+- accéder à un groupe lorsqu'il possède `am_access = TRUE`, lorsqu'il est
+  Responsable du groupe ou lorsqu'il est Administrateur global ;
+- demander son rattachement lorsqu'il n'est pas encore membre et qu'aucune
+  demande n'est en attente ;
+- voir l'état `Demande de rattachement en attente` lorsqu'une demande existe.
+
+Les visiteurs anonymes peuvent consulter la liste des groupes AM actifs, mais
+ne peuvent ni entrer dans un groupe ni demander un rattachement sans se
+connecter.
+
 La page `/groups/<id>/` est la page de pilotage synthétique d'un groupe.
 Elle ne doit pas devenir une page fourre-tout contenant tous les formulaires de
 gestion. Elle présente l'état du groupe, les listes utiles à la décision et des
 accès vers les actions ou pages dédiées.
+
+Cette page est accessible à un Membre ayant l'accès AM, à un Responsable du
+groupe et à un Administrateur global. L'interface y est contextuelle :
+
+- un Membre simple voit l'état du groupe et les listes utiles, sans blocs de
+  gestion ;
+- un Responsable ou un Administrateur global voit aussi les blocs de navigation
+  vers les pages de gestion et les liens de demandes en cours ;
+- un Responsable impression ne reçoit pas, par ce rôle seul, de droits de
+  gestion `app_group`.
 
 L'encadré résumé de `/groups/<id>/` est une zone de lecture seule. Il doit
 afficher, avec des éléments séparés et lisibles :
@@ -208,6 +263,48 @@ Les formulaires longs, les listes éditables et les actions de masse doivent
 vivre sur ces pages dédiées. Le tableau de bord `/groups/<id>/` conserve
 seulement les indicateurs, les listes principales en lecture ou consultation
 rapide, et les boutons de navigation vers ces écrans.
+
+## Workflows utilisateur actuels
+
+### Consultation publique et demande de rattachement
+
+1. Un visiteur ouvre `/groups/` et voit les groupes AM actifs.
+2. S'il est connecté et non membre d'un groupe, il peut envoyer une demande de
+   rattachement.
+3. La demande crée une ligne `common.g_group_user_ask_to_join`.
+4. Un Responsable traite la demande depuis `/groups/<id>/members/`.
+5. En cas d'acceptation, `common.g_group_user` est créé ou mis à jour avec
+   `am_access = TRUE`, et l'ancre technique `am.g_group_member` est créée si
+   elle manque.
+
+### Retrait d'un membre
+
+1. Un Responsable ouvre `/groups/<id>/members/`.
+2. `Retirer de l'espace AM` enlève seulement l'accès AM et l'ancre technique
+   AM du membre.
+3. `Retirer du groupe` enlève l'appartenance commune et l'ancre technique AM.
+4. Si le membre ciblé est le dernier Responsable du groupe, l'action est
+   refusée.
+
+### Entrée dans un groupe
+
+1. Un utilisateur connecté voit le bouton d'accès au groupe sur `/groups/` s'il
+   possède `am_access = TRUE`, s'il est Responsable du groupe ou s'il est
+   Administrateur global.
+2. Le bouton ouvre `/groups/<id>/`.
+3. Un utilisateur sans accès AM, non Responsable et non Administrateur global
+   reçoit un refus d'accès.
+
+### Pilotage par rôle
+
+1. Un Membre avec accès AM consulte le tableau de bord synthétique du groupe.
+2. Un Responsable ou Administrateur global consulte le même tableau de bord,
+   avec les blocs supplémentaires de gestion.
+3. Les pages dédiées sous `/groups/<id>/.../` restent réservées aux
+   Responsables et Administrateurs globaux.
+4. Les demandes en cours sont signalées par un lien contextuel `🆕` uniquement
+   aux Responsables et Administrateurs globaux, car elles mènent vers une page
+   de gestion.
 
 ---
 
@@ -314,7 +411,17 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 
 **GROUP-ACCESS-04** — La page `/groups/<id>/` est une page de pilotage synthétique : elle expose l'état du groupe, les listes principales et des accès vers les actions dédiées, sans concentrer tous les formulaires de gestion.
 
+**GROUP-ACCESS-05** — Un Membre avec `am_access = TRUE`, un Responsable du groupe ou un Administrateur global peut entrer dans `/groups/<id>/`; les pages dédiées de gestion restent réservées aux Responsables et Administrateurs globaux.
+
+**GROUP-ACCESS-06** — Retirer un membre de l'espace AM désactive `am_access` et supprime son ancre `am.g_group_member`, sans supprimer son appartenance commune.
+
+**GROUP-ACCESS-07** — Retirer un membre du groupe supprime son appartenance `common.g_group_user` et son ancre `am.g_group_member` éventuelle.
+
 **GROUP-UI-01** — Les formulaires longs et les listes éditables de gestion d'un groupe doivent vivre dans des pages dédiées sous `/groups/<id>/.../`, afin que le tableau de bord groupe reste synthétique.
+
+**GROUP-UI-02** — Les listes visibles de personnes affichent prénom et nom lorsque l'annuaire les fournit, jamais l'UUID technique ni l'email.
+
+**GROUP-UI-03** — Les listes de personnes affichent les badges de statut utiles : accès AM, Responsable, Responsable impression et fonctions affectées.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

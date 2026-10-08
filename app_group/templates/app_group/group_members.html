@@ -1,44 +1,76 @@
 {% extends "app_group/group_page_base.html" %}
 {% load i18n %}
 
+{% block page_summary %}
+    <p>{% trans "Espace AM actif." %}</p>
+    <p>{% blocktrans with members=metrics.account_members %}{{ members }} membres avec compte.{% endblocktrans %}</p>
+    <p>{% blocktrans with requests=metrics.requests %}{{ requests }} demandes en attente.{% endblocktrans %}</p>
+{% endblock %}
+
 {% block group_page_content %}
     <section class="site-theme-selection" aria-label="{% trans 'Membres avec compte' %}">
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Membres avec compte" %}</h2></div></header>
             {% for row in account_member_rows %}
-                <p><code>{{ row.membership.member_id }}</code></p>
-                {% if row.group_member %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="assign_responsable_impression">
-                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
-                        <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
-                    </form>
-                    <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="remove_responsable_impression">
-                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
-                        <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
-                    </form>
-                {% endif %}
+                <div class="group-person-row">
+                    <div class="group-person-main">
+                        <p>
+                            {{ row.display_name }}
+                            {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
+                            {% if row.is_responsable %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
+                            {% if row.has_responsable_impression %}<span class="site-role-banner">{% trans "Responsable impression" %}</span>{% endif %}
+                        </p>
+                        {% if row.function_names %}
+                            <p>{% trans "Fonctions" %} : {{ row.function_names|join:", " }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="group-person-actions">
+                        {% if row.group_member %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="assign_responsable_impression">
+                                <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
+                                <button class="site-action site-action--secondary" type="submit">{% trans "Attribuer Responsable impression" %}</button>
+                            </form>
+                            <form method="post" data-app-group-confirm="{% trans 'Retirer le droit Responsable impression ?' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove_responsable_impression">
+                                <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
+                                <button class="site-action site-action--danger" type="submit">{% trans "Retirer Responsable impression" %}</button>
+                            </form>
+                        {% endif %}
+                        <form method="post" data-app-group-confirm="{% trans 'Retirer ce membre de l’espace AM ?' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="remove_member_am_access">
+                            <input type="hidden" name="member_id" value="{{ row.membership.member_id }}">
+                            <button class="site-action site-action--danger" type="submit">{% trans "❌ AM" %}</button>
+                        </form>
+                        <form method="post" data-app-group-confirm="{% trans 'Retirer ce membre du groupe ?' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="remove_common_group_member">
+                            <input type="hidden" name="member_id" value="{{ row.membership.member_id }}">
+                            <button class="site-action site-action--danger" type="submit">{% trans "❌ Gr" %}</button>
+                        </form>
+                    </div>
+                </div>
             {% empty %}
                 <p>{% trans "Aucun membre avec compte actif." %}</p>
             {% endfor %}
         </article>
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Demandes de rattachement" %}</h2></div></header>
-            {% for join_request in common_join_requests %}
-                <p><code>{{ join_request.member_id }}</code></p>
+            {% for row in common_join_request_rows %}
+                <p>{{ row.display_name }}</p>
                 <form method="post" style="display: inline-block;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="accept_common_join_request">
-                    <input type="hidden" name="member_id" value="{{ join_request.member_id }}">
+                    <input type="hidden" name="member_id" value="{{ row.request.member_id }}">
                     <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
                 </form>
                 <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande de rattachement ?' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="refuse_common_join_request">
-                    <input type="hidden" name="member_id" value="{{ join_request.member_id }}">
+                    <input type="hidden" name="member_id" value="{{ row.request.member_id }}">
                     <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
                 </form>
             {% empty %}
@@ -46,28 +78,19 @@
             {% endfor %}
         </article>
         <article class="site-theme-card">
-            <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande d’accès AM" %}</h2></div></header>
-            <form method="post" data-unsaved-guard>
-                {% csrf_token %}
-                <input type="hidden" name="action" value="create_access_request">
-                {% for field in forms.access_request.visible_fields %}<div>{{ field.label_tag }} {{ field }} {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}</div>{% endfor %}
-                <button class="site-action site-action--primary" type="submit">{% trans "Créer la demande" %}</button>
-            </form>
-        </article>
-        <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Demandes d’accès AM" %}</h2></div></header>
-            {% for access_request in access_requests %}
-                <p><code>{{ access_request.member_id }}</code></p>
+            {% for row in access_request_rows %}
+                <p>{{ row.display_name }}</p>
                 <form method="post" style="display: inline-block;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="accept_access_request">
-                    <input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
+                    <input type="hidden" name="access_request_id" value="{{ row.request.gar_id }}">
                     <button class="site-action site-action--primary" type="submit">{% trans "Accepter" %}</button>
                 </form>
                 <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Refuser cette demande ?' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="refuse_access_request">
-                    <input type="hidden" name="access_request_id" value="{{ access_request.gar_id }}">
+                    <input type="hidden" name="access_request_id" value="{{ row.request.gar_id }}">
                     <button class="site-action site-action--danger" type="submit">{% trans "Refuser" %}</button>
                 </form>
             {% empty %}

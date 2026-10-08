@@ -322,6 +322,9 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "members": [],
             "account_members": [],
             "account_member_rows": [],
+            "common_member_rows": [],
+            "responsable_member_rows": [],
+            "function_member_rows": [],
             "am_members": [],
             "functions": [],
             "titles": [],
@@ -330,7 +333,9 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "celebration_rules": [],
             "special_date_rules": [],
             "access_requests": [],
+            "access_request_rows": [],
             "common_join_requests": [],
+            "common_join_request_rows": [],
             "am_member_requests": [],
             "group_tags": [],
             "songs": [],
@@ -434,6 +439,9 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "access_context": build_access.return_value,
             "members": [],
             "account_member_rows": [],
+            "common_member_rows": [],
+            "responsable_member_rows": [],
+            "function_member_rows": [],
             "functions": [],
             "titles": [],
             "locations": [],
@@ -441,7 +449,9 @@ class AppGroupManagementViewTests(SimpleTestCase):
             "celebration_rules": [],
             "special_date_rules": [],
             "access_requests": [],
+            "access_request_rows": [],
             "common_join_requests": [],
+            "common_join_request_rows": [],
             "am_member_requests": [],
             "group_tags": [],
             "songs": [],
@@ -513,6 +523,11 @@ class AppGroupManagementViewTests(SimpleTestCase):
                     member_id="11111111-1111-1111-1111-111111111111"
                 ),
                 "group_member": None,
+                "display_name": "Alice Martin",
+                "has_am_access": True,
+                "is_responsable": False,
+                "has_responsable_impression": False,
+                "function_names": [],
             }
         ]
         build_context.return_value = context
@@ -521,7 +536,8 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Liste des membres")
-        self.assertContains(response, "11111111-1111-1111-1111-111111111111")
+        self.assertContains(response, "Alice Martin")
+        self.assertNotContains(response, "11111111-1111-1111-1111-111111111111")
         self.assertNotContains(response, "Modifier les personnes")
         self.assertNotContains(response, "Paramètres du calendrier")
         self.assertNotContains(response, "Paramètres du groupe")
@@ -665,6 +681,53 @@ class AppGroupManagementViewTests(SimpleTestCase):
                     response, reverse("group_detail", kwargs={"group_id": 7})
                 )
                 self.assertContains(response, "static/js/app_group.js")
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_members_page_summary_and_removal_actions(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_members", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        context = self.empty_group_context()
+        context["metrics"]["account_members"] = 1
+        context["metrics"]["requests"] = 0
+        context["account_member_rows"] = [
+            {
+                "membership": SimpleNamespace(
+                    member_id="11111111-1111-1111-1111-111111111111"
+                ),
+                "group_member": None,
+                "display_name": "Alice Martin",
+                "has_am_access": True,
+                "is_responsable": False,
+                "has_responsable_impression": False,
+                "function_names": [],
+            }
+        ]
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
+        build_context.return_value = context
+
+        response = group_views.group_members(request, 7)
+
+        self.assertContains(response, "1 membres avec compte.")
+        self.assertContains(response, "0 demandes en attente.")
+        self.assertContains(response, "❌ AM")
+        self.assertContains(response, "❌ Gr")
+        self.assertContains(response, 'class="group-person-row"')
+        self.assertContains(response, 'data-app-group-confirm="')
+        self.assertNotContains(response, "Créer une demande d’accès AM")
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.ensure_group_environment")
@@ -1130,6 +1193,39 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
 
         accept_access_request.assert_called_once_with(access_request)
         refuse_access_request.assert_called_once_with(access_request)
+
+    @patch("app_group.views.messages")
+    @patch("app_group.views.services.remove_common_group_member")
+    @patch("app_group.views.services.remove_member_am_access")
+    def test_dispatch_member_removals(
+        self, remove_am_access, remove_common_member, _messages
+    ):
+        remove_am_request = self.post_request(
+            {
+                "action": "remove_member_am_access",
+                "member_id": "22222222-2222-2222-2222-222222222222",
+            }
+        )
+        remove_common_request = self.post_request(
+            {
+                "action": "remove_common_group_member",
+                "member_id": "22222222-2222-2222-2222-222222222222",
+            }
+        )
+
+        group_views._dispatch_group_action(
+            remove_am_request, self.group, "remove_member_am_access"
+        )
+        group_views._dispatch_group_action(
+            remove_common_request, self.group, "remove_common_group_member"
+        )
+
+        remove_am_access.assert_called_once_with(
+            7, "22222222-2222-2222-2222-222222222222"
+        )
+        remove_common_member.assert_called_once_with(
+            7, "22222222-2222-2222-2222-222222222222"
+        )
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.refuse_common_join_request")
@@ -1694,6 +1790,87 @@ class AppGroupServiceTests(SimpleTestCase):
                 1,
                 "11111111-1111-1111-1111-111111111111",
                 enabled=True,
+            )
+
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_remove_member_am_access_disables_am_and_deletes_anchor(
+        self, common_group_user, atomic, group_member_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        membership = Mock(is_group_admin=False, am_access=True)
+        memberships = Mock()
+        memberships.filter.return_value.first.return_value = membership
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+        group_member_model.objects.filter.return_value.delete.return_value = (1, {})
+
+        group_services.remove_member_am_access(
+            1, "11111111-1111-1111-1111-111111111111"
+        )
+
+        self.assertFalse(membership.am_access)
+        membership.save.assert_called_once_with(update_fields=["am_access"])
+        group_member_model.objects.filter.assert_called_once_with(
+            group_id=1,
+            member_id="11111111-1111-1111-1111-111111111111",
+            member_kind=group_models.MEMBER_KIND_ACCOUNT,
+        )
+        group_member_model.objects.filter.return_value.delete.assert_called_once()
+
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_remove_common_group_member_deletes_membership_and_anchor(
+        self, common_group_user, atomic, group_member_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        membership = Mock(is_group_admin=False)
+        memberships = Mock()
+        memberships.filter.return_value.first.return_value = membership
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+        group_member_model.objects.filter.return_value.delete.return_value = (1, {})
+
+        group_services.remove_common_group_member(
+            1, "11111111-1111-1111-1111-111111111111"
+        )
+
+        group_member_model.objects.filter.return_value.delete.assert_called_once()
+        membership.delete.assert_called_once()
+
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_member_removals_protect_last_responsable(
+        self, common_group_user, atomic, _group_member_model
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        membership = Mock(is_group_admin=True, am_access=True)
+        memberships = Mock()
+        memberships.filter.side_effect = [
+            Mock(first=Mock(return_value=membership)),
+            Mock(count=Mock(return_value=1)),
+            Mock(first=Mock(return_value=membership)),
+            Mock(count=Mock(return_value=1)),
+        ]
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+
+        with self.assertRaisesMessage(ValidationError, "au moins un Responsable"):
+            group_services.remove_member_am_access(
+                1, "11111111-1111-1111-1111-111111111111"
+            )
+        with self.assertRaisesMessage(ValidationError, "au moins un Responsable"):
+            group_services.remove_common_group_member(
+                1, "11111111-1111-1111-1111-111111111111"
             )
 
     @patch("app_group.services.GroupMemberRole")

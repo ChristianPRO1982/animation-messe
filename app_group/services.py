@@ -185,6 +185,56 @@ def set_common_responsable(group_id: int, member_id: str, *, enabled: bool) -> N
             raise ValidationError(_("L'appartenance commune est introuvable."))
 
 
+def _ensure_not_last_responsable(memberships, membership) -> None:
+    if not membership.is_group_admin:
+        return
+
+    responsable_count = memberships.filter(is_group_admin=True).count()
+    if responsable_count <= 1:
+        raise ValidationError(_("Un groupe doit conserver au moins un Responsable."))
+
+
+def remove_member_am_access(group_id: int, member_id: str) -> None:
+    with transaction.atomic():
+        memberships = CommonGroupUser.objects.select_for_update().filter(
+            group_id=group_id
+        )
+        membership = memberships.filter(member_id=member_id).first()
+        if membership is None:
+            raise ValidationError(_("L'appartenance commune est introuvable."))
+
+        _ensure_not_last_responsable(memberships, membership)
+
+        if membership.am_access:
+            membership.am_access = False
+            membership.save(update_fields=["am_access"])
+
+        GroupMember.objects.filter(
+            group_id=group_id,
+            member_id=member_id,
+            member_kind=MEMBER_KIND_ACCOUNT,
+        ).delete()
+
+
+def remove_common_group_member(group_id: int, member_id: str) -> None:
+    with transaction.atomic():
+        memberships = CommonGroupUser.objects.select_for_update().filter(
+            group_id=group_id
+        )
+        membership = memberships.filter(member_id=member_id).first()
+        if membership is None:
+            raise ValidationError(_("L'appartenance commune est introuvable."))
+
+        _ensure_not_last_responsable(memberships, membership)
+
+        GroupMember.objects.filter(
+            group_id=group_id,
+            member_id=member_id,
+            member_kind=MEMBER_KIND_ACCOUNT,
+        ).delete()
+        membership.delete()
+
+
 def assign_group_function(
     group_member: GroupMember,
     function: GroupFunction,

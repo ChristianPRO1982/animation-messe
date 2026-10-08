@@ -5,19 +5,19 @@
     <section class="site-theme-selection" aria-label="{% trans 'Responsables communs' %}">
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Responsables communs" %}</h2></div></header>
-            {% for membership in common_memberships %}
+            {% for row in common_member_rows %}
                 <p>
-                    <code>{{ membership.member_id }}</code>
-                    {% if membership.is_group_admin %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
-                    {% if membership.am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
+                    {{ row.display_name }}
+                    {% if row.is_responsable %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
+                    {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
                 </p>
                 <form method="post" data-app-group-confirm="{% trans 'Modifier le rôle Responsable de ce membre ?' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="set_common_responsable">
-                    <input type="hidden" name="member_id" value="{{ membership.member_id }}">
-                    <input type="hidden" name="enabled" value="{{ membership.is_group_admin|yesno:',on' }}">
+                    <input type="hidden" name="member_id" value="{{ row.membership.member_id }}">
+                    <input type="hidden" name="enabled" value="{{ row.is_responsable|yesno:',on' }}">
                     <button class="site-action site-action--secondary" type="submit">
-                        {% if membership.is_group_admin %}{% trans "Retirer Responsable" %}{% else %}{% trans "Nommer Responsable" %}{% endif %}
+                        {% if row.is_responsable %}{% trans "Retirer Responsable" %}{% else %}{% trans "Nommer Responsable" %}{% endif %}
                     </button>
                 </form>
             {% empty %}
