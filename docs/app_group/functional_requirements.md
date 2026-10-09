@@ -386,6 +386,16 @@ version active du consentement. La version texte (`vN`) et, si elle existe, la
 référence au message publié du groupe sont conservées sur la demande puis copiées
 sur le Membre AM créé.
 
+L'invitation Membre AM déclenche un email transactionnel envoyé par la couche
+`app_notification`. Le Responsable ne voit jamais le jeton de consentement en
+clair dans l'interface : il saisit l'identité et l'adresse email, puis Django
+prépare l'email d'invitation. Le jeton brut n'est utilisé que pour construire le
+lien personnel envoyé au destinataire et n'est pas stocké dans la trace de
+notification.
+
+La page publique de validation du lien et le retrait autonome de l'avatar
+numérique restent des workflows dédiés à implémenter dans une étape suivante.
+
 ---
 
 # 5. Paramètres durables pour le planning
@@ -494,6 +504,8 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-AM-07** — Si un groupe n'a pas encore publié de message de consentement, les nouvelles invitations Membres AM utilisent le modèle commun site `v1`.
 
 **GROUP-AM-08** — Une demande Membre AM et le Membre AM créé conservent la version de consentement utilisée au moment de l'invitation ou de l'acceptation.
+
+**GROUP-AM-09** — La création d'une invitation Membre AM envoie un email via le service de notifications Django, sans afficher le jeton brut au Responsable.
 
 **GROUP-PLAN-01** — Les états, fonctions, lieux, règles régulières et dates particulières sont des paramètres durables du groupe.
 

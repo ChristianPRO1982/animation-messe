@@ -1223,6 +1223,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
 
     @patch("app_group.views.messages")
+    @patch("app_group.views.email_service.send_transactional_email")
     @patch("app_group.views.services.create_am_member_request")
     @patch("app_group.views.services.get_current_group_consent")
     @patch("app_group.views.secrets.token_urlsafe", return_value="token-public")
@@ -1241,9 +1242,14 @@ class AppGroupManagementViewTests(SimpleTestCase):
         _token,
         get_current_consent,
         create_request,
+        send_email,
         _messages,
     ):
         requested_by = build_group_member(group=self.group, member=build_member())
+        create_request.return_value = SimpleNamespace(
+            pk=42,
+            expires_at=timezone.now() + timezone.timedelta(days=14),
+        )
         consent_message = group_models.GroupConsentMessage(
             group=self.group,
             version=2,
@@ -1287,10 +1293,18 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertIs(
             create_request.call_args.kwargs["consent_message"], consent_message
         )
+        send_email.assert_called_once()
+        email_kwargs = send_email.call_args.kwargs
+        self.assertEqual(email_kwargs["notification_type"], "am_member_invitation")
+        self.assertEqual(email_kwargs["recipient"], "alice@example.test")
+        self.assertEqual(email_kwargs["group_id"], 7)
+        self.assertEqual(email_kwargs["object_type"], "am_member_request")
+        self.assertEqual(email_kwargs["object_id"], 42)
         self.assertIn(
-            "token-public",
-            request.session["app_group_invitation_notice"]["messageMarkdown"],
+            "/groups/am-invitations/token-public/",
+            email_kwargs["context"]["invitation_url"],
         )
+        self.assertNotIn("app_group_invitation_notice", request.session)
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.assign_group_function")

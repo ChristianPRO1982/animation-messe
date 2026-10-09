@@ -1,0 +1,10 @@
+Bonjour {{ first_name }} {{ last_name }},
+
+Un Responsable du groupe {{ group_name }} vous invite à rejoindre Animation Messe comme Membre AM.
+
+Vous pourrez valider cette invitation avec le lien suivant :
+{{ invitation_url }}
+
+Ce lien est personnel et expire le {{ expires_at|date:"d/m/Y à H:i" }}.
+
+Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.

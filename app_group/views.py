@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import secrets
 from types import SimpleNamespace
 
@@ -34,8 +35,10 @@ from app_group.models import (
 )
 from app_main.models import DirectoryUserRecord
 from app_member.models import Member
+from app_notification.services import email as email_service
 
 INVITATION_NOTICE_SESSION_KEY = "app_group_invitation_notice"
+logger = logging.getLogger(__name__)
 
 GROUP_PAGE_CONFIG = {
     "members": {
@@ -497,7 +500,7 @@ def _handle_group_post(
 
     try:
         services.require_group_manager(request.user, group)
-        _dispatch_group_action(request, group, action)
+        _dispatch_group_action(request, common_group, group, action)
     except PermissionDenied:
         return HttpResponseForbidden(_("Accès refusé."))
     except (ValidationError, ValueError) as exc:
@@ -506,7 +509,20 @@ def _handle_group_post(
     return redirect(redirect_name, group_id=group_id)
 
 
-def _dispatch_group_action(request, group: Group, action: str) -> None:
+def _dispatch_group_action(
+    request,
+    common_group_or_group: CommonGroup | Group,
+    group_or_action: Group | str,
+    action: str | None = None,
+) -> None:
+    if action is None:
+        group = common_group_or_group
+        action = str(group_or_action)
+        common_group = CommonGroup(group_id=group.gg_id, name=str(group.gg_id))
+    else:
+        common_group = common_group_or_group
+        group = group_or_action
+
     if action in {"assign_responsable_impression", "remove_responsable_impression"}:
         form = forms.GroupMemberActionForm(request.POST)
         _validate_action_form(form, action)
@@ -605,7 +621,7 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         requested_by = _current_group_member(group, request.user)
         token = secrets.token_urlsafe(24)
         current_consent = services.get_current_group_consent(group)
-        services.create_am_member_request(
+        am_request = services.create_am_member_request(
             group,
             requested_by,
             first_name=form.cleaned_data["first_name"],
@@ -615,18 +631,57 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
             consent_version=current_consent.version_label,
             consent_message=current_consent.message,
         )
-        request.session[INVITATION_NOTICE_SESSION_KEY] = {
-            "title": str(_("Invitation Membre AM")),
-            "messageMarkdown": str(
-                _(
-                    "Transmettre ce jeton à la personne invitée :\n\n`%(token)s`\n\n"
-                    "Il ne sera plus affiché après cette page."
-                )
+        invitation_url = request.build_absolute_uri(f"/groups/am-invitations/{token}/")
+        try:
+            email_notification = email_service.send_transactional_email(
+                notification_type="am_member_invitation",
+                recipient=form.cleaned_data["email"],
+                group_id=group.gg_id,
+                object_type="am_member_request",
+                object_id=am_request.pk,
+                idempotency_key=email_service.build_idempotency_key(
+                    "am_member_invitation",
+                    recipient=form.cleaned_data["email"],
+                    object_type="am_member_request",
+                    object_id=am_request.pk,
+                ),
+                context={
+                    "first_name": form.cleaned_data["first_name"],
+                    "last_name": form.cleaned_data["last_name"],
+                    "group_name": common_group.name,
+                    "invitation_url": invitation_url,
+                    "expires_at": am_request.expires_at,
+                },
             )
-            % {"token": token},
-        }
-        request.session.modified = True
-        messages.success(request, _("La demande de Membre AM est créée."))
+        except Exception:
+            logger.exception(
+                "am_member_invitation_email_unexpected_failure request_id=%s",
+                am_request.pk,
+            )
+            messages.warning(
+                request,
+                _(
+                    "La demande de Membre AM est créée, mais l'e-mail n'a pas pu "
+                    "être préparé."
+                ),
+            )
+        else:
+            if email_notification.status == "failed":
+                messages.warning(
+                    request,
+                    _(
+                        "La demande de Membre AM est créée, mais l'e-mail "
+                        "d'invitation a échoué."
+                    ),
+                )
+            else:
+                messages.success(
+                    request,
+                    _(
+                        "La demande de Membre AM est créée et l'e-mail "
+                        "d'invitation est envoyé."
+                    ),
+                )
         return
 
     if action == "save_consent_draft":

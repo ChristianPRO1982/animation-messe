@@ -113,6 +113,8 @@ class ProjectSettingsTests(SimpleTestCase):
     def test_core_apps_are_installed(self):
         self.assertIn("app_main", settings.INSTALLED_APPS)
         self.assertIn("app_member", settings.INSTALLED_APPS)
+        self.assertIn("app_notification", settings.INSTALLED_APPS)
+        self.assertIn("django.contrib.admin", settings.INSTALLED_APPS)
 
     def test_home_provision_defaults_target_animation_messe(self):
         self.assertEqual(settings.HOME_PROVISION_APP_ID, "am")
