@@ -253,6 +253,7 @@ def _build_groups_home_context(request):
                 "is_member": is_member,
                 "has_am_access": has_am_access,
                 "is_responsable": is_responsable,
+                "is_global_admin": is_global_admin,
                 "can_enter_group": has_am_access or is_responsable or is_global_admin,
                 "has_pending_request": has_pending_request,
                 "has_pending_am_access_request": has_pending_am_access_request,

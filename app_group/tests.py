@@ -193,6 +193,44 @@ class AppGroupPublicPageTests(SimpleTestCase):
         self.assertContains(response, reverse("group_detail", kwargs={"group_id": 7}))
 
     @patch("app_group.views._build_groups_home_context")
+    def test_groups_home_allows_global_admin_to_request_join_without_member_label(
+        self, home_context
+    ):
+        common_group = group_models.CommonGroup(
+            group_id=7,
+            name="Chorale",
+            status=group_models.CommonGroup.STATUS_PRIVATE,
+        )
+        home_context.return_value = {
+            "rows": [
+                {
+                    "common_group": common_group,
+                    "is_member": False,
+                    "has_am_access": False,
+                    "is_responsable": False,
+                    "is_global_admin": True,
+                    "can_enter_group": True,
+                    "has_pending_request": False,
+                    "has_pending_am_access_request": False,
+                    "can_request_join": True,
+                    "can_request_am_access": False,
+                }
+            ],
+            "selected_group": None,
+            "is_authenticated": True,
+        }
+        request = build_request(
+            self.factory, path="/groups/", user=build_user(admin=True)
+        )
+
+        response = group_views.groups_home(request)
+
+        self.assertContains(response, "Accès administrateur global.")
+        self.assertContains(response, "Accéder au groupe")
+        self.assertContains(response, "Demander le rattachement")
+        self.assertNotContains(response, "Vous êtes membre de ce groupe.")
+
+    @patch("app_group.views._build_groups_home_context")
     def test_groups_home_shows_am_access_request_for_member_without_am_access(
         self, home_context
     ):
