@@ -783,6 +783,8 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertContains(response, "Liste des membres")
         self.assertContains(response, "Liste des responsables")
         self.assertContains(response, "Liste des Membres AM")
+        self.assertContains(response, "site-nav-role-marker--responsable", count=2)
+        self.assertContains(response, "Rôle Responsable du groupe courant", count=2)
         self.assertContains(response, reverse("group_songs", kwargs={"group_id": 7}))
         self.assertContains(response, "🆕 2 demandes en cours.", count=2)
         self.assertContains(

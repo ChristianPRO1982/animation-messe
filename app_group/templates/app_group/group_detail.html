@@ -91,7 +91,6 @@
                 {% for row in account_member_rows %}
                     <p>
                         {{ row.display_name }}
-                        {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
                         {% if row.is_responsable %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
                         {% if row.has_responsable_impression %}<span class="site-role-banner">{% trans "Responsable impression" %}</span>{% endif %}
                     </p>
@@ -108,7 +107,6 @@
                     <p>
                         {{ row.display_name }}
                         <span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>
-                        {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
                     </p>
                 {% empty %}
                     <p>{% trans "Aucun Responsable commun trouvé." %}</p>
