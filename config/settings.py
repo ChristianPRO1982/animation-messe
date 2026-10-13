@@ -90,11 +90,15 @@ USER_TABLE = os.environ.get("USER_TABLE", "users")
 
 
 INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app_main",
     "app_member",
+    "app_email",
     "app_group",
     "app_planning",
     "app_celebration",
@@ -107,6 +111,7 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "app_main.middleware.SessionUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -122,6 +127,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "app_main.context_processors.wiki_help",
                 "app_member.context_processors.site_popup",
@@ -169,6 +175,36 @@ TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", "Europe/Paris")
 USE_I18N = True
 
 USE_TZ = True
+
+
+AM_EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "no-reply@example.invalid",
+)
+AM_EMAIL_FROM_NAME = os.environ.get("AM_EMAIL_FROM_NAME", "Animation Messe")
+AM_EMAIL_ENABLED = env_bool("AM_EMAIL_ENABLED", False)
+AM_EMAIL_SUBJECT_PREFIX = os.environ.get("AM_EMAIL_SUBJECT_PREFIX", "")
+AM_EMAIL_MAILER_OPTIONS = {}
+if AM_EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":
+    AM_EMAIL_MAILER_OPTIONS = {
+        "host": os.environ.get("EMAIL_HOST", "localhost"),
+        "port": int(os.environ.get("EMAIL_PORT", "25")),
+        "username": os.environ.get("EMAIL_HOST_USER", ""),
+        "password": env_value("EMAIL_HOST_PASSWORD", ""),
+        "use_tls": env_bool("EMAIL_USE_TLS", False),
+        "use_ssl": env_bool("EMAIL_USE_SSL", False),
+        "timeout": int(os.environ.get("EMAIL_TIMEOUT", "10")),
+    }
+MAILERS = {
+    "default": {
+        "BACKEND": AM_EMAIL_BACKEND,
+        "OPTIONS": AM_EMAIL_MAILER_OPTIONS,
+    }
+}
 
 
 STATIC_URL = "/static/"

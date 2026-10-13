@@ -6,5 +6,7 @@ class SessionUserMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.user = refresh_request_user(request.session)
+        path_info = getattr(request, "path_info", "")
+        if path_info != "/admin" and not path_info.startswith("/admin/"):
+            request.user = refresh_request_user(request.session)
         return self.get_response(request)

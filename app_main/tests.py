@@ -111,8 +111,25 @@ class ProjectSettingsTests(SimpleTestCase):
         self.assertIn("whitenoise.middleware.WhiteNoiseMiddleware", settings.MIDDLEWARE)
 
     def test_core_apps_are_installed(self):
+        self.assertIn("django.contrib.admin", settings.INSTALLED_APPS)
+        self.assertIn("django.contrib.auth", settings.INSTALLED_APPS)
+        self.assertIn("django.contrib.contenttypes", settings.INSTALLED_APPS)
         self.assertIn("app_main", settings.INSTALLED_APPS)
         self.assertIn("app_member", settings.INSTALLED_APPS)
+        self.assertIn("app_email", settings.INSTALLED_APPS)
+
+    def test_email_settings_have_safe_defaults(self):
+        self.assertEqual(
+            settings.AM_EMAIL_BACKEND,
+            "django.core.mail.backends.console.EmailBackend",
+        )
+        self.assertEqual(
+            settings.MAILERS["default"]["BACKEND"],
+            "django.core.mail.backends.console.EmailBackend",
+        )
+        self.assertEqual(settings.DEFAULT_FROM_EMAIL, "no-reply@example.invalid")
+        self.assertEqual(settings.AM_EMAIL_FROM_NAME, "Animation Messe")
+        self.assertFalse(settings.AM_EMAIL_ENABLED)
 
     def test_home_provision_defaults_target_animation_messe(self):
         self.assertEqual(settings.HOME_PROVISION_APP_ID, "am")
