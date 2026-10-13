@@ -182,7 +182,11 @@ def email_fingerprint(email: str) -> str:
     normalized_email = str(email or "").strip().lower()
     if not normalized_email:
         raise ValidationError(_("L'adresse email est obligatoire."))
-    return salted_hmac("app_group.am_member_email", normalized_email).hexdigest()
+    return salted_hmac(
+        "app_group.am_member_email",
+        normalized_email,
+        algorithm="sha1",
+    ).hexdigest()
 
 
 def _user_member_id(user) -> str:
