@@ -157,6 +157,7 @@ def _can_access_group_management(user) -> bool:
         return CommonGroupUser.objects.filter(
             member_id=member_id,
             is_group_admin=True,
+            am_access=True,
         ).exists()
     except (TypeError, ValueError, ValidationError):
         return False

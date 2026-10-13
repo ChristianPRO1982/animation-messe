@@ -179,7 +179,8 @@ chaque bloc étant ordonné alphabétiquement.
 Depuis `/groups/`, un utilisateur authentifié peut :
 
 - accéder à un groupe lorsqu'il possède `am_access = TRUE`, lorsqu'il est
-  Responsable du groupe ou lorsqu'il est Administrateur global ;
+  Responsable du groupe avec `am_access = TRUE` ou lorsqu'il est
+  Administrateur global ;
 - demander l'accès AM lorsqu'il est déjà membre du groupe commun, que
   `am_access = FALSE` et qu'aucune demande d'accès AM n'est en attente ;
 - demander son rattachement lorsqu'il n'est pas encore membre et qu'aucune

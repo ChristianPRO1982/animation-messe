@@ -811,6 +811,7 @@ class MainViewHelperTests(SimpleTestCase):
         common_group_user.objects.filter.assert_called_once_with(
             member_id="44444444-4444-4444-4444-444444444444",
             is_group_admin=True,
+            am_access=True,
         )
 
     def test_collect_heavy_images_returns_am_and_static_urls(self):

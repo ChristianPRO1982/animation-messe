@@ -196,12 +196,17 @@ def _user_member_id(user) -> str:
     return member_id
 
 
-def is_common_group_responsable(group_id: int, member_id: str) -> bool:
+def is_group_responsable_with_am_access(group_id: int, member_id: str) -> bool:
     return CommonGroupUser.objects.filter(
         group_id=group_id,
         member_id=member_id,
         is_group_admin=True,
+        am_access=True,
     ).exists()
+
+
+def is_common_group_responsable(group_id: int, member_id: str) -> bool:
+    return is_group_responsable_with_am_access(group_id, member_id)
 
 
 def can_manage_group(user, group: Group) -> bool:
@@ -209,7 +214,7 @@ def can_manage_group(user, group: Group) -> bool:
         return False
     if getattr(user, "is_admin", False):
         return True
-    return is_common_group_responsable(group.gg_id, _user_member_id(user))
+    return is_group_responsable_with_am_access(group.gg_id, _user_member_id(user))
 
 
 def require_group_manager(user, group: Group) -> None:
@@ -569,7 +574,7 @@ def create_am_member_request(
     _ensure_account_group_member(requested_by)
     if consent_message is not None:
         _ensure_same_group(group.gg_id, consent_message.group_id)
-    if not is_common_group_responsable(group.gg_id, requested_by.member_id):
+    if not is_group_responsable_with_am_access(group.gg_id, requested_by.member_id):
         raise PermissionDenied(_("Seul un Responsable peut inviter un Membre AM."))
 
     first_name = str(first_name or "").strip()

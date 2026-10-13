@@ -72,13 +72,22 @@ def build_user(*, authenticated=True, admin=False):
     )
 
 
-def build_access_context(*, can_enter=True, can_manage=True, has_am_access=True):
+def build_access_context(
+    *,
+    can_enter=True,
+    can_manage=True,
+    has_am_access=True,
+    is_common_responsable=None,
+    is_global_admin=False,
+):
+    if is_common_responsable is None:
+        is_common_responsable = can_manage and not is_global_admin
     return SimpleNamespace(
         membership=None,
         member_id="11111111-1111-1111-1111-111111111111",
         has_am_access=has_am_access,
-        is_common_responsable=can_manage,
-        is_global_admin=False,
+        is_common_responsable=is_common_responsable,
+        is_global_admin=is_global_admin,
         can_manage_group=can_manage,
         can_enter_group=can_enter,
     )
@@ -355,7 +364,7 @@ class AppGroupPublicPageTests(SimpleTestCase):
     @patch("app_group.views.CommonGroupUser")
     @patch("app_group.views.CommonGroup")
     @patch("app_group.views.Group")
-    def test_groups_home_context_allows_responsable_to_enter_without_am_access(
+    def test_groups_home_context_requires_am_access_for_responsable_status(
         self,
         group_model,
         common_group_model,
@@ -382,8 +391,9 @@ class AppGroupPublicPageTests(SimpleTestCase):
         context = group_views._build_groups_home_context(request)
 
         self.assertFalse(context["rows"][0]["has_am_access"])
-        self.assertTrue(context["rows"][0]["is_responsable"])
-        self.assertTrue(context["rows"][0]["can_enter_group"])
+        self.assertFalse(context["rows"][0]["is_responsable"])
+        self.assertFalse(context["rows"][0]["can_enter_group"])
+        self.assertTrue(context["rows"][0]["can_request_am_access"])
 
     @patch("app_group.views.AccessRequest")
     @patch("app_group.views.CommonGroupJoinRequest")
@@ -794,6 +804,39 @@ class AppGroupManagementViewTests(SimpleTestCase):
         self.assertContains(response, "static/js/app_group.js")
         self.assertNotContains(response, "Créer une demande d’accès AM")
         self.assertNotContains(response, "Ajouter au recueil")
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
+    def test_detail_nav_does_not_show_responsable_marker_for_admin_only(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path="/groups/7/",
+            user=build_user(admin=True),
+        )
+        access_context = build_access_context(
+            can_manage=True,
+            is_global_admin=True,
+            is_common_responsable=False,
+        )
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = access_context
+        context = self.empty_group_context()
+        context["access_context"] = access_context
+        build_context.return_value = context
+
+        response = group_views.group_detail(request, 7)
+
+        self.assertContains(response, "site-nav-role-marker--admin", count=2)
+        self.assertNotContains(response, "site-nav-role-marker--responsable")
 
     @patch("app_group.views._build_group_context")
     @patch("app_group.views._build_group_access_context")
@@ -2214,6 +2257,40 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
             group_views._manageable_common_groups(build_user()), [self.common_group]
         )
 
+    @patch("app_group.views.CommonGroupUser")
+    def test_group_access_context_requires_am_access_for_responsable_status(
+        self, common_group_user
+    ):
+        common_group_user.objects.filter.return_value.first.return_value = (
+            SimpleNamespace(is_group_admin=True, am_access=False)
+        )
+
+        access_context = group_views._build_group_access_context(
+            build_user(),
+            self.common_group,
+            self.group,
+        )
+
+        self.assertFalse(access_context.has_am_access)
+        self.assertFalse(access_context.is_common_responsable)
+        self.assertFalse(access_context.can_manage_group)
+        self.assertFalse(access_context.can_enter_group)
+
+        common_group_user.objects.filter.return_value.first.return_value = (
+            SimpleNamespace(is_group_admin=True, am_access=True)
+        )
+
+        access_context = group_views._build_group_access_context(
+            build_user(),
+            self.common_group,
+            self.group,
+        )
+
+        self.assertTrue(access_context.has_am_access)
+        self.assertTrue(access_context.is_common_responsable)
+        self.assertTrue(access_context.can_manage_group)
+        self.assertTrue(access_context.can_enter_group)
+
     @patch("app_group.views.CommonGroup")
     def test_get_common_group_and_small_helpers(self, common_group_model):
         common_group_model.objects.get.return_value = self.common_group
@@ -2517,7 +2594,7 @@ class AppGroupServiceTests(SimpleTestCase):
         draft.full_clean.assert_called_once()
         draft.save.assert_called_once()
 
-    @patch("app_group.services.is_common_group_responsable")
+    @patch("app_group.services.is_group_responsable_with_am_access")
     def test_group_management_permissions_accept_admin_or_responsable(
         self, is_responsable
     ):
@@ -2552,14 +2629,38 @@ class AppGroupServiceTests(SimpleTestCase):
         group_services.require_group_manager(build_user(), build_group())
 
     @patch("app_group.services.CommonGroupUser")
-    def test_common_responsable_lookup_uses_common_membership(self, common_group_user):
-        common_group_user.objects.filter.return_value.exists.return_value = True
+    def test_group_responsable_with_am_access_lookup_requires_full_membership(
+        self, common_group_user
+    ):
+        cases = (
+            ("pas membre du groupe", False, False),
+            ("membre sans acces AM", False, False),
+            ("membre AM non responsable", False, False),
+            ("membre AM responsable", True, True),
+        )
+        for label, exists, expected in cases:
+            common_group_user.objects.filter.return_value.exists.return_value = exists
+            with self.subTest(label=label):
+                self.assertIs(
+                    group_services.is_group_responsable_with_am_access(
+                        1,
+                        "11111111-1111-1111-1111-111111111111",
+                    ),
+                    expected,
+                )
 
-        self.assertTrue(
+        common_group_user.objects.filter.assert_called_with(
+            group_id=1,
+            member_id="11111111-1111-1111-1111-111111111111",
+            is_group_admin=True,
+            am_access=True,
+        )
+        self.assertIs(
             group_services.is_common_group_responsable(
                 1,
                 "11111111-1111-1111-1111-111111111111",
-            )
+            ),
+            True,
         )
 
     @patch("app_group.services.Group")
@@ -3202,7 +3303,7 @@ class AppGroupServiceTests(SimpleTestCase):
 
         access_request.delete.assert_called_once()
 
-    @patch("app_group.services.is_common_group_responsable", return_value=True)
+    @patch("app_group.services.is_group_responsable_with_am_access", return_value=True)
     @patch("app_group.services.AmMemberRequest")
     def test_am_member_request_hashes_token_and_requires_responsable(
         self,
@@ -3239,7 +3340,7 @@ class AppGroupServiceTests(SimpleTestCase):
         self.assertEqual(create_kwargs["email"], "alice@example.test")
         self.assertIs(create_kwargs["consent_message"], consent_message)
 
-    @patch("app_group.services.is_common_group_responsable", return_value=True)
+    @patch("app_group.services.is_group_responsable_with_am_access", return_value=True)
     @patch("app_group.services.AmMemberRequest")
     def test_am_member_request_validates_identity_email_and_consent_version(
         self,
@@ -3296,7 +3397,7 @@ class AppGroupServiceTests(SimpleTestCase):
 
         request_model.objects.create.assert_not_called()
 
-    @patch("app_group.services.is_common_group_responsable", return_value=True)
+    @patch("app_group.services.is_group_responsable_with_am_access", return_value=True)
     @patch("app_group.services.AmMemberRequest")
     def test_am_member_request_expiration_cannot_exceed_14_days(
         self,
@@ -3350,7 +3451,7 @@ class AppGroupServiceTests(SimpleTestCase):
             request,
         )
 
-    @patch("app_group.services.is_common_group_responsable", return_value=False)
+    @patch("app_group.services.is_group_responsable_with_am_access", return_value=False)
     def test_am_member_request_requires_requester_to_be_responsable(
         self, _is_responsable
     ):
@@ -3368,7 +3469,7 @@ class AppGroupServiceTests(SimpleTestCase):
                 consent_version="v1",
             )
 
-    @patch("app_group.services.is_common_group_responsable", return_value=True)
+    @patch("app_group.services.is_group_responsable_with_am_access", return_value=True)
     def test_am_member_request_requires_same_group_and_account_requester(
         self, _is_responsable
     ):

@@ -149,7 +149,8 @@ groupe :
 
 - Administrateur global AM ;
 - Responsable d'au moins un groupe commun via
-  `common.g_group_user.is_group_admin = TRUE`.
+  `common.g_group_user.is_group_admin = TRUE` et
+  `common.g_group_user.am_access = TRUE`.
 
 Ce lien n'ouvre aucun droit supplémentaire : la route cible reste protégée par
 les règles de `app_group`.

@@ -215,7 +215,7 @@ def _build_groups_home_context(request):
             responsable_group_ids = {
                 membership.group_id
                 for membership in memberships
-                if membership.is_group_admin
+                if membership.is_group_admin and membership.am_access
             }
             pending_group_ids = set(
                 CommonGroupJoinRequest.objects.filter(member_id=member_id).values_list(
@@ -834,7 +834,9 @@ def _build_group_access_context(user, common_group: CommonGroup, group: Group | 
         ).first()
 
     has_am_access = bool(membership and membership.am_access)
-    is_common_responsable = bool(membership and membership.is_group_admin)
+    is_common_responsable = bool(
+        membership and membership.is_group_admin and membership.am_access
+    )
     can_manage_group = is_global_admin or is_common_responsable
     can_enter_group = bool((group and has_am_access) or can_manage_group)
     return SimpleNamespace(
@@ -1201,6 +1203,7 @@ def _manageable_common_groups(user):
     group_ids = CommonGroupUser.objects.filter(
         member_id=member_id,
         is_group_admin=True,
+        am_access=True,
     ).values("group_id")
     return list(
         CommonGroup.objects.filter(group_id__in=group_ids).order_by("name", "group_id")
@@ -1215,6 +1218,7 @@ def _can_manage_common_group(user, group_id: int) -> bool:
         group_id=group_id,
         member_id=member_id,
         is_group_admin=True,
+        am_access=True,
     ).exists()
 
 
