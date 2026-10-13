@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 12:29+0200\n"
+"POT-Creation-Date: 2026-10-13 15:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,628 +18,944 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
 "1000000 == 0 ? 1 : 2;\n"
-#: app_group/forms.py:32
+
+#: app_group/forms.py:28
+msgid "Conservation des célébrations"
+msgstr ""
+
+#: app_group/forms.py:31
+msgid "Durée en mois, entre 1 et 24."
+msgstr ""
+
+#: app_group/forms.py:37
+msgid "Message de consentement"
+msgstr ""
+
+#: app_group/forms.py:40
+msgid ""
+"Markdown léger : gras, italique, ligne horizontale, titres h1 à h3 et liens "
+"URL."
+msgstr ""
+
+#: app_group/forms.py:64 app_group/templates/app_group/group_members.html:17
+#: app_group/views.py:1072 app_group/views.py:1160
 msgid "Membre"
 msgstr ""
 
-#: app_group/forms.py:34 app_group/forms.py:49
+#: app_group/forms.py:66
 msgid "Version du consentement"
 msgstr ""
 
-#: app_group/forms.py:45
+#: app_group/forms.py:70
+msgid ""
+"Identifiant du texte de consentement accepté, par exemple v1. À modifier "
+"quand ce texte évolue."
+msgstr ""
+
+#: app_group/forms.py:85
 msgid "Prénom"
 msgstr ""
 
-#: app_group/forms.py:46 app_group/forms.py:74 app_group/forms.py:119
+#: app_group/forms.py:86 app_group/forms.py:109 app_group/forms.py:154
 msgid "Nom"
 msgstr ""
 
-#: app_group/forms.py:47
+#: app_group/forms.py:87
 msgid "Adresse e-mail"
 msgstr ""
 
-#: app_group/forms.py:60
+#: app_group/forms.py:95
 msgid "Jeton de consentement"
 msgstr ""
 
-#: app_group/forms.py:62
+#: app_group/forms.py:97
 msgid "Secret personnel"
 msgstr ""
 
-#: app_group/forms.py:75 app_group/forms.py:93 app_group/forms.py:114
+#: app_group/forms.py:110 app_group/forms.py:128 app_group/forms.py:149
 msgid "Position"
 msgstr ""
 
-#: app_group/forms.py:76 app_group/forms.py:94
+#: app_group/forms.py:111 app_group/forms.py:129
 msgid "Actif"
 msgstr ""
 
-#: app_group/forms.py:81
+#: app_group/forms.py:116
 msgid "Édition automatique des célébrations"
 msgstr ""
 
-#: app_group/forms.py:92
+#: app_group/forms.py:127
 msgid "Libellé"
 msgstr ""
 
-#: app_group/forms.py:99
+#: app_group/forms.py:134
 msgid "Adresse"
 msgstr ""
 
-#: app_group/forms.py:106
+#: app_group/forms.py:141
 msgid "Couleur"
 msgstr ""
 
-#: app_group/forms.py:107 app_group/forms.py:121
+#: app_group/forms.py:142 app_group/forms.py:156
 msgid "Type"
 msgstr ""
 
-#: app_group/forms.py:111 app_group/forms.py:138
+#: app_group/forms.py:146 app_group/forms.py:173
 msgid "Jour"
 msgstr ""
 
-#: app_group/forms.py:112
+#: app_group/forms.py:147
 msgid "Heure"
 msgstr ""
 
-#: app_group/forms.py:113
+#: app_group/forms.py:148
 msgid "Lieu"
 msgstr ""
 
-#: app_group/forms.py:115 app_group/forms.py:147
+#: app_group/forms.py:150 app_group/forms.py:182
 msgid "Active"
 msgstr ""
 
-#: app_group/forms.py:123
+#: app_group/forms.py:158
 msgid "Date annuelle fixe"
 msgstr ""
 
-#: app_group/forms.py:124
+#: app_group/forms.py:159
 msgid "Date ponctuelle"
 msgstr ""
 
-#: app_group/forms.py:125
+#: app_group/forms.py:160
 msgid "Nième jour du mois"
 msgstr ""
 
-#: app_group/forms.py:129
+#: app_group/forms.py:164
 msgid "Collision"
 msgstr ""
 
-#: app_group/forms.py:131
+#: app_group/forms.py:166
 msgid "Ajouter"
 msgstr ""
 
-#: app_group/forms.py:132
+#: app_group/forms.py:167
 msgid "Remplacer"
 msgstr ""
 
-#: app_group/forms.py:136
+#: app_group/forms.py:171
 msgid "Mois"
 msgstr ""
 
-#: app_group/forms.py:139
+#: app_group/forms.py:174
 msgid "Date exacte"
 msgstr ""
 
-#: app_group/forms.py:141
+#: app_group/forms.py:176
 msgid "Jour de semaine"
 msgstr ""
 
-#: app_group/forms.py:146
+#: app_group/forms.py:181
 msgid "Occurrence"
 msgstr ""
 
-#: app_group/forms.py:151
+#: app_group/forms.py:186
 msgid "ID chant LSS"
 msgstr ""
 
-#: app_group/forms.py:153
+#: app_group/forms.py:188
 msgid "IDs blocs LSS"
 msgstr ""
 
-#: app_group/forms.py:155
+#: app_group/forms.py:190
 msgid "Séparer plusieurs IDs par des virgules ou des espaces."
 msgstr ""
 
-#: app_group/forms.py:167
+#: app_group/forms.py:202
 msgid "Les IDs de blocs doivent être entiers."
 msgstr ""
 
-#: app_group/forms.py:170
+#: app_group/forms.py:205
 msgid "Les IDs de blocs doivent être positifs."
 msgstr ""
 
-#: app_group/forms.py:177 app_group/templates/app_group/group_detail.html:283
+#: app_group/forms.py:212 app_group/templates/app_group/group_songs.html:23
 msgid "Tag"
 msgstr ""
 
-#: app_group/models.py:21
+#: app_group/models.py:23
 msgid "Ouvert"
 msgstr ""
 
-#: app_group/models.py:22
+#: app_group/models.py:24
 msgid "Prive"
 msgstr ""
 
-#: app_group/models.py:95
+#: app_group/models.py:99 app_group/models.py:155
+#: app_group/templates/app_group/group_consent.html:17
+msgid "Brouillon"
+msgstr ""
+
+#: app_group/models.py:100
+msgid "Publie"
+msgstr ""
+
+#: app_group/models.py:160
 msgid "Compte"
 msgstr ""
 
-#: app_group/models.py:96 app_group/templates/app_group/group_detail.html:183
+#: app_group/models.py:161
+#: app_group/templates/app_group/group_am_members.html:10
+#: app_group/views.py:1170
 msgid "Membre AM"
 msgstr ""
 
-#: app_group/models.py:316
+#: app_group/models.py:389
 msgid "Acces AM"
 msgstr ""
 
-#: app_group/models.py:360
+#: app_group/models.py:433
 msgid "En attente"
 msgstr ""
 
-#: app_group/models.py:361
+#: app_group/models.py:434
 msgid "Refusee"
 msgstr ""
 
-#: app_group/models.py:362
+#: app_group/models.py:435
 msgid "Expiree"
 msgstr ""
 
-#: app_group/models.py:406
+#: app_group/models.py:487
 msgid "Selection"
 msgstr ""
 
-#: app_group/models.py:407
+#: app_group/models.py:488
 msgid "Defaut"
 msgstr ""
 
-#: app_group/models.py:408
+#: app_group/models.py:489
 msgid "Personnalise"
 msgstr ""
 
-#: app_group/services.py:51
+#: app_group/services.py:127
+msgid "Seul le brouillon de consentement est modifiable."
+msgstr ""
+
+#: app_group/services.py:145
+msgid "Aucun brouillon de consentement à publier."
+msgstr ""
+
+#: app_group/services.py:173
 msgid "Le secret personnel est obligatoire."
 msgstr ""
 
-#: app_group/services.py:62
+#: app_group/services.py:184
 msgid "L'adresse email est obligatoire."
 msgstr ""
 
-#: app_group/services.py:69
+#: app_group/services.py:191
 msgid "Utilisateur sans identifiant membre."
 msgstr ""
 
-#: app_group/services.py:91
+#: app_group/services.py:213
 msgid "Accès refusé au groupe."
 msgstr ""
 
-#: app_group/services.py:100
+#: app_group/services.py:222
 msgid "Le groupe commun est introuvable."
 msgstr ""
 
-#: app_group/services.py:114 app_group/services.py:126
-#: app_group/services.py:127
+#: app_group/services.py:236 app_group/services.py:248
+#: app_group/services.py:249 app_group/templates/app_group/group_detail.html:96
+#: app_group/templates/app_group/group_members.html:19
+#: app_group/templates/app_group/group_members.html:31
+#: app_group/templates/app_group/group_members.html:39
 msgid "Responsable impression"
 msgstr ""
 
-#: app_group/services.py:139
+#: app_group/services.py:261
 msgid "Seul un membre avec compte peut recevoir ce droit."
 msgstr ""
 
-#: app_group/services.py:144
+#: app_group/services.py:266
 msgid "Les objets doivent appartenir au même groupe."
 msgstr ""
 
-#: app_group/services.py:179
+#: app_group/services.py:301 app_group/services.py:315
 msgid "Un groupe doit conserver au moins un Responsable."
 msgstr ""
 
-#: app_group/services.py:184 app_group/services.py:274
+#: app_group/services.py:306 app_group/services.py:325
+#: app_group/services.py:347 app_group/services.py:501
 msgid "L'appartenance commune est introuvable."
 msgstr ""
 
-#: app_group/services.py:247
+#: app_group/services.py:425
 msgid "Le membre n'appartient pas au groupe commun."
 msgstr ""
 
-#: app_group/services.py:249
+#: app_group/services.py:427
 msgid "Le membre possède déjà l'accès AM."
 msgstr ""
 
-#: app_group/services.py:306
+#: app_group/services.py:447
+msgid "Le groupe AM est introuvable."
+msgstr ""
+
+#: app_group/services.py:453
+msgid "Vous faites déjà partie de ce groupe."
+msgstr ""
+
+#: app_group/services.py:536
 msgid "Seul un Responsable peut inviter un Membre AM."
 msgstr ""
 
-#: app_group/services.py:313
+#: app_group/services.py:543
 msgid "Le nom et le prénom du Membre AM sont obligatoires."
 msgstr ""
 
-#: app_group/services.py:316
+#: app_group/services.py:546
 msgid "La version du consentement est obligatoire."
 msgstr ""
 
-#: app_group/services.py:322
+#: app_group/services.py:552
 msgid "La demande de Membre AM doit expirer sous 14 jours."
 msgstr ""
 
-#: app_group/services.py:405
+#: app_group/services.py:636
 msgid "La demande n'est plus en attente."
 msgstr ""
 
-#: app_group/services.py:408
+#: app_group/services.py:639
 msgid "La demande de Membre AM a expiré."
 msgstr ""
 
-#: app_group/services.py:410
+#: app_group/services.py:641
 msgid "Le jeton de consentement est invalide."
 msgstr ""
 
-#: app_group/services.py:511
+#: app_group/services.py:743
 msgid "Une date annuelle fixe requiert mois et jour."
 msgstr ""
 
-#: app_group/services.py:514
+#: app_group/services.py:746
 msgid "Une date ponctuelle requiert une date exacte."
 msgstr ""
 
-#: app_group/services.py:518
+#: app_group/services.py:750
 msgid "Une date récurrente requiert mois, jour de semaine et occurrence."
 msgstr ""
 
-#: app_group/services.py:521
+#: app_group/services.py:753
 msgid "Type de règle spéciale non pris en charge."
 msgstr ""
 
-#: app_group/services.py:569 app_group/services.py:573
+#: app_group/services.py:801 app_group/services.py:805
 msgid "La célébration liée doit appartenir à la même règle spéciale."
 msgstr ""
 
+#: app_group/templates/app_group/group_am_member_titles.html:5
+#: app_group/templates/app_group/group_am_member_titles.html:7
+#: app_group/templates/app_group/group_detail.html:139 app_group/views.py:81
+msgid "Titres Membre AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_member_titles.html:8
+msgid "Aucun titre configuré."
+msgstr ""
+
+#: app_group/templates/app_group/group_am_member_titles.html:13
+msgid "Enregistrer le titre"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:5
+#: app_group/templates/app_group/group_am_members.html:7
+#: app_group/templates/app_group/group_detail.html:137 app_group/views.py:64
+msgid "Membres AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:10
+msgid "Consentement enregistré"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:14
+#: app_group/templates/app_group/group_detail.html:99
+#: app_group/templates/app_group/group_detail.html:124
+#: app_group/templates/app_group/group_detail.html:138
+#: app_group/templates/app_group/group_functions.html:5
+#: app_group/templates/app_group/group_functions.html:7
+#: app_group/templates/app_group/group_functions.html:24 app_group/views.py:75
+msgid "Fonctions"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:18
+msgid "Aucun droit applicatif ne peut être attribué à un Membre AM."
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:20
+#: app_group/templates/app_group/group_detail.html:129
+msgid "Aucun Membre AM actif."
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:24
+msgid "Créer une demande Membre AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:26
+#, python-format
+msgid "Consentement utilisé : %(version)s."
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:27
+msgid "Gérer le message"
+msgstr ""
+
+#: app_group/templates/app_group/group_am_members.html:40
+msgid "Créer l’invitation"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_regular_rules.html:5
+#: app_group/templates/app_group/group_calendar_regular_rules.html:7
+#: app_group/templates/app_group/group_detail.html:149 app_group/views.py:99
+msgid "Règles régulières"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_regular_rules.html:8
+msgid "Aucune règle régulière."
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_regular_rules.html:13
+msgid "Créer la règle"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_special_dates.html:5
+#: app_group/templates/app_group/group_calendar_special_dates.html:7
+#: app_group/templates/app_group/group_detail.html:150 app_group/views.py:105
+msgid "Dates particulières"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_special_dates.html:8
+msgid "Aucune date particulière."
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_special_dates.html:13
+msgid "Créer la date"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_states.html:5
+#: app_group/templates/app_group/group_calendar_states.html:7
+#: app_group/templates/app_group/group_detail.html:148 app_group/views.py:93
+msgid "États planning"
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_states.html:8
+msgid "Aucun état configuré."
+msgstr ""
+
+#: app_group/templates/app_group/group_calendar_states.html:13
+msgid "Enregistrer l’état"
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:5
+msgid "Consentement Membre AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:7
+msgid "Version active"
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:9
+#, python-format
+msgid "Version utilisée pour les nouvelles invitations : %(version)s."
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:10
+msgid "Modèle commun du site."
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:29
+msgid "Enregistrer le brouillon"
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:34
+msgid "Publier ce brouillon comme nouvelle version de consentement ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_consent.html:37
+msgid "Publier la prochaine version"
+msgstr ""
+
 #: app_group/templates/app_group/group_detail.html:12
+#: app_group/templates/app_group/group_members.html:55
+#: app_group/templates/app_group/group_page_base.html:15
 msgid "Groupe"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:14
+#: app_group/templates/app_group/group_detail.html:15
+#: app_group/templates/app_group/group_page_base.html:18
 msgid "Tous les groupes"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:15
+#: app_group/templates/app_group/group_detail.html:16
+#: app_group/templates/app_group/group_page_base.html:19
+msgid "Gestion des chants"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:18
 #: app_group/templates/app_group/groups_manage.html:14
 msgid "Page publique"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:28
-msgid "Groupe commun ouvert."
-msgstr ""
-
 #: app_group/templates/app_group/group_detail.html:30
-msgid "Groupe commun privé."
+#: app_group/templates/app_group/group_detail.html:47
+#, python-format
+msgid "%(requests)s demandes en cours."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:36
+#: app_group/templates/app_group/group_detail.html:35
+#: app_group/templates/app_group/group_members.html:5
+#: app_group/templates/app_group/group_page_base.html:39
 #: app_group/templates/app_group/groups_manage.html:52
 msgid "Espace AM actif."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:37
+#: app_group/templates/app_group/group_detail.html:38
+#: app_group/templates/app_group/group_page_base.html:32
+msgid "Groupe commun public."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:40
+#: app_group/templates/app_group/group_page_base.html:34
+msgid "Groupe commun privé."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:43
+#: app_group/templates/app_group/group_members.html:6
 #, python-format
-msgid "%(members)s membres AM, %(requests)s demandes, %(songs)s chants."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:39
-msgid "Espace AM à activer pour utiliser les paramètres et les demandes."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:45
-msgid "Activation AM"
+msgid "%(members)s membres avec compte."
 msgstr ""
 
 #: app_group/templates/app_group/group_detail.html:49
-#: app_group/templates/app_group/group_detail.html:57
+msgid "Aucune demande en cours."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:53
+#, python-format
+msgid "%(am_members)s Membres AM."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:54
+#, python-format
+msgid "%(songs)s chants dans le recueil."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:58
+msgid "Vous êtes Responsable de ce groupe."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:60
+#: app_group/templates/app_group/groups_home.html:65
+#: app_group/templates/app_group/groups_home.html:68
+#: app_group/templates/app_group/groups_home.html:76
+msgid "Vous êtes membre de ce groupe."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:65
+msgid "Espace AM à activer pour utiliser les paramètres et les demandes."
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:71
+msgid "Activation AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:75
+#: app_group/templates/app_group/group_detail.html:83
 #: app_group/templates/app_group/groups_manage.html:65
 msgid "Activer l’espace AM"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:50
+#: app_group/templates/app_group/group_detail.html:76
 msgid ""
 "Le groupe commun existe déjà ; Animation Messe va seulement créer son "
 "extension AM."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:54
+#: app_group/templates/app_group/group_detail.html:80
 #: app_group/templates/app_group/groups_manage.html:61
 msgid "Activer l’espace AM pour ce groupe ?"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:62
-msgid "Tableau de bord groupe"
+#: app_group/templates/app_group/group_detail.html:88
+msgid "Personnes du groupe"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:64
-msgid "Synthèse"
+#: app_group/templates/app_group/group_detail.html:90
+msgid "Liste des membres"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:65
-#, python-format
-msgid "%(functions)s fonctions configurées."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:66
-msgid "Le rôle Responsable reste porté par le groupe commun."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:69
-msgid "Responsables communs"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:73
-msgid "Responsable"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:74
-#: app_group/templates/app_group/group_detail.html:172
+#: app_group/templates/app_group/group_detail.html:94
+#: app_group/templates/app_group/group_detail.html:111
+#: app_group/templates/app_group/group_responsables.html:13
 msgid "Accès AM"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:76
-msgid "Modifier le rôle Responsable de ce membre ?"
+#: app_group/templates/app_group/group_detail.html:95
+#: app_group/templates/app_group/group_detail.html:110
+#: app_group/templates/app_group/group_members.html:18
+#: app_group/templates/app_group/group_members.html:28
+#: app_group/templates/app_group/group_members.html:29
+#: app_group/templates/app_group/group_responsables.html:12
+msgid "Responsable"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:82
-msgid "Retirer Responsable"
+#: app_group/templates/app_group/group_detail.html:102
+#: app_group/templates/app_group/group_members.html:67
+msgid "Aucun membre avec compte actif."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:82
-msgid "Nommer Responsable"
+#: app_group/templates/app_group/group_detail.html:106
+msgid "Liste des responsables"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:86
-msgid "Aucune appartenance commune trouvée."
+#: app_group/templates/app_group/group_detail.html:114
+msgid "Aucun Responsable commun trouvé."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:91
-msgid "Membres du groupe"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:93
-msgid "Membres et Membres AM"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:113
-msgid "Attribuer Responsable impression"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:115
-msgid "Retirer le droit Responsable impression ?"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:119
-msgid "Retirer Responsable impression"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:122
-msgid "Aucun droit applicatif ne peut être attribué à un Membre AM."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:125
-#: app_group/templates/app_group/group_detail.html:208
-msgid "Fonctions"
+#: app_group/templates/app_group/group_detail.html:118
+msgid "Liste des Membres AM"
 msgstr ""
 
 #: app_group/templates/app_group/group_detail.html:134
-msgid "Retirer cette fonction ?"
+msgid "Modifier les personnes"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:135 app_group/views.py:43
+msgid "Membres"
+msgstr ""
+
+#: app_group/templates/app_group/group_detail.html:136 app_group/views.py:58
+msgid "Responsables"
 msgstr ""
 
 #: app_group/templates/app_group/group_detail.html:145
-msgid "Aucun membre AM actif pour l’instant."
+msgid "Actions de gestion"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:150
-msgid "Demandes"
+#: app_group/templates/app_group/group_detail.html:147
+msgid "Paramètres du calendrier"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:152
-msgid "Créer une demande d’accès AM"
+#: app_group/templates/app_group/group_detail.html:153
+msgid "Paramètres du groupe"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:157
-msgid "Créer la demande"
+#: app_group/templates/app_group/group_detail.html:154
+#: app_group/templates/app_group/group_settings.html:5
+#: app_group/templates/app_group/group_settings.html:7 app_group/views.py:111
+msgid "Paramètres généraux"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:161
-msgid "Créer une demande Membre AM"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:166
-msgid "Créer l’invitation"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:170
-msgid "Demandes en cours"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:175
-#: app_group/templates/app_group/group_detail.html:190
-msgid "Accepter"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:177
-msgid "Refuser cette demande ?"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:179
-#: app_group/templates/app_group/group_detail.html:194
-msgid "Refuser"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:188
-msgid "Jeton"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:189
-msgid "Secret"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:192
-msgid "Refuser cette demande Membre AM ?"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:196
-msgid "Expirer cette demande Membre AM ?"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:198
-msgid "Expirer"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:201
-msgid "Aucune demande en cours."
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:206
-msgid "Paramètres groupe"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:209
-msgid "inactive"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:213
-msgid "Enregistrer la fonction"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:217
-msgid "Titres Membre AM"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:222
-msgid "Enregistrer le titre"
-msgstr ""
-
-#: app_group/templates/app_group/group_detail.html:226
+#: app_group/templates/app_group/group_detail.html:155
+#: app_group/templates/app_group/group_locations.html:5
+#: app_group/templates/app_group/group_locations.html:7 app_group/views.py:117
 msgid "Lieux"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:231
+#: app_group/templates/app_group/group_detail.html:156 app_group/views.py:87
+msgid "Consentement"
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:8
+msgid "inactive"
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:8
+msgid "Aucune fonction configurée."
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:13
+msgid "Enregistrer la fonction"
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:17
+msgid "Affectations"
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:34
+msgid "Retirer cette fonction ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_functions.html:43
+msgid "Aucune personne active pour l’instant."
+msgstr ""
+
+#: app_group/templates/app_group/group_locations.html:8
+msgid "Aucun lieu configuré."
+msgstr ""
+
+#: app_group/templates/app_group/group_locations.html:13
 msgid "Enregistrer le lieu"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:235
-msgid "États planning"
+#: app_group/templates/app_group/group_members.html:7
+#, python-format
+msgid "%(requests)s demandes en attente."
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:240
-msgid "Enregistrer l’état"
+#: app_group/templates/app_group/group_members.html:11
+#: app_group/templates/app_group/group_members.html:13
+msgid "Membres avec compte"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:245
-msgid "Règles de célébration"
+#: app_group/templates/app_group/group_members.html:20
+#: app_group/templates/app_group/group_members.html:52
+msgid "Retirer de l’espace AM"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:247
-msgid "Règles régulières"
+#: app_group/templates/app_group/group_members.html:21
+#: app_group/templates/app_group/group_members.html:60
+msgid "Retirer du groupe"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:252
-msgid "Créer la règle"
+#: app_group/templates/app_group/group_members.html:29
+msgid "Non responsable"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:256
-msgid "Dates particulières"
+#: app_group/templates/app_group/group_members.html:33
+msgid "Retirer le droit Responsable impression ?"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:261
-msgid "Créer la date"
+#: app_group/templates/app_group/group_members.html:37
+msgid "Basculer Responsable impression"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:266
+#: app_group/templates/app_group/group_members.html:41
+msgid "Modifier"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:44
+msgid "Accès AM requis"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:47
+msgid "Espace AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:48
+msgid "Retirer ce membre de l’espace AM ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:56
+msgid "Retirer ce membre du groupe ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:71
+msgid "Demandes de rattachement"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:78
+#: app_group/templates/app_group/group_members.html:98
+msgid "Accepter"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:80
+msgid "Refuser cette demande de rattachement ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:84
+#: app_group/templates/app_group/group_members.html:104
+msgid "Refuser"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:87
+msgid "Aucune demande de rattachement."
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:91
+msgid "Demandes d’accès AM"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:100
+msgid "Refuser cette demande ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_members.html:107
+msgid "Aucune demande d’accès AM."
+msgstr ""
+
+#: app_group/templates/app_group/group_page_base.html:17
+msgid "Tableau de bord"
+msgstr ""
+
+#: app_group/templates/app_group/group_responsables.html:5
+#: app_group/templates/app_group/group_responsables.html:7
+msgid "Responsables communs"
+msgstr ""
+
+#: app_group/templates/app_group/group_responsables.html:15
+msgid "Modifier le rôle Responsable de ce membre ?"
+msgstr ""
+
+#: app_group/templates/app_group/group_responsables.html:21
+msgid "Retirer Responsable"
+msgstr ""
+
+#: app_group/templates/app_group/group_responsables.html:21
+msgid "Nommer Responsable"
+msgstr ""
+
+#: app_group/templates/app_group/group_responsables.html:26
+msgid "Aucune appartenance commune trouvée."
+msgstr ""
+
+#: app_group/templates/app_group/group_settings.html:12
+#: app_main/templates/main/site_params.html:68
+#: app_main/templates/main/site_params.html:116
+msgid "Enregistrer les paramètres"
+msgstr ""
+
+#: app_group/templates/app_group/group_songs.html:5 app_group/views.py:123
 msgid "Recueil"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:268
+#: app_group/templates/app_group/group_songs.html:7
 msgid "Ajouter un chant LSS"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:272
+#: app_group/templates/app_group/group_songs.html:12
 msgid "Ajouter au recueil"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:277
+#: app_group/templates/app_group/group_songs.html:17
 msgid "Chant LSS"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:278
+#: app_group/templates/app_group/group_songs.html:18
 msgid "Blocs"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:278
+#: app_group/templates/app_group/group_songs.html:18
 msgid "aucun"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:288
+#: app_group/templates/app_group/group_songs.html:28
 msgid "Associer le tag"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:301
+#: app_group/templates/app_group/group_songs.html:41
 msgid "retirer défaut"
 msgstr ""
 
-#: app_group/templates/app_group/group_detail.html:301
+#: app_group/templates/app_group/group_songs.html:41
 msgid "définir défaut"
 msgstr ""
 
+#: app_group/templates/app_group/group_songs.html:49
+msgid "Recueil vide"
+msgstr ""
+
+#: app_group/templates/app_group/group_songs.html:50
+msgid "Aucun chant n’est encore dans le recueil."
+msgstr ""
+
 #: app_group/templates/app_group/groups_home.html:5
-#: app_group/templates/app_group/groups_home.html:7
-#: app_group/templates/app_group/groups_home.html:11
-#: app_group/templates/app_group/groups_home.html:26
-#: app_group/templates/app_group/groups_home.html:42
-#: app_group/templates/app_group/groups_home.html:46
-#: app_group/templates/app_group/groups_home.html:61
-#: app_group/templates/app_group/groups_home.html:77
+#: app_group/templates/app_group/groups_home.html:6
+#: app_group/templates/app_group/groups_home.html:9
+#: app_group/templates/app_group/groups_home.html:12
+#: app_group/templates/app_group/groups_home.html:24
+#: app_group/templates/app_group/groups_home.html:27
+#: app_group/templates/app_group/groups_home.html:30
+#: app_group/templates/app_group/groups_home.html:38
 #: app_group/templates/app_group/groups_manage.html:6
 #: app_group/templates/app_group/groups_manage.html:16
 #: templates/includes/nav.html:11
 msgid "Groupes"
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:34
+#: app_group/templates/app_group/groups_home.html:16
 #: app_group/templates/app_group/groups_manage.html:12
 msgid "Accès"
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:38
+#: app_group/templates/app_group/groups_home.html:19
+msgid "Sélectionnez un groupe pour demander votre rattachement."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:21
+msgid "Se connecter pour demander un rattachement"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:35
+msgid "Les groupes affichés disposent déjà d’un espace Animation Messe actif."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:40
 msgid ""
-"Les demandes d’accès et la gestion des équipes seront disponibles dans cet "
-"espace."
+"Retrouvez les groupes Animation Messe actifs et demandez un rattachement ou "
+"un accès AM si nécessaire."
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:71
+#: app_group/templates/app_group/groups_home.html:43
 msgid ""
-"La page des groupes est publique. Les actions sensibles resteront protégées "
-"par les droits AM."
+"Les demandes sont transmises aux Responsables du groupe, qui les acceptent "
+"ou les refusent."
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:80
-msgid "Retrouvez ici les groupes Animation Messe et leurs accès."
+#: app_group/templates/app_group/groups_home.html:47
+msgid "Groupes Animation Messe actifs"
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:84
-msgid ""
-"La fondation technique des groupes est en place. Les écrans de gestion "
-"arriveront dans les prochaines étapes."
+#: app_group/templates/app_group/groups_home.html:55
+msgid "Groupe ouvert"
 msgstr ""
 
-#: app_group/templates/app_group/groups_home.html:88
-#: app_group/templates/app_group/groups_home.html:92
+#: app_group/templates/app_group/groups_home.html:57
+msgid "Groupe privé"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:66
+msgid "Accéder au groupe"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:69
+msgid "Envoyer une demande d’accès AM pour ce groupe ?"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:73
+msgid "Demander l’accès AM"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:78
+msgid "Demande d’accès AM en attente."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:81
+msgid "Demande de rattachement en attente."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:83
+msgid "Envoyer une demande de rattachement à ce groupe ?"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:87
+msgid "Demander le rattachement"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:90
+msgid "Connectez-vous pour demander un rattachement."
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:95
+msgid "Aucun groupe actif"
+msgstr ""
+
+#: app_group/templates/app_group/groups_home.html:96
+msgid "Aucun groupe Animation Messe actif n’est disponible pour l’instant."
+msgstr ""
+
 #: app_group/templates/app_group/groups_manage.html:5
 #: app_group/templates/app_group/groups_manage.html:23
+#: app_main/templates/main/connexion.html:215
+#: app_main/templates/main/homepage.html:105
 msgid "Gestion des groupes"
-msgstr ""
-
-#: app_group/templates/app_group/groups_home.html:93
-msgid ""
-"Cette page accueillera la liste des groupes, les demandes d’accès et les "
-"paramètres propres aux équipes."
 msgstr ""
 
 #: app_group/templates/app_group/groups_manage.html:25
@@ -680,60 +996,104 @@ msgstr ""
 msgid "Aucun groupe commun administrable n’est disponible pour votre compte."
 msgstr ""
 
-#: app_group/views.py:75 app_group/views.py:89 app_group/views.py:123
-#: app_main/views.py:602 app_main/views.py:638
-msgid "Accès refusé."
+#: app_group/views.py:149
+msgid "Demande de rattachement invalide."
 msgstr ""
 
-#: app_group/views.py:95 app_group/views.py:112
-msgid "L'espace AM du groupe est activé."
-msgstr ""
-
-#: app_group/views.py:98
-msgid "Action groupe invalide."
-msgstr ""
-
-#: app_group/views.py:116
-msgid "Activez l'espace AM avant cette action."
-msgstr ""
-
-#: app_group/views.py:138
-msgid "Le droit Responsable impression est attribué."
-msgstr ""
-
-#: app_group/views.py:142
-msgid "Le droit Responsable impression est retiré."
-msgstr ""
-
-#: app_group/views.py:153
-msgid "Le rôle Responsable a été mis à jour."
-msgstr ""
-
-#: app_group/views.py:163
-msgid "La fonction est attribuée."
+#: app_group/views.py:160
+msgid "Votre demande de rattachement est envoyée."
 msgstr ""
 
 #: app_group/views.py:166
+msgid "Demande d'accès AM invalide."
+msgstr ""
+
+#: app_group/views.py:173
+msgid "L'espace AM du groupe est introuvable."
+msgstr ""
+
+#: app_group/views.py:186
+msgid "Votre demande d'accès AM est envoyée."
+msgstr ""
+
+#: app_group/views.py:189
+msgid "Demande groupe invalide."
+msgstr ""
+
+#: app_group/views.py:317 app_group/views.py:390 app_group/views.py:420
+#: app_group/views.py:502 app_main/views.py:624 app_main/views.py:660
+msgid "Accès refusé."
+msgstr ""
+
+#: app_group/views.py:396 app_group/views.py:487
+msgid "L'espace AM du groupe est activé."
+msgstr ""
+
+#: app_group/views.py:399
+msgid "Action groupe invalide."
+msgstr ""
+
+#: app_group/views.py:424 app_group/views.py:491
+msgid "Activez l'espace AM avant cette action."
+msgstr ""
+
+#: app_group/views.py:495
+msgid "Action groupe invalide sur cette page."
+msgstr ""
+
+#: app_group/views.py:517
+msgid "Le droit Responsable impression est attribué."
+msgstr ""
+
+#: app_group/views.py:521
+msgid "Le droit Responsable impression est retiré."
+msgstr ""
+
+#: app_group/views.py:532
+msgid "Le rôle Responsable a été mis à jour."
+msgstr ""
+
+#: app_group/views.py:541
+msgid "L'accès AM du membre est retiré."
+msgstr ""
+
+#: app_group/views.py:544
+msgid "Le membre est retiré du groupe."
+msgstr ""
+
+#: app_group/views.py:554
+msgid "La fonction est attribuée."
+msgstr ""
+
+#: app_group/views.py:557
 msgid "La fonction est retirée."
 msgstr ""
 
-#: app_group/views.py:179
+#: app_group/views.py:570
 msgid "La demande d'accès AM est créée."
 msgstr ""
 
-#: app_group/views.py:190
+#: app_group/views.py:581
 msgid "La demande d'accès AM est acceptée."
 msgstr ""
 
-#: app_group/views.py:193
+#: app_group/views.py:584
 msgid "La demande d'accès AM est refusée."
 msgstr ""
 
-#: app_group/views.py:211
+#: app_group/views.py:596
+msgid "La demande de rattachement est acceptée."
+msgstr ""
+
+#: app_group/views.py:599
+msgid "La demande de rattachement est refusée."
+msgstr ""
+
+#: app_group/views.py:619
 msgid "Invitation Membre AM"
 msgstr ""
 
-#: app_group/views.py:214
+#: app_group/views.py:622
 #, python-format
 msgid ""
 "Transmettre ce jeton à la personne invitée :\n"
@@ -743,63 +1103,76 @@ msgid ""
 "Il ne sera plus affiché après cette page."
 msgstr ""
 
-#: app_group/views.py:221
+#: app_group/views.py:629
 msgid "La demande de Membre AM est créée."
 msgstr ""
 
-#: app_group/views.py:232
+#: app_group/views.py:638
+msgid "Le brouillon de consentement est enregistré."
+msgstr ""
+
+#: app_group/views.py:647
+#, python-format
+msgid "Le consentement %(version)s est publié."
+msgstr ""
+
+#: app_group/views.py:660
 msgid "La demande de Membre AM est refusée."
 msgstr ""
 
-#: app_group/views.py:235
+#: app_group/views.py:663
 msgid "La demande de Membre AM est expirée."
 msgstr ""
 
-#: app_group/views.py:249
+#: app_group/views.py:677
 msgid "Le Membre AM est créé."
 msgstr ""
 
-#: app_group/views.py:264
+#: app_group/views.py:692
 msgid "La fonction est enregistrée."
 msgstr ""
 
-#: app_group/views.py:278
+#: app_group/views.py:702
+msgid "Les paramètres généraux sont enregistrés."
+msgstr ""
+
+#: app_group/views.py:716
 msgid "Le titre Membre AM est enregistré."
 msgstr ""
 
-#: app_group/views.py:292
+#: app_group/views.py:730
 msgid "Le lieu est enregistré."
 msgstr ""
 
-#: app_group/views.py:306
+#: app_group/views.py:744
 msgid "L'état planning est enregistré."
 msgstr ""
 
-#: app_group/views.py:320
+#: app_group/views.py:758
 msgid "La règle régulière est créée."
 msgstr ""
 
-#: app_group/views.py:338
+#: app_group/views.py:776
 msgid "La date particulière est créée."
 msgstr ""
 
-#: app_group/views.py:349
+#: app_group/views.py:787
 msgid "Le chant est ajouté au recueil."
 msgstr ""
 
-#: app_group/views.py:361
+#: app_group/views.py:799
 msgid "Le tag est associé au chant."
 msgstr ""
 
-#: app_group/views.py:380
+#: app_group/views.py:818
 msgid "La sélection du bloc est enregistrée."
 msgstr ""
 
-#: app_group/views.py:383
+#: app_group/views.py:821
 msgid "Action groupe inconnue."
 msgstr ""
 
-#: app_group/views.py:504
+#: app_group/views.py:1226
 msgid "Action invalide."
 msgstr ""
 
@@ -935,7 +1308,7 @@ msgstr ""
 #: app_main/templates/main/connexion.html:5
 #: app_main/templates/main/connexion.html:81
 #: app_main/templates/main/connexion.html:190
-#: app_main/templates/main/connexion.html:413
+#: app_main/templates/main/connexion.html:414
 #: app_main/templates/main/homepage.html:55
 #: app_main/templates/main/homepage.html:56
 #: app_main/templates/main/homepage.html:88
@@ -1030,7 +1403,7 @@ msgid ""
 msgstr ""
 
 #: app_main/templates/main/connexion.html:170
-#: app_main/templates/main/connexion.html:403
+#: app_main/templates/main/connexion.html:404
 msgid "Informations du profil"
 msgstr ""
 
@@ -1039,19 +1412,19 @@ msgid "Données personnelles"
 msgstr ""
 
 #: app_main/templates/main/connexion.html:177
-#: app_main/templates/main/connexion.html:405
+#: app_main/templates/main/connexion.html:406
 msgid ""
 "Les données personnelles demandées servent uniquement à la connexion et à la "
 "gestion des groupes."
 msgstr ""
 
 #: app_main/templates/main/connexion.html:178
-#: app_main/templates/main/connexion.html:406
+#: app_main/templates/main/connexion.html:407
 msgid "Elles ne sont jamais affichées au grand public."
 msgstr ""
 
 #: app_main/templates/main/connexion.html:179
-#: app_main/templates/main/connexion.html:407
+#: app_main/templates/main/connexion.html:408
 msgid ""
 "L'adresse e-mail est utilisée seulement pour la gestion du compte, par "
 "exemple pour la récupération du mot de passe, l'information en cas "
@@ -1092,106 +1465,106 @@ msgstr ""
 msgid "Paramètres du site"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:220
+#: app_main/templates/main/connexion.html:221
 msgid "Messages administrateur"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:224 app_member/forms.py:43
+#: app_main/templates/main/connexion.html:225 app_member/forms.py:43
 msgid "Message global administrateur"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:225
+#: app_main/templates/main/connexion.html:226
 msgid "Ce message est public sur toutes les pages du site."
 msgstr ""
 
-#: app_main/templates/main/connexion.html:229
+#: app_main/templates/main/connexion.html:230
 msgid ""
 "Les paramètres du site ne sont pas encore disponibles pour cette langue. "
 "L'édition du message administrateur est temporairement indisponible."
 msgstr ""
 
-#: app_main/templates/main/connexion.html:245
+#: app_main/templates/main/connexion.html:246
 msgid "Enregistrer l'administration"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:251
+#: app_main/templates/main/connexion.html:252
 msgid "Administration du site"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:255
+#: app_main/templates/main/connexion.html:256
 msgid "Membres du site"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:256
+#: app_main/templates/main/connexion.html:257
 msgid ""
 "La recherche lit uniquement `users.users` et la gestion des rôles reste "
 "locale à Animation Messe."
 msgstr ""
 
-#: app_main/templates/main/connexion.html:268
+#: app_main/templates/main/connexion.html:269
 msgid "Rechercher"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:272
+#: app_main/templates/main/connexion.html:273
 #, python-format
 msgid "Résultats pour « %(search)s »"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:281
+#: app_main/templates/main/connexion.html:282
 msgid "Rôle actuel : administrateur"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:283
+#: app_main/templates/main/connexion.html:284
 msgid "Rôle actuel : membre"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:288
+#: app_main/templates/main/connexion.html:289
 msgid "Compte actif dans users.users"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:290
+#: app_main/templates/main/connexion.html:291
 msgid "Compte désactivé dans users.users"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:303
+#: app_main/templates/main/connexion.html:304
 msgid "Retirer administrateur"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:305
+#: app_main/templates/main/connexion.html:306
 msgid "Attribuer administrateur"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:312
+#: app_main/templates/main/connexion.html:313
 msgid "Aucun membre ne correspond à cette recherche."
 msgstr ""
 
-#: app_main/templates/main/connexion.html:323
+#: app_main/templates/main/connexion.html:324
 msgid "Paramètres du profil"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:328
-#: app_main/templates/main/connexion.html:338
-#: app_main/templates/main/connexion.html:353
+#: app_main/templates/main/connexion.html:329
+#: app_main/templates/main/connexion.html:339
+#: app_main/templates/main/connexion.html:354
 msgid "Langue utilisée"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:331
+#: app_main/templates/main/connexion.html:332
 #: app_main/templates/main/language.html:98
 #: app_main/templates/main/language.html:127
 #: app_main/templates/main/site_params.html:49
 msgid "English"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:333
+#: app_main/templates/main/connexion.html:334
 #: app_main/templates/main/language.html:98
 #: app_main/templates/main/language.html:106
 #: app_main/templates/main/site_params.html:48 templates/includes/nav.html:139
 msgid "Français"
 msgstr ""
 
-#: app_main/templates/main/connexion.html:369
-#: app_main/templates/main/connexion.html:374
-#: app_main/templates/main/connexion.html:389
+#: app_main/templates/main/connexion.html:370
+#: app_main/templates/main/connexion.html:375
+#: app_main/templates/main/connexion.html:390
 msgid "Thème choisi"
 msgstr ""
 
@@ -1265,7 +1638,7 @@ msgstr ""
 msgid "Dernière version publiée"
 msgstr ""
 
-#: app_main/templates/main/homepage.html:107
+#: app_main/templates/main/homepage.html:110
 msgid "Présentation de Animation Messe"
 msgstr ""
 
@@ -1289,7 +1662,7 @@ msgstr ""
 msgid "Retour à la connexion"
 msgstr ""
 
-#: app_main/templates/main/keycloak_diagnostic.html:33 templates/base.html:178
+#: app_main/templates/main/keycloak_diagnostic.html:33 templates/base.html:179
 msgid "Diagnostic expert Keycloak"
 msgstr ""
 
@@ -1920,11 +2293,6 @@ msgstr ""
 msgid "Accueil"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:68
-#: app_main/templates/main/site_params.html:116
-msgid "Enregistrer les paramètres"
-msgstr ""
-
 #: app_main/templates/main/site_params.html:72
 msgid "Délais des messages popup"
 msgstr ""
@@ -2002,175 +2370,175 @@ msgstr ""
 msgid "Activer ce thème"
 msgstr ""
 
-#: app_main/views.py:65
+#: app_main/views.py:67
 msgid "Normal"
 msgstr ""
 
-#: app_main/views.py:66
+#: app_main/views.py:68
 msgid "Palette chaude et classique pour l'habillage principal."
 msgstr ""
 
-#: app_main/views.py:70
+#: app_main/views.py:72
 msgid "Scout"
 msgstr ""
 
-#: app_main/views.py:72
+#: app_main/views.py:74
 msgid "Palette plus fraîche, plus nette, avec une ambiance vert-bleu."
 msgstr ""
 
-#: app_main/views.py:77
+#: app_main/views.py:79
 msgid "Taizé"
 msgstr ""
 
-#: app_main/views.py:79
+#: app_main/views.py:81
 msgid ""
 "Palette rouge et ocre, inspirée du parchemin et de la lumière des bougies."
 msgstr ""
 
-#: app_main/views.py:84
+#: app_main/views.py:86
 msgid "Me†al"
 msgstr ""
 
-#: app_main/views.py:85
+#: app_main/views.py:87
 msgid "Palette métal avec des néons de couleurs"
 msgstr ""
 
-#: app_main/views.py:285
+#: app_main/views.py:307
 #, python-format
 msgid "Compte de %(username)s"
 msgstr ""
 
-#: app_main/views.py:297
+#: app_main/views.py:319
 msgid "La connexion interactive n'est pas configurée pour cet environnement."
 msgstr ""
 
-#: app_main/views.py:360
+#: app_main/views.py:382
 msgid "Unsupported authentication mode."
 msgstr ""
 
-#: app_main/views.py:397
+#: app_main/views.py:419
 msgid ""
 "Votre compte Animation Messe doit être synchronisé depuis cARThographie."
 msgstr ""
 
-#: app_main/views.py:429
+#: app_main/views.py:451
 #, python-format
 msgid "Connecté en tant que %(username)s."
 msgstr ""
 
-#: app_main/views.py:449
+#: app_main/views.py:471
 msgid "Secret client Keycloak invalide ou non monté dans le conteneur AM."
 msgstr ""
 
-#: app_main/views.py:450
+#: app_main/views.py:472
 msgid "Client ID différent entre AM et Keycloak."
 msgstr ""
 
-#: app_main/views.py:451
+#: app_main/views.py:473
 msgid "Client Keycloak non configuré comme client confidentiel."
 msgstr ""
 
-#: app_main/views.py:455
+#: app_main/views.py:477
 msgid "URL de retour Keycloak différente de celle déclarée dans le client."
 msgstr ""
 
-#: app_main/views.py:456
+#: app_main/views.py:478
 msgid "Code OAuth déjà consommé ou expiré."
 msgstr ""
 
-#: app_main/views.py:457
+#: app_main/views.py:479
 msgid "Décalage d'horloge entre les services."
 msgstr ""
 
-#: app_main/views.py:461
+#: app_main/views.py:483
 msgid "Jeton d'accès refusé par l'endpoint userinfo."
 msgstr ""
 
-#: app_main/views.py:462
+#: app_main/views.py:484
 msgid "Realm ou endpoint userinfo incohérent avec le jeton reçu."
 msgstr ""
 
-#: app_main/views.py:466
+#: app_main/views.py:488
 msgid "Consultez les logs AM autour de keycloak_http_error."
 msgstr ""
 
-#: app_main/views.py:467
+#: app_main/views.py:489
 msgid "Vérifiez la configuration Keycloak non sensible affichée ci-dessous."
 msgstr ""
 
-#: app_main/views.py:477
+#: app_main/views.py:499
 msgid ""
 "Vérifier que KEYCLOAK_CLIENT_SECRET_FILE pointe vers un fichier monté dans "
 "le conteneur AM."
 msgstr ""
 
-#: app_main/views.py:479
+#: app_main/views.py:501
 msgid "Vérifier KEYCLOAK_CLIENT_ID et KEYCLOAK_REDIRECT_URI dans .env.prod."
 msgstr ""
 
-#: app_main/views.py:480
+#: app_main/views.py:502
 msgid "Chercher keycloak_http_error dans les logs AM."
 msgstr ""
 
-#: app_main/views.py:481
+#: app_main/views.py:503
 msgid ""
 "Vérifier le chemin du secret Home si le flux de provisioning est atteint."
 msgstr ""
 
-#: app_main/views.py:504
+#: app_main/views.py:526
 msgid "Aucune synchronisation de compte n'est en attente."
 msgstr ""
 
-#: app_main/views.py:523
+#: app_main/views.py:545
 msgid "Aucune finalisation de synchronisation n'est en attente."
 msgstr ""
 
-#: app_main/views.py:560
+#: app_main/views.py:582
 #, python-format
 msgid "Connecté en tant que %(username)s après synchronisation du compte."
 msgstr ""
 
-#: app_main/views.py:578
+#: app_main/views.py:600
 msgid "Vous êtes déconnecté."
 msgstr ""
 
-#: app_main/views.py:607
+#: app_main/views.py:629
 msgid "Les paramètres du site sont introuvables pour cette langue."
 msgstr ""
 
-#: app_main/views.py:617
+#: app_main/views.py:639
 msgid "Les réglages administrateur ont été enregistrés."
 msgstr ""
 
-#: app_main/views.py:648
+#: app_main/views.py:670
 msgid "administrateur"
 msgstr ""
 
-#: app_main/views.py:652
+#: app_main/views.py:674
 #, python-format
 msgid "Le rôle %(role)s a été attribué."
 msgstr ""
 
-#: app_main/views.py:657
+#: app_main/views.py:679
 #, python-format
 msgid "Le rôle %(role)s a été retiré."
 msgstr ""
 
-#: app_main/views.py:664
+#: app_main/views.py:686
 msgid "La demande de mise à jour des rôles est invalide."
 msgstr ""
 
-#: app_main/views.py:678
+#: app_main/views.py:700
 msgid "Action de compte inconnue."
 msgstr ""
 
-#: app_main/views.py:765
+#: app_main/views.py:787
 #, python-format
 msgid ""
 "Enregistrement impossible: informations manquantes ou invalides (%(fields)s)."
 msgstr ""
 
-#: app_main/views.py:774
+#: app_main/views.py:796
 msgid "Enregistrement impossible: informations manquantes ou invalides."
 msgstr ""
 
@@ -2392,23 +2760,23 @@ msgstr ""
 msgid "Confirmation"
 msgstr ""
 
-#: templates/base.html:169
+#: templates/base.html:170
 msgid "Messages"
 msgstr ""
 
-#: templates/base.html:176
+#: templates/base.html:177
 msgid "Diagnostic"
 msgstr ""
 
-#: templates/base.html:187
+#: templates/base.html:188
 msgid "Section"
 msgstr ""
 
-#: templates/base.html:195
+#: templates/base.html:196
 msgid "Outils"
 msgstr ""
 
-#: templates/base.html:206
+#: templates/base.html:207
 msgid "Structure de la page"
 msgstr ""
 
