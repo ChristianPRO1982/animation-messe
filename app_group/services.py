@@ -290,20 +290,53 @@ def set_common_responsable(group_id: int, member_id: str, *, enabled: bool) -> N
         memberships = CommonGroupUser.objects.select_for_update().filter(
             group_id=group_id
         )
+        membership = memberships.filter(member_id=member_id).first()
+        if membership is None:
+            raise ValidationError(_("L'appartenance commune est introuvable."))
+
+        if enabled and not membership.am_access:
+            raise ValidationError(_("Un Responsable doit d'abord posséder l'accès AM."))
+
         if not enabled:
             responsable_count = memberships.filter(is_group_admin=True).count()
-            is_target_responsable = memberships.filter(
-                member_id=member_id,
-                is_group_admin=True,
-            ).exists()
-            if is_target_responsable and responsable_count <= 1:
+            if membership.is_group_admin and responsable_count <= 1:
                 raise ValidationError(
                     _("Un groupe doit conserver au moins un Responsable.")
                 )
 
-        updated = memberships.filter(member_id=member_id).update(is_group_admin=enabled)
-        if not updated:
-            raise ValidationError(_("L'appartenance commune est introuvable."))
+        if membership.is_group_admin != enabled:
+            membership.is_group_admin = enabled
+            membership.save(update_fields=["is_group_admin"])
+
+
+def repair_group_access_consistency(group: Group) -> None:
+    with transaction.atomic():
+        memberships = CommonGroupUser.objects.select_for_update().filter(
+            group_id=group.gg_id
+        )
+        invalid_responsables = memberships.filter(
+            is_group_admin=True,
+            am_access=False,
+        )
+        invalid_responsables.update(am_access=True)
+
+        member_ids = list(
+            memberships.filter(am_access=True).values_list("member_id", flat=True)
+        )
+        for member_id in member_ids:
+            member, _created = Member.objects.get_or_create(mm_id=member_id)
+            GroupMember.objects.get_or_create(
+                group=group,
+                member=member,
+                member_kind=MEMBER_KIND_ACCOUNT,
+            )
+
+        if member_ids:
+            AccessRequest.objects.filter(
+                group=group,
+                member_id__in=member_ids,
+                request_type=REQUEST_TYPE_AM_ACCESS,
+            ).delete()
 
 
 def _ensure_not_last_responsable(memberships, membership) -> None:

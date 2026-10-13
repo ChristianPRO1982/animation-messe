@@ -1024,6 +1024,96 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
+    def test_responsables_page_requires_am_access_before_nomination(
+        self,
+        get_common_group,
+        group_model,
+        build_access,
+        build_context,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_responsables", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        context = self.empty_group_context()
+        context["common_member_rows"] = [
+            {
+                "membership": SimpleNamespace(
+                    member_id="11111111-1111-1111-1111-111111111111"
+                ),
+                "display_name": "Alice Martin",
+                "is_responsable": False,
+                "has_am_access": False,
+            }
+        ]
+        get_common_group.return_value = self.common_group
+        group_model.objects.filter.return_value.first.return_value = self.group
+        build_access.return_value = build_access_context()
+        build_context.return_value = context
+
+        response = group_views.group_responsables(request, 7)
+
+        self.assertContains(response, "Accès AM requis")
+        self.assertNotContains(response, "Nommer Responsable")
+
+    @patch("app_group.views.services.repair_group_access_consistency")
+    @patch("app_group.views.CommonGroupTag")
+    @patch("app_group.views.CommonGroupJoinRequest")
+    @patch("app_group.views.CommonGroupUser")
+    def test_group_context_repairs_consistency_for_managers(
+        self,
+        common_group_user,
+        common_join_request,
+        common_group_tag,
+        repair_consistency,
+    ):
+        request = build_request(
+            self.factory,
+            path=reverse("group_detail", kwargs={"group_id": 7}),
+            user=self.user,
+        )
+        manager = Mock()
+        manager.all.return_value = []
+        manager.count.return_value = 0
+        manager.select_related.return_value.prefetch_related.return_value.order_by.return_value = []
+        manager.prefetch_related.return_value.order_by.return_value = []
+        manager.prefetch_related.return_value.all.return_value = []
+        group = SimpleNamespace(
+            gg_id=7,
+            celebration_retention_months=24,
+            members=manager,
+            access_requests=manager,
+            functions=manager,
+            am_member_titles=manager,
+            locations=manager,
+            planning_states=manager,
+            celebration_rules=manager,
+            special_date_rules=manager,
+            am_member_requests=Mock(
+                all=Mock(return_value=[]),
+                filter=Mock(return_value=Mock(count=Mock(return_value=0))),
+            ),
+            songs=manager,
+        )
+        common_group_user.objects.filter.return_value.order_by.return_value = []
+        common_join_request.objects.filter.return_value.order_by.return_value = []
+        common_join_request.objects.filter.return_value.count.return_value = 0
+        common_group_tag.objects.filter.return_value = []
+
+        group_views._build_group_context(
+            request,
+            self.common_group,
+            group,
+            access_context=build_access_context(can_manage=True),
+        )
+
+        repair_consistency.assert_called_once_with(group)
+
+    @patch("app_group.views._build_group_context")
+    @patch("app_group.views._build_group_access_context")
+    @patch("app_group.views.Group")
+    @patch("app_group.views._get_common_group")
     def test_am_members_page_hides_request_list_and_aligns_creation_form(
         self,
         get_common_group,
@@ -1957,11 +2047,16 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         tag_song.assert_called_once_with(song, tag)
         set_selection.assert_called_once_with(song_tag, verse, selected_by_default=True)
 
+    @patch("app_group.views.services.repair_group_access_consistency")
     @patch("app_group.views.CommonGroupJoinRequest")
     @patch("app_group.views.CommonGroupTag")
     @patch("app_group.views.CommonGroupUser")
     def test_build_group_context_for_inactive_and_active_group(
-        self, common_group_user, common_group_tag, common_join_request
+        self,
+        common_group_user,
+        common_group_tag,
+        common_join_request,
+        repair_consistency,
     ):
         request = self.post_request({})
         request.session[group_views.INVITATION_NOTICE_SESSION_KEY] = {
@@ -2007,6 +2102,7 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
 
         self.assertEqual(active_context["metrics"]["members"], 0)
         self.assertEqual(active_context["metrics"]["requests"], 0)
+        repair_consistency.assert_called_once_with(group)
 
     @patch("app_group.views.DirectoryUserRecord")
     def test_directory_member_profile_map_and_display_name_fallbacks(
@@ -2490,9 +2586,10 @@ class AppGroupServiceTests(SimpleTestCase):
         atomic.return_value.__enter__ = Mock(return_value=None)
         atomic.return_value.__exit__ = Mock(return_value=False)
         memberships = Mock()
+        membership = Mock(is_group_admin=True, am_access=True)
         memberships.filter.side_effect = [
+            Mock(first=Mock(return_value=membership)),
             Mock(count=Mock(return_value=1)),
-            Mock(exists=Mock(return_value=True)),
         ]
         common_group_user.objects.select_for_update.return_value.filter.return_value = (
             memberships
@@ -2515,7 +2612,8 @@ class AppGroupServiceTests(SimpleTestCase):
         atomic.return_value.__enter__ = Mock(return_value=None)
         atomic.return_value.__exit__ = Mock(return_value=False)
         memberships = Mock()
-        memberships.filter.return_value.update.return_value = 1
+        membership = Mock(is_group_admin=False, am_access=True)
+        memberships.filter.return_value.first.return_value = membership
         common_group_user.objects.select_for_update.return_value.filter.return_value = (
             memberships
         )
@@ -2529,6 +2627,29 @@ class AppGroupServiceTests(SimpleTestCase):
         memberships.filter.assert_called_once_with(
             member_id="11111111-1111-1111-1111-111111111111"
         )
+        self.assertTrue(membership.is_group_admin)
+        membership.save.assert_called_once_with(update_fields=["is_group_admin"])
+
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_set_common_responsable_requires_am_access(self, common_group_user, atomic):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        memberships = Mock()
+        memberships.filter.return_value.first.return_value = Mock(
+            is_group_admin=False,
+            am_access=False,
+        )
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+
+        with self.assertRaisesMessage(ValidationError, "accès AM"):
+            group_services.set_common_responsable(
+                1,
+                "11111111-1111-1111-1111-111111111111",
+                enabled=True,
+            )
 
     @patch("app_group.services.transaction.atomic")
     @patch("app_group.services.CommonGroupUser")
@@ -2538,7 +2659,7 @@ class AppGroupServiceTests(SimpleTestCase):
         atomic.return_value.__enter__ = Mock(return_value=None)
         atomic.return_value.__exit__ = Mock(return_value=False)
         memberships = Mock()
-        memberships.filter.return_value.update.return_value = 0
+        memberships.filter.return_value.first.return_value = None
         common_group_user.objects.select_for_update.return_value.filter.return_value = (
             memberships
         )
@@ -2549,6 +2670,72 @@ class AppGroupServiceTests(SimpleTestCase):
                 "11111111-1111-1111-1111-111111111111",
                 enabled=True,
             )
+
+    @patch("app_group.services.AccessRequest")
+    @patch("app_group.services.GroupMember")
+    @patch("app_group.services.Member")
+    @patch("app_group.services.transaction.atomic")
+    @patch("app_group.services.CommonGroupUser")
+    def test_repair_group_access_consistency_normalizes_responsables_and_anchors(
+        self,
+        common_group_user,
+        atomic,
+        member_model,
+        group_member_model,
+        access_request_model,
+    ):
+        atomic.return_value.__enter__ = Mock(return_value=None)
+        atomic.return_value.__exit__ = Mock(return_value=False)
+        group = build_group(7)
+        memberships = Mock()
+        invalid_responsables = Mock()
+        accessible_memberships = Mock()
+        accessible_memberships.values_list.return_value = [
+            uuid.UUID("11111111-1111-1111-1111-111111111111"),
+            uuid.UUID("22222222-2222-2222-2222-222222222222"),
+        ]
+
+        def filter_memberships(**kwargs):
+            if kwargs == {"is_group_admin": True, "am_access": False}:
+                return invalid_responsables
+            if kwargs == {"am_access": True}:
+                return accessible_memberships
+            raise AssertionError(f"Unexpected filter {kwargs}")
+
+        memberships.filter.side_effect = filter_memberships
+        common_group_user.objects.select_for_update.return_value.filter.return_value = (
+            memberships
+        )
+        first_member = Mock()
+        second_member = Mock()
+        member_model.objects.get_or_create.side_effect = [
+            (first_member, True),
+            (second_member, False),
+        ]
+
+        group_services.repair_group_access_consistency(group)
+
+        invalid_responsables.update.assert_called_once_with(am_access=True)
+        self.assertEqual(member_model.objects.get_or_create.call_count, 2)
+        group_member_model.objects.get_or_create.assert_any_call(
+            group=group,
+            member=first_member,
+            member_kind=group_models.MEMBER_KIND_ACCOUNT,
+        )
+        group_member_model.objects.get_or_create.assert_any_call(
+            group=group,
+            member=second_member,
+            member_kind=group_models.MEMBER_KIND_ACCOUNT,
+        )
+        access_request_model.objects.filter.assert_called_once_with(
+            group=group,
+            member_id__in=[
+                uuid.UUID("11111111-1111-1111-1111-111111111111"),
+                uuid.UUID("22222222-2222-2222-2222-222222222222"),
+            ],
+            request_type=group_models.REQUEST_TYPE_AM_ACCESS,
+        )
+        access_request_model.objects.filter.return_value.delete.assert_called_once()
 
     @patch("app_group.services.GroupMember")
     @patch("app_group.services.transaction.atomic")

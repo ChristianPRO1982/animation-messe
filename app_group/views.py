@@ -862,6 +862,9 @@ def _build_group_context(
         common_group,
         group,
     )
+    if group is not None and access_context.can_manage_group:
+        services.repair_group_access_consistency(group)
+
     common_memberships = list(
         CommonGroupUser.objects.filter(group_id=common_group.group_id).order_by(
             "-is_group_admin",

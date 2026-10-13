@@ -124,6 +124,17 @@ common.group_tags
 Les éventuels modèles Django représentant ces tables doivent être
 `managed = False`.
 
+Invariant fonctionnel maintenu par AM :
+
+```text
+common.g_group_user.is_group_admin = TRUE
+    => common.g_group_user.am_access = TRUE
+```
+
+AM ne possède pas `common.g_group_user`, mais ses services doivent maintenir cet
+invariant lorsqu'ils nomment un Responsable ou réparent un groupe consulté par
+un Responsable ou un Administrateur global.
+
 `common.*` est un schéma partagé avec LSS. Les migrations Django de
 `app_group` ne doivent pas créer ni modifier ces tables comme si elles étaient
 propriétaires AM.
@@ -241,6 +252,9 @@ redondant.
 
 Le rôle Responsable n'est pas stocké dans `am.g_group_member` ni dans
 `am.g_role`. Il est lu depuis `common.g_group_user.is_group_admin`.
+
+Dans AM, toute appartenance Responsable doit aussi posséder `am_access = TRUE`
+et donc une ancre `am.g_group_member(member_kind = 'account')`.
 
 `ggm_id` est l'ancre stable d'une personne dans un groupe. Une future fusion
 Membre AM vers compte CARThographie doit conserver le même `ggm_id`.

@@ -11,16 +11,19 @@
                         {{ row.display_name }}
                         {% if row.is_responsable %}<span class="site-role-banner song-tag-badge">{% trans "Responsable" %}</span>{% endif %}
                         {% if row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM" %}</span>{% endif %}
+                        {% if not row.has_am_access %}<span class="site-role-banner">{% trans "Accès AM requis" %}</span>{% endif %}
                     </p>
-                    <form method="post" data-app-group-confirm="{% trans 'Modifier le rôle Responsable de ce membre ?' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="set_common_responsable">
-                        <input type="hidden" name="member_id" value="{{ row.membership.member_id }}">
-                        <input type="hidden" name="enabled" value="{{ row.is_responsable|yesno:',on' }}">
-                        <button class="site-action site-action--secondary" type="submit">
-                            {% if row.is_responsable %}{% trans "Retirer Responsable" %}{% else %}{% trans "Nommer Responsable" %}{% endif %}
-                        </button>
-                    </form>
+                    {% if row.is_responsable or row.has_am_access %}
+                        <form method="post" data-app-group-confirm="{% trans 'Modifier le rôle Responsable de ce membre ?' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="set_common_responsable">
+                            <input type="hidden" name="member_id" value="{{ row.membership.member_id }}">
+                            <input type="hidden" name="enabled" value="{{ row.is_responsable|yesno:',on' }}">
+                            <button class="site-action site-action--secondary" type="submit">
+                                {% if row.is_responsable %}{% trans "Retirer Responsable" %}{% else %}{% trans "Nommer Responsable" %}{% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
                 </div>
             {% empty %}
                 <p>{% trans "Aucune appartenance commune trouvée." %}</p>

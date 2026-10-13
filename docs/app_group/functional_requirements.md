@@ -91,6 +91,10 @@ Les statuts fonctionnels visibles dans un groupe AM sont :
 En BDD, le rôle Responsable est porté par
 `common.g_group_user.is_group_admin`.
 
+Dans AM, un Responsable est obligatoirement un membre du groupe commun avec
+accès AM. Une appartenance `is_group_admin = TRUE` doit donc aussi avoir
+`am_access = TRUE` et une ancre technique `am.g_group_member`.
+
 Les rôles AM assignés qui ajoutent des droits propres à AM sont :
 
 - Responsable impression.
@@ -109,6 +113,8 @@ Un groupe doit toujours conserver au moins un Responsable commun
 `is_group_admin = TRUE`.
 
 Un Responsable peut gérer les membres, les Membres AM, les paramètres du groupe et les validations administratives prévues par les apps métier.
+La nomination d'un Responsable depuis AM est refusée si le membre commun ne
+possède pas déjà l'accès AM.
 
 Un Responsable impression peut gérer les feuilles de messe selon les règles de `app_celebration`, sans droit sur le planning, le déroulé, la validation ou l’administration du groupe.
 
@@ -454,6 +460,8 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-ROLE-04** — Un groupe doit toujours avoir au moins un Responsable.
 
 **GROUP-ROLE-05** — Les rôles de groupe sont distincts du rôle global Administrateur de `app_member`.
+
+**GROUP-ROLE-06** — Dans AM, un Responsable doit être membre du groupe commun, posséder `am_access = TRUE` et disposer d'une ancre `am.g_group_member`.
 
 **GROUP-ACCESS-01** — L’appartenance au groupe commun ne donne pas automatiquement accès AM.
 
