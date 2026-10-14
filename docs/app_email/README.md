@@ -21,6 +21,8 @@ importante, etc.
 
 # 1. Documents
 
+- [Guide d'utilisation inter-apps](usage.md) — à lire avant d'ajouter un envoi :
+  appels, templates, idempotence, transactions, configuration et tests.
 - `docs/app_email/functional_requirements.md` — règles fonctionnelles, familles
   d'e-mails, confidentialité, idempotence et périmètre.
 - `docs/app_email/models.md` — contrat technique cible, modèle de notification,
