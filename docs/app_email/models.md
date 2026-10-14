@@ -51,7 +51,7 @@ Exemples :
 
 # 2. Fichiers créés en V1
 
-Structure cible :
+Structure implémentée en V1 :
 
 ```text
 app_email/
@@ -66,16 +66,16 @@ app_email/
 
 templates/
     emails/
-        base.html
-        group_am_member_invitation/
-            subject.txt
-            body.txt
-            body.html
-        planning_personal_schedule/
+        test_notification/
             subject.txt
             body.txt
             body.html
 ```
+
+Les templates métier réels, par exemple `group_am_member_invitation` ou
+`planning_personal_schedule`, restent à créer au moment où le flux métier
+correspondant est branché. La V1 ne fournit que le template de test nécessaire
+aux tests d'infrastructure email.
 
 Des sous-modules peuvent être ajoutés si le service grossit :
 
@@ -105,7 +105,7 @@ Modifications attendues :
 - ajouter la configuration email par variables d'environnement ;
 - ajouter Django Admin ;
 - protéger `/admin/` du middleware de session AM ;
-- ajouter les templates d'e-mails ;
+- ajouter les templates d'e-mails nécessaires aux tests d'infrastructure ;
 - ajouter les tests.
 
 Les branchements métier doivent rester explicites.
@@ -176,9 +176,10 @@ production
     AM_EMAIL_ENABLED = true
 ```
 
-Si `AM_EMAIL_ENABLED = false`, le service peut créer une notification en statut
-`skipped` ou rester en `pending` selon la décision d'implémentation. La règle
-doit être testée.
+Si `AM_EMAIL_ENABLED = false`, une tentative d'envoi fait passer la notification
+`pending` à `skipped`, sans envoyer d'e-mail. `queue_email()` seul crée toujours
+une notification `pending`. Une notification déjà `sent`, `failed` ou `skipped`
+conserve son statut.
 
 ---
 
@@ -285,7 +286,9 @@ Identifiant retourné par le provider si disponible.
 
 `error_message`
 
-Message technique court, nettoyé de toute donnée sensible.
+Diagnostic technique court issu d'une liste de messages fixes. Le texte libre
+des exceptions du backend n'est ni stocké ni loggé, car il peut contenir des
+secrets ou des données personnelles sous des formats imprévisibles.
 
 Le corps complet de l'e-mail ne doit pas être stocké par défaut.
 
@@ -354,13 +357,13 @@ La V1 peut rester sur une seule table.
 
 # 8. Service d'envoi
 
-API cible indicative :
+API V1 :
 
 ```python
 queue_email(
     notification_type: str,
     recipient_email: str,
-    context: dict,
+    context: dict | None = None,
     *,
     recipient_member_id: str | None = None,
     group=None,
@@ -370,14 +373,17 @@ queue_email(
 ```
 
 ```python
-send_notification(notification: EmailNotification) -> EmailNotification
+send_notification(
+    notification: EmailNotification,
+    context: dict | None = None,
+) -> EmailNotification
 ```
 
 ```python
 send_email_now(
     notification_type: str,
     recipient_email: str,
-    context: dict,
+    context: dict | None = None,
     *,
     recipient_member_id: str | None = None,
     group=None,
@@ -385,6 +391,11 @@ send_email_now(
     business_key: str | None = None,
 ) -> EmailNotification
 ```
+
+`queue_email()` crée ou retrouve la trace ; son paramètre `context` n'est pas
+stocké. Pour un envoi séparé, fournir le contexte à `send_notification()`.
+`send_email_now()` le transmet directement au rendu. Aucun corps de message
+n'est persisté par ces fonctions.
 
 Les services métier doivent utiliser une fonction de haut niveau adaptée au cas
 métier.
@@ -419,11 +430,20 @@ Règles :
 - le sujet est dans `subject.txt` ;
 - le texte brut est obligatoire ;
 - le HTML est optionnel mais recommandé pour les e-mails riches ;
+- le sujet et le corps texte préservent les caractères du contexte sans
+  échappement HTML ; le corps HTML conserve l'échappement automatique Django ;
 - le Python ne construit pas de longs corps HTML ;
 - chaque template reçoit un contexte métier minimal ;
 - les secrets ne doivent pas être injectés dans des logs de rendu.
 
-Le sujet rendu doit être normalisé sur une seule ligne.
+Le sujet rendu doit être normalisé sur une seule ligne, préfixe de configuration
+inclus. Un HTML absent permet un envoi texte seul ; un HTML présent mais cassé
+(par exemple une inclusion introuvable) fait échouer le rendu et l'envoi.
+
+En V1, seuls les templates `test_notification` existent dans le dépôt. Les
+types métier cités ci-dessous sont des exemples de flux futurs et ne doivent
+pas être appelés tant que leurs templates et services métier dédiés ne sont pas
+ajoutés.
 
 ---
 
@@ -442,7 +462,30 @@ service métier
 -> retourne la notification
 ```
 
-Les erreurs sont capturées dans le service email.
+Les erreurs de rendu et du backend sont capturées dans le service email. Leur
+diagnostic fixe est loggé avant la sauvegarde du statut `failed`, sans traceback
+du backend. Les erreurs de persistance restent propagées à l'appelant, sans
+chaîner l'exception sensible du backend. Un échec de sauvegarde de `sent` n'est
+pas requalifié en échec du backend.
+
+`send_notification()` exige une notification déjà enregistrée en base ; sinon,
+il lève `ValueError` avant le rendu et avant tout envoi.
+
+Pour une notification persistée, le service verrouille la ligne en base et
+relit son statut avant tout envoi. Le verrou est conservé jusqu'à la mise à
+jour du statut. Seules les notifications `pending` sont envoyées : deux
+instances chargées avant l'envoi ne peuvent donc pas provoquer un double envoi
+concurrent. Une notification `sent`, `failed` ou `skipped` n'est pas réessayée
+automatiquement.
+
+Le verrou ne rend pas l'envoi SMTP transactionnel : les futurs appels métier
+doivent intervenir après la validation de leur transaction, afin qu'un rollback
+métier ne remette pas à `pending` une notification déjà envoyée.
+
+Une panne de persistance après acceptation SMTP peut également laisser une
+notification `pending` malgré l'envoi effectif. Dans ce cas, aucun retry aveugle
+ne doit être déclenché : la V1 ne garantit pas l'envoi exactement une fois face
+aux pannes entre SMTP et PostgreSQL.
 
 Le service métier peut choisir :
 
@@ -553,7 +596,7 @@ type + célébration + feuille + destinataire
 
 # 12. Tests attendus
 
-Tests minimum :
+Tests minimum V1 (infrastructure email) :
 
 - création d'une notification `pending` ;
 - rendu du bon sujet ;
@@ -564,8 +607,10 @@ Tests minimum :
 - passage à `failed` si le backend échoue ;
 - aucun envoi réel en tests ;
 - respect de l'idempotence ;
-- absence de secret dans les logs ou erreurs stockées ;
-- e-mail de planning personnel sans données inutiles d'autres membres.
+- absence de secret dans les logs ou erreurs stockées.
+
+Lors de l'ajout du futur flux métier de planning personnel, ajouter un test
+vérifiant que l'e-mail ne contient aucune donnée inutile d'autres membres.
 
 Les tests doivent utiliser le backend mémoire Django :
 
@@ -597,6 +642,11 @@ Actions admin possibles en V1 :
   explicitement codée et testée.
 
 Pas d'éditeur de contenu ou de workflow en V1.
+
+L'admin est consultatif : création, modification et suppression des
+notifications sont interdites, y compris pour les superutilisateurs. L'action
+de suppression groupée n'est pas disponible, afin de préserver les traces et
+les clés d'idempotence.
 
 ---
 

@@ -21,9 +21,9 @@ importante, etc.
 
 # 1. Documents
 
-- `docs/email/functional_requirements.md` — règles fonctionnelles, familles
+- `docs/app_email/functional_requirements.md` — règles fonctionnelles, familles
   d'e-mails, confidentialité, idempotence et périmètre.
-- `docs/email/models.md` — contrat technique cible, modèle de notification,
+- `docs/app_email/models.md` — contrat technique cible, modèle de notification,
   service d'envoi, templates, configuration et tests.
 
 ---

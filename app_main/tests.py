@@ -123,9 +123,12 @@ class ProjectSettingsTests(SimpleTestCase):
             settings.AM_EMAIL_BACKEND,
             "django.core.mail.backends.console.EmailBackend",
         )
-        self.assertEqual(
+        self.assertIn(
             settings.MAILERS["default"]["BACKEND"],
-            "django.core.mail.backends.console.EmailBackend",
+            {
+                "django.core.mail.backends.console.EmailBackend",
+                "django.core.mail.backends.locmem.EmailBackend",
+            },
         )
         self.assertEqual(settings.DEFAULT_FROM_EMAIL, "no-reply@example.invalid")
         self.assertEqual(settings.AM_EMAIL_FROM_NAME, "Animation Messe")

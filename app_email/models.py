@@ -54,7 +54,9 @@ class EmailNotification(models.Model):
                 fields=["notification_type", "status"],
                 name="een_type_status_idx",
             ),
-            models.Index(fields=["status", "created_at"], name="een_status_created_idx"),
+            models.Index(
+                fields=["status", "created_at"], name="een_status_created_idx"
+            ),
             models.Index(fields=["group", "status"], name="een_group_status_idx"),
         ]
         ordering = ["-created_at", "-een_id"]
@@ -104,4 +106,3 @@ class EmailNotification(models.Model):
                 "updated_at",
             ]
         )
-

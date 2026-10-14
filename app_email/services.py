@@ -1,22 +1,20 @@
 import logging
-import re
 from dataclasses import dataclass
+from email.headerregistry import Address
+from smtplib import SMTPAuthenticationError
 from typing import Any
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
-from django.template.loader import render_to_string
-from django.template import TemplateDoesNotExist
+from django.template import Context, TemplateDoesNotExist
+from django.template.loader import get_template
 from django.utils.translation import gettext_lazy as _
 
 from app_email.models import EmailNotification
 
 logger = logging.getLogger("app_email")
-SENSITIVE_ERROR_RE = re.compile(
-    r"(?i)\b(password|passwd|pwd|secret|token|api[_-]?key|authorization)=([^\s]+)"
-)
 
 
 @dataclass(frozen=True)
@@ -28,7 +26,10 @@ class RenderedEmail:
 
 def _normalize_subject(subject: str) -> str:
     normalized = " ".join(str(subject or "").split())
-    prefix = str(getattr(settings, "AM_EMAIL_SUBJECT_PREFIX", "") or "")
+    raw_prefix = str(getattr(settings, "AM_EMAIL_SUBJECT_PREFIX", "") or "")
+    prefix = " ".join(raw_prefix.split())
+    if prefix and raw_prefix[-1].isspace():
+        prefix += " "
     if prefix and not normalized.startswith(prefix):
         normalized = f"{prefix}{normalized}"
     return normalized
@@ -38,14 +39,19 @@ def _from_email() -> str:
     email = str(getattr(settings, "DEFAULT_FROM_EMAIL", "") or "").strip()
     name = str(getattr(settings, "AM_EMAIL_FROM_NAME", "") or "").strip()
     if name and email and "<" not in email and ">" not in email:
-        return f"{name} <{email}>"
+        return str(Address(display_name=name, addr_spec=email))
     return email
 
 
 def _sanitize_error(error: object) -> str:
-    message = " ".join(str(error or "").split())
-    message = SENSITIVE_ERROR_RE.sub(r"\1=***", message)
-    return message[:1000]
+    # Backend messages may contain arbitrary credentials or message contents.
+    if isinstance(error, SMTPAuthenticationError):
+        return str(_("Authentification SMTP refusee."))
+    if isinstance(error, TimeoutError):
+        return str(_("Delai d'envoi email depasse."))
+    if isinstance(error, TemplateDoesNotExist):
+        return str(_("Template email introuvable."))
+    return str(_("Echec technique de l'envoi email."))
 
 
 def _content_object_identity(content_object: object | None) -> tuple[str, str]:
@@ -67,16 +73,23 @@ def _group_id(group: object | None) -> int | None:
     return getattr(group, "gg_id", group)
 
 
+def _render_text_template(template_name: str, context: dict[str, Any]) -> str:
+    template = get_template(template_name)
+    return template.template.render(Context(context, autoescape=False))
+
+
 def render_email(notification_type: str, context: dict[str, Any]) -> RenderedEmail:
     template_root = f"emails/{notification_type}"
     subject = _normalize_subject(
-        render_to_string(f"{template_root}/subject.txt", context)
+        _render_text_template(f"{template_root}/subject.txt", context)
     )
-    body_text = render_to_string(f"{template_root}/body.txt", context)
+    body_text = _render_text_template(f"{template_root}/body.txt", context)
     try:
-        body_html = render_to_string(f"{template_root}/body.html", context)
+        html_template = get_template(f"{template_root}/body.html")
     except TemplateDoesNotExist:
         body_html = ""
+    else:
+        body_html = html_template.render(context)
     return RenderedEmail(subject=subject, body_text=body_text, body_html=body_html)
 
 
@@ -117,7 +130,12 @@ def queue_email(
                 )
                 return notification
         except IntegrityError:
-            return EmailNotification.objects.get(business_key=business_key)
+            notification = EmailNotification.objects.filter(
+                business_key=business_key
+            ).first()
+            if notification is None:
+                raise
+            return notification
 
     return EmailNotification.objects.create(
         notification_type=notification_type,
@@ -130,7 +148,27 @@ def send_notification(
     notification: EmailNotification,
     context: dict[str, Any] | None = None,
 ) -> EmailNotification:
+    if notification._state.adding or notification.pk is None:
+        raise ValueError(_("La notification doit etre enregistree avant l'envoi."))
+
+    database = notification._state.db or "default"
+    # Hold the row lock through delivery and the final status update.
+    with transaction.atomic(using=database):
+        notification.refresh_from_db(
+            using=database,
+            from_queryset=EmailNotification.objects.using(database).select_for_update(),
+        )
+        return _send_pending_notification(notification, context)
+
+
+def _send_pending_notification(
+    notification: EmailNotification,
+    context: dict[str, Any] | None = None,
+) -> EmailNotification:
     context = context or {}
+    if notification.status != EmailNotification.STATUS_PENDING:
+        return notification
+
     if not getattr(settings, "AM_EMAIL_ENABLED", True):
         notification.mark_skipped(_("Envoi email désactivé."))
         return notification
@@ -149,21 +187,24 @@ def send_notification(
         provider_message_id = getattr(message, "extra_headers", {}).get(
             "Message-ID", ""
         )
-        if sent_count:
-            notification.mark_sent(provider_message_id=provider_message_id)
-        else:
-            notification.mark_failed(_("Le backend email n'a envoyé aucun message."))
     except Exception as exc:
         error_message = _sanitize_error(exc)
-        notification.mark_failed(error_message)
-        logger.exception(
-            "Email notification failed",
-            extra={
-                "notification_id": notification.pk,
-                "notification_type": notification.notification_type,
-                "status": notification.status,
-            },
-        )
+    else:
+        if sent_count:
+            notification.mark_sent(provider_message_id=provider_message_id)
+            return notification
+        error_message = str(_("Le backend email n'a envoyé aucun message."))
+
+    # Persist outside the exception handler to avoid chaining backend secrets.
+    logger.error(
+        "Email notification failed: %s",
+        error_message,
+        extra={
+            "notification_id": notification.pk,
+            "status": EmailNotification.STATUS_FAILED,
+        },
+    )
+    notification.mark_failed(error_message)
     return notification
 
 
@@ -187,4 +228,3 @@ def send_email_now(
         business_key=business_key,
     )
     return send_notification(notification, context)
-

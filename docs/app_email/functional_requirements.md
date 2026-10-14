@@ -17,7 +17,7 @@ Sources fonctionnelles principales :
 
 Contrat technique cible :
 
-- `docs/email/models.md`
+- `docs/app_email/models.md`
 
 ---
 

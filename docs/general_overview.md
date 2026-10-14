@@ -42,7 +42,7 @@ cible AM. Les chants sont couverts par `SFD-03-chants.md` et par les contrats
 Les contrats techniques transverses déjà disponibles sont :
 
 - `docs/keycloak_connexion.md` — authentification Keycloak, session AM, provisioning, diagnostics.
-- `docs/email/` — e-mails transactionnels et e-mails de vie métier gérés par Django.
+- `docs/app_email/` — e-mails transactionnels et e-mails de vie métier gérés par Django.
 - `docs/popup_messagebox.md` — API popup globale `window.LSSMessageBox` utilisée dans AM.
 - `docs/wiki_help_mapping.md` — mapping entre routes Django et pages du wiki Animation Messe.
 - `docs/pj_codex_block_naming.md` — vocabulaire stable pour désigner les blocs de page dans les échanges Codex.
