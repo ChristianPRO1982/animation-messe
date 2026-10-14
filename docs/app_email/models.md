@@ -176,10 +176,14 @@ production
     AM_EMAIL_ENABLED = true
 ```
 
-Si `AM_EMAIL_ENABLED = false`, une tentative d'envoi fait passer la notification
-`pending` à `skipped`, sans envoyer d'e-mail. `queue_email()` seul crée toujours
-une notification `pending`. Une notification déjà `sent`, `failed` ou `skipped`
-conserve son statut.
+L'envoi exige `AM_EMAIL_ENABLED = true` et `EmailSettings.enabled = true`.
+Le verrou serveur est prioritaire : s'il bloque, une tentative passe de
+`pending` à `blocked_env`, sinon une autorisation BDD absente ou désactivée
+produit `blocked_admin`. `queue_email()` seul crée toujours `pending`.
+Une notification non `pending` n'est jamais renvoyée automatiquement.
+
+Le fournisseur retenu est Brevo via le backend SMTP Django standard, avec
+STARTTLS sur le port 587. Voir [brevo.md](brevo.md) pour le raccordement.
 
 ---
 
@@ -202,6 +206,7 @@ Champs :
 ```text
 een_id
 notification_type
+sender_key
 recipient_email
 recipient_member_id
 gg_id
@@ -311,6 +316,9 @@ pending
 sent
 failed
 skipped
+blocked_env
+blocked_admin
+blocked_admin_history
 ```
 
 `pending`
@@ -327,8 +335,35 @@ Tentative d'envoi en erreur.
 
 `skipped`
 
-Notification non envoyée volontairement, par exemple parce que les envois sont
-désactivés en local.
+Statut historique d'une notification ignorée ; sa cause n'est pas reclassifiée.
+
+`blocked_env` : blocage par l'environnement, message
+« Impossible d'envoyer des emails ».
+
+`blocked_admin` : blocage administratif courant, message
+« Impossible d'envoyer des emails - blocage administratif ».
+
+`blocked_admin_history` : blocage administratif archivé, avec le même message.
+Ces trois statuts sont terminaux pour l'envoi automatique. `status` accepte
+32 caractères et l'admin permet de filtrer les nouvelles valeurs.
+
+## Réglage global et périodes administratives
+
+`EmailSettings`, dans `am.e_email_settings`, possède une unique ligne `id=1`
+(contrainte BDD), avec `enabled=False` à l'initialisation. La migration crée
+cette ligne. Ce réglage est indépendant de `SiteParams.language` et accessible
+au rôle Administrateur AM dans les paramètres du site.
+
+`set_email_enabled()` verrouille cette ligne et, uniquement lors du passage de
+`enabled=True` à `False`, passe les notifications encore `blocked_admin` en
+`blocked_admin_history` dans la même transaction. Les statuts modifiés, les
+blocages environnement et les autres états restent intacts. Un enregistrement
+répété du verrou et sa levée n'archivent rien.
+
+L'ordre de verrouillage commun aux envois et aux bascules est : réglage global,
+puis notification. Les envois autorisés sont sérialisés pendant l'appel SMTP.
+La lecture du réglage est évitée lorsque l'environnement bloque. Une ligne
+absente est une interdiction ; une erreur de lecture est propagée avant SMTP.
 
 ---
 
@@ -369,6 +404,7 @@ queue_email(
     group=None,
     content_object=None,
     business_key: str | None = None,
+    sender_key: str = "default",
 ) -> EmailNotification
 ```
 
@@ -389,6 +425,7 @@ send_email_now(
     group=None,
     content_object=None,
     business_key: str | None = None,
+    sender_key: str = "default",
 ) -> EmailNotification
 ```
 
@@ -396,6 +433,12 @@ send_email_now(
 stocké. Pour un envoi séparé, fournir le contexte à `send_notification()`.
 `send_email_now()` le transmet directement au rendu. Aucun corps de message
 n'est persisté par ces fonctions.
+
+`sender_key` est persisté sur la notification et vaut `default` pour les
+notifications préexistantes. Seuls `default` et `planning` sont acceptés.
+`default` utilise `DEFAULT_FROM_EMAIL` / `AM_EMAIL_FROM_NAME` ; `planning`
+utilise `AM_EMAIL_PLANNING_FROM_EMAIL` / `AM_EMAIL_PLANNING_FROM_NAME`.
+La réutilisation d'une clé métier ne modifie pas son profil d'expédition.
 
 Les services métier doivent utiliser une fonction de haut niveau adaptée au cas
 métier.
@@ -475,8 +518,8 @@ Pour une notification persistée, le service verrouille la ligne en base et
 relit son statut avant tout envoi. Le verrou est conservé jusqu'à la mise à
 jour du statut. Seules les notifications `pending` sont envoyées : deux
 instances chargées avant l'envoi ne peuvent donc pas provoquer un double envoi
-concurrent. Une notification `sent`, `failed` ou `skipped` n'est pas réessayée
-automatiquement.
+concurrent. Une notification non `pending`, y compris bloquée ou historique,
+n'est pas réessayée automatiquement, même après réactivation des envois.
 
 Le verrou ne rend pas l'envoi SMTP transactionnel : les futurs appels métier
 doivent intervenir après la validation de leur transaction, afin qu'un rollback

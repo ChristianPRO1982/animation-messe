@@ -219,6 +219,25 @@ La règle ne doit pas empêcher un renvoi volontaire.
 Un renvoi volontaire doit être une nouvelle notification ou un nouvel essai
 explicitement tracé selon le cas métier.
 
+## Double autorisation et blocages
+
+L'environnement et le réglage global en BDD doivent tous deux autoriser les
+envois. Le verrou environnement est prioritaire et ne peut pas être levé par
+l'interface administrateur. Le rôle Administrateur AM gère le verrou quotidien
+dans les paramètres du site, indépendamment de la langue.
+
+Une tentative bloquée reste tracée : `blocked_env` avec le message
+« Impossible d'envoyer des emails », ou `blocked_admin` avec
+« Impossible d'envoyer des emails - blocage administratif ». Ces messages
+doivent être affichés au responsable par le futur flux appelant. Une
+réactivation ne renvoie pas ces e-mails.
+
+Lorsqu'un nouveau verrou administratif est posé, les notifications encore
+`blocked_admin` passent à `blocked_admin_history`. Celles qui ont changé de
+statut ne sont pas touchées. Lever le verrou ou enregistrer à nouveau un
+verrou déjà actif n'archive rien. Les blocages environnement n'ont pas
+d'historisation de ce type.
+
 ---
 
 # 10. Confidentialité
@@ -331,7 +350,7 @@ automatique.
 
 # 14. Points encore à spécifier
 
-1. Provider de production retenu : SMTP, Brevo, Mailjet, Resend, SES ou autre.
+1. Validation réelle de Brevo, fournisseur retenu via SMTP, en préproduction.
 2. Politique exacte de retry manuel ou automatique.
 3. Catalogue final des types d'e-mails V1.
 4. Préférences utilisateur éventuelles pour certains rappels non critiques.

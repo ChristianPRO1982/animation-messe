@@ -57,7 +57,29 @@ nouveau flux métier à brancher tel quel en production.
 | --- | --- |
 | `sent` | Le backend a accepté l'envoi ; cela ne prouve pas la réception dans la boîte du destinataire. |
 | `failed` | Le rendu ou le backend a échoué, ou le backend a indiqué zéro envoi. Le diagnostic est dans `error_message`. |
-| `skipped` | L'envoi était désactivé par `AM_EMAIL_ENABLED=False` lorsque la notification `pending` a été traitée. |
+| `blocked_env` | Verrou serveur : « Impossible d'envoyer des emails ». Prioritaire, même si le verrou administratif est actif. |
+| `blocked_admin` | Dernière période de blocage administratif : « Impossible d'envoyer des emails - blocage administratif ». |
+| `blocked_admin_history` | Blocage administratif d'une période antérieure, archivé lors de la pose d'un nouveau verrou administratif. |
+| `skipped` | Ancienne notification ignorée ; sa cause n'est pas déduite rétroactivement. |
+
+Les causes et les messages sont persistés dans `status` et `error_message`.
+Les apps appelantes peuvent afficher le message de blocage au responsable avec
+le mécanisme de messages existant :
+
+```python
+from django.contrib import messages
+
+if notification.status in {
+    EmailNotification.STATUS_BLOCKED_ENV,
+    EmailNotification.STATUS_BLOCKED_ADMIN,
+    EmailNotification.STATUS_BLOCKED_ADMIN_HISTORY,
+}:
+    messages.error(request, notification.error_message)
+```
+
+Cet extrait s'utilise dans la vue ou dans un callback dédié disposant de la
+requête et du résultat de l'envoi. Un simple `on_commit()` ne retourne pas ce
+résultat à son appelant.
 
 Un échec de rendu ou du backend est normalement converti en `failed`, sans
 relancer l'exception brute. Les erreurs de validation, de création ou de
@@ -139,7 +161,8 @@ Cette clé illustre un futur flux. Son type n'est pas fourni en V1.
 - Deux appels avec la même clé retrouvent la même notification. Les nouveaux
   arguments ne remplacent pas son type, son destinataire ou ses autres données.
 - Seules les notifications `pending` sont envoyées. Une clé déjà `sent`,
-  `failed` ou `skipped` ne provoque aucun renvoi automatique.
+  `failed`, `skipped`, `blocked_env`, `blocked_admin` ou `blocked_admin_history`
+  ne provoque aucun renvoi automatique, même après réactivation des envois.
 - Ne pas réutiliser une même clé pour un autre destinataire ou un autre type,
   même en fournissant un nouveau contexte : celui-ci ne change pas l'identité
   de la notification existante.
@@ -221,13 +244,21 @@ pour `send_email_now()`.
 dont le type et la clé primaire seront tracés). `send_notification()` utilise
 les métadonnées de la notification déjà enregistrée, sans les recevoir à nouveau.
 
+Pour choisir l'expéditeur, passer `sender_key="default"` ou
+`sender_key="planning"` à `queue_email()` ou `send_email_now()`. Le profil est
+persisté ; une clé métier déjà existante conserve son profil. Le premier profil
+utilise `DEFAULT_FROM_EMAIL` et `AM_EMAIL_FROM_NAME`, le second
+`AM_EMAIL_PLANNING_FROM_EMAIL` et `AM_EMAIL_PLANNING_FROM_NAME`.
+`send_notification()` utilise le profil enregistré. Les autres valeurs sont
+refusées avant la création de la notification.
+
 ## 7. Configuration et vérifications
 
 Les paramètres sont lus par `config/settings.py` depuis l'environnement :
 
 | Paramètre | Rôle |
 | --- | --- |
-| `AM_EMAIL_ENABLED` | Activation des envois ; `false` par défaut. |
+| `AM_EMAIL_ENABLED` | Autorisation serveur prioritaire ; `false` par défaut. |
 | `EMAIL_BACKEND` | Backend alimentant `MAILERS["default"]` de Django 6. |
 | `DEFAULT_FROM_EMAIL` | Adresse de l'expéditeur. |
 | `AM_EMAIL_FROM_NAME` | Nom affiché de l'expéditeur. |
@@ -238,13 +269,35 @@ Pour SMTP, utiliser `django.core.mail.backends.smtp.EmailBackend` et configurer
 `EMAIL_HOST_PASSWORD_FILE`, `EMAIL_USE_TLS`, `EMAIL_USE_SSL` et `EMAIL_TIMEOUT`.
 TLS et SSL ne doivent pas être activés simultanément.
 
+L'autorisation serveur ne suffit pas : `EmailSettings.enabled` en BDD doit
+aussi être vraie. Le rôle Administrateur AM peut la modifier dans « Paramètres
+du site », indépendamment de la langue. Une ligne absente bloque les envois ;
+une erreur de lecture est propagée avant SMTP. Le réglage est global par base
+de données, et non partagé automatiquement entre des bases DEV et PROD distinctes.
+
+La bascule passe par `app_email.services.set_email_enabled()` : ne pas modifier
+directement le champ par `save()` ou `update()`. Au passage de `True` à `False`,
+ce service archive atomiquement les seuls `blocked_admin` encore courants.
+Une levée de verrou ou un enregistrement répété de `False` n'archive rien.
+Les `blocked_env` ne sont pas historisés et aucune réactivation ne relance
+d'envoi. Le filtre de statut de l'admin Django retrouve chaque catégorie.
+
+Le verrou global BDD est pris avant celui de la notification et conservé
+pendant l'envoi. Les envois SMTP autorisés sont donc sérialisés en V1 ; une
+bascule administrative attend la fin d'un envoi déjà engagé.
+
+Le fournisseur retenu est Brevo en SMTP standard. Voir [brevo.md](brevo.md)
+pour la configuration locale optionnelle et le montage du secret.
+
 Le backend console par défaut écrit le message complet sur la sortie standard :
 ne pas l'utiliser avec de vraies données sensibles. En tests, forcer le backend
 mémoire dans `MAILERS["default"]` et activer explicitement `AM_EMAIL_ENABLED`
-pour les scénarios d'envoi. Aucun test ne doit contacter un serveur SMTP réel.
+ainsi que `EmailSettings.enabled` pour les scénarios d'envoi. Aucun test ne
+doit contacter un serveur SMTP réel.
 
 Tester le bon destinataire, le contenu minimal, le callback après commit et son
-absence après rollback, l'idempotence, les statuts `failed` et `skipped`, ainsi
+absence après rollback, l'idempotence, les échecs, les deux verrous et
+l'historisation administrative, ainsi
 que l'absence de fuite de secrets. Avec `django.test.TestCase`, utiliser
 `captureOnCommitCallbacks(execute=True)` pour exécuter les callbacks dans le test.
 

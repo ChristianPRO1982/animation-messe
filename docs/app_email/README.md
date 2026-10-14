@@ -23,6 +23,8 @@ importante, etc.
 
 - [Guide d'utilisation inter-apps](usage.md) — à lire avant d'ajouter un envoi :
   appels, templates, idempotence, transactions, configuration et tests.
+- [Raccordement Brevo](brevo.md) — secret SMTP hors dépôt, Docker local,
+  double autorisation et procédure de test contrôlé.
 - `docs/app_email/functional_requirements.md` — règles fonctionnelles, familles
   d'e-mails, confidentialité, idempotence et périmètre.
 - `docs/app_email/models.md` — contrat technique cible, modèle de notification,

@@ -21,7 +21,7 @@ from django.utils import timezone
 
 from app_email import services
 from app_email.admin import EmailNotificationAdmin
-from app_email.models import EmailNotification
+from app_email.models import EmailNotification, EmailSettings
 from app_main.middleware import SessionUserMiddleware
 
 
@@ -87,6 +87,7 @@ class EmailNotificationModelTests(SimpleTestCase):
 )
 class EmailServiceTests(TestCase):
     def setUp(self):
+        EmailSettings.objects.update_or_create(pk=1, defaults={"enabled": True})
         if hasattr(mail, "outbox"):
             mail.outbox.clear()
 
@@ -103,6 +104,7 @@ class EmailServiceTests(TestCase):
 
         self.assertIs(notification, created)
         notification_model.objects.create.assert_called_once_with(
+            sender_key="default",
             notification_type="test_notification",
             business_key=None,
             recipient_email="alice@example.test",
@@ -437,7 +439,7 @@ class EmailServiceTests(TestCase):
                 self.assertEqual(notification.updated_at, updated_at)
 
     @override_settings(AM_EMAIL_ENABLED=False)
-    def test_send_notification_skips_when_email_is_disabled(self):
+    def test_send_notification_blocks_when_environment_is_disabled(self):
         notification = EmailNotification.objects.create(
             notification_type="test_notification",
             recipient_email="alice@example.test",
@@ -452,7 +454,8 @@ class EmailServiceTests(TestCase):
             },
         )
 
-        self.assertEqual(notification.status, EmailNotification.STATUS_SKIPPED)
+        self.assertEqual(notification.status, EmailNotification.STATUS_BLOCKED_ENV)
+        self.assertEqual(notification.error_message, "Impossible d'envoyer des emails")
         self.assertEqual(getattr(mail, "outbox", []), [])
 
     @override_settings(AM_EMAIL_ENABLED=True)
@@ -542,6 +545,7 @@ class EmailServiceTests(TestCase):
             group=None,
             content_object=None,
             business_key="test:key:now",
+            sender_key="default",
         )
         send_notification.assert_called_once_with(notification, context)
 
@@ -556,6 +560,9 @@ class EmailServiceTests(TestCase):
     DEFAULT_FROM_EMAIL="no-reply@example.test",
 )
 class EmailServiceIntegrationTests(TestCase):
+    def setUp(self):
+        EmailSettings.objects.update_or_create(pk=1, defaults={"enabled": True})
+
     def test_stale_pending_instance_does_not_resend(self):
         first = services.queue_email(
             "test_notification", "alice@example.test", business_key="test:stale"
@@ -631,7 +638,13 @@ class EmailServiceIntegrationTests(TestCase):
     DEFAULT_FROM_EMAIL="no-reply@example.test",
 )
 class EmailConcurrentDeliveryTests(TransactionTestCase):
+    def setUp(self):
+        EmailSettings.objects.update_or_create(pk=1, defaults={"enabled": True})
+
     def test_concurrent_pending_instances_send_only_once(self):
+        self.addCleanup(
+            EmailNotification.objects.filter(business_key="test:concurrent").delete
+        )
         first = services.queue_email(
             "test_notification", "alice@example.test", business_key="test:concurrent"
         )

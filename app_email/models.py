@@ -3,20 +3,43 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+class EmailSettings(models.Model):
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    enabled = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'am"."e_email_settings'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(id=1), name="email_settings_singleton"
+            )
+        ]
+
+
 class EmailNotification(models.Model):
     STATUS_PENDING = "pending"
     STATUS_SENT = "sent"
     STATUS_FAILED = "failed"
     STATUS_SKIPPED = "skipped"
+    STATUS_BLOCKED_ENV = "blocked_env"
+    STATUS_BLOCKED_ADMIN = "blocked_admin"
+    STATUS_BLOCKED_ADMIN_HISTORY = "blocked_admin_history"
     STATUS_CHOICES = (
         (STATUS_PENDING, _("En attente")),
         (STATUS_SENT, _("Envoyé")),
         (STATUS_FAILED, _("Échec")),
         (STATUS_SKIPPED, _("Ignoré")),
+        (STATUS_BLOCKED_ENV, _("Blocage environnement")),
+        (STATUS_BLOCKED_ADMIN, _("Blocage administratif courant")),
+        (STATUS_BLOCKED_ADMIN_HISTORY, _("Blocage administratif historique")),
     )
+    SENDER_CHOICES = (("default", _("Notifications")), ("planning", _("Planning")))
 
     een_id = models.BigAutoField(primary_key=True)
     notification_type = models.CharField(max_length=100)
+    sender_key = models.CharField(
+        max_length=32, choices=SENDER_CHOICES, default="default"
+    )
     recipient_email = models.EmailField(max_length=254)
     recipient_member_id = models.UUIDField(blank=True, null=True)
     group = models.ForeignKey(
@@ -36,7 +59,7 @@ class EmailNotification(models.Model):
         unique=True,
     )
     status = models.CharField(
-        max_length=16,
+        max_length=32,
         choices=STATUS_CHOICES,
         default=STATUS_PENDING,
     )
@@ -106,3 +129,15 @@ class EmailNotification(models.Model):
                 "updated_at",
             ]
         )
+
+    def mark_blocked(self, status: str) -> None:
+        reasons = {
+            self.STATUS_BLOCKED_ENV: _("Impossible d'envoyer des emails"),
+            self.STATUS_BLOCKED_ADMIN: _(
+                "Impossible d'envoyer des emails - blocage administratif"
+            ),
+        }
+        self.error_message = str(reasons[status])
+        self.status = status
+        self.failed_at = None
+        self.save(update_fields=["status", "error_message", "failed_at", "updated_at"])

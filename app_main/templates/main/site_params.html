@@ -2,6 +2,10 @@
 {% load static %}
 {% load i18n %}
 
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/email_settings.css' %}">
+{% endblock %}
+
 {% block title %}{% trans "Paramètres du site" %} | Animation Messe{% endblock %}
 {% block section_title %}{% if selected_group %}{{ selected_group.name }}{% else %}{% trans "Administration" %}{% endif %}{% endblock %}
 {% block section_intro %}{% endblock %}
@@ -31,10 +35,33 @@
 {% block page_kicker %}Animation Messe{% endblock %}
 {% block page_title %}{% trans "Paramètres du site" %}{% endblock %}
 {% block page_summary %}
-    <p>{% trans "Les paramètres sont enregistrés par langue." %}</p>
+    <p>{% trans "Les contenus sont enregistrés par langue." %}</p>
 {% endblock %}
 
 {% block content %}
+    <section aria-labelledby="email-settings-title" id="email-settings">
+        <h2 id="email-settings-title">{% trans "Envoi des e-mails" %}</h2>
+        <dl>
+            <dt>{% trans "Autorisation serveur" %}</dt>
+            <dd>{% if email_environment_enabled %}{% trans "Activée" %}{% else %}{% trans "Désactivée" %}{% endif %}</dd>
+            <dt>{% trans "Autorisation administrateur" %}</dt>
+            <dd>{% if email_admin_enabled %}{% trans "Activée" %}{% else %}{% trans "Désactivée" %}{% endif %}</dd>
+        </dl>
+        <p role="status">
+            {% if not email_environment_enabled %}{% trans "Impossible d'envoyer des emails" %}
+            {% elif not email_admin_enabled %}{% trans "Impossible d'envoyer des emails - blocage administratif" %}
+            {% else %}{% trans "Envois autorisés" %}{% endif %}
+        </p>
+        <form method="post" aria-label="{% trans 'Autorisation globale des e-mails' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_email_settings">
+            {{ email_form.non_field_errors }}
+            <p class="email-settings-toggle">{{ email_form.enabled }} {{ email_form.enabled.label_tag }}</p>
+            {{ email_form.enabled.errors }}
+            <button type="submit" class="site-action site-action--primary">{% trans "Enregistrer l'autorisation" %}</button>
+        </form>
+    </section>
+
     <section class="site-theme-selection" aria-label="{% trans 'Paramètres du site' %}">
         <article class="site-theme-card">
             <header class="site-theme-card-header">

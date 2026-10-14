@@ -18,4 +18,5 @@ chris
 node_modules
 .env
 .env.local
+.env.email.local
 .env.production.local

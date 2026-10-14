@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from app_email.models import EmailNotification
+from app_email.services import get_sender_address
 
 
 @admin.register(EmailNotification)
@@ -9,6 +10,7 @@ class EmailNotificationAdmin(admin.ModelAdmin):
     list_display = (
         "een_id",
         "notification_type",
+        "sender_key",
         "recipient_email",
         "group",
         "status",
@@ -16,8 +18,17 @@ class EmailNotificationAdmin(admin.ModelAdmin):
         "sent_at",
         "failed_at",
     )
-    list_filter = ("notification_type", "status", "group", "created_at", "sent_at")
+    list_filter = (
+        "notification_type",
+        "sender_key",
+        "status",
+        "group",
+        "created_at",
+        "sent_at",
+    )
     readonly_fields = (
+        "sender_key",
+        "sender_address",
         "een_id",
         "notification_type",
         "recipient_email",
@@ -49,3 +60,7 @@ class EmailNotificationAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    @admin.display(description="Expéditeur configuré")
+    def sender_address(self, obj):
+        return get_sender_address(obj.sender_key)

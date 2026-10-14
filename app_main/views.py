@@ -19,6 +19,8 @@ from django.urls import reverse
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
+from app_email.forms import EmailSettingsForm
+from app_email.services import get_email_settings, set_email_enabled
 from app_group.models import CommonGroupUser
 from app_main.auth import (
     HOME_PROVISION_TARGET_SESSION_KEY,
@@ -732,6 +734,20 @@ def site_params(request: HttpRequest) -> HttpResponse:
     if selected_language not in {"fr", "en"}:
         selected_language = "fr"
 
+    email_configuration = get_email_settings()
+    if request.method == "POST" and request.POST.get("action") == "save_email_settings":
+        email_form = EmailSettingsForm(request.POST, prefix="email-settings")
+        if email_form.is_valid():
+            set_email_enabled(email_form.cleaned_data["enabled"])
+            messages.success(request, _("Autorisation des envois enregistrée."))
+            return redirect(
+                f"{reverse('site_params')}?{urlencode({'language': selected_language})}"
+            )
+    else:
+        email_form = EmailSettingsForm(
+            initial={"enabled": email_configuration.enabled}, prefix="email-settings"
+        )
+
     language_db_value = selected_language.upper()
     current_params = SiteParams.objects.filter(
         language__iexact=language_db_value
@@ -745,7 +761,7 @@ def site_params(request: HttpRequest) -> HttpResponse:
         )
     )
 
-    if request.method == "POST":
+    if request.method == "POST" and request.POST.get("action") != "save_email_settings":
         posted_language = (request.POST.get("language") or selected_language)[
             :2
         ].lower()
@@ -810,6 +826,9 @@ def site_params(request: HttpRequest) -> HttpResponse:
             "selected_group": _get_selected_group(request),
             "selected_language": selected_language,
             "admin_form": admin_form,
+            "email_form": email_form,
+            "email_environment_enabled": settings.AM_EMAIL_ENABLED,
+            "email_admin_enabled": email_configuration.enabled,
             "is_admin": True,
         },
     )

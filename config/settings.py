@@ -186,6 +186,12 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     "no-reply@example.invalid",
 )
 AM_EMAIL_FROM_NAME = os.environ.get("AM_EMAIL_FROM_NAME", "Animation Messe")
+AM_EMAIL_PLANNING_FROM_EMAIL = os.environ.get(
+    "AM_EMAIL_PLANNING_FROM_EMAIL", "planning@example.invalid"
+)
+AM_EMAIL_PLANNING_FROM_NAME = os.environ.get(
+    "AM_EMAIL_PLANNING_FROM_NAME", "Animation Messe - Planning"
+)
 AM_EMAIL_ENABLED = env_bool("AM_EMAIL_ENABLED", False)
 AM_EMAIL_SUBJECT_PREFIX = os.environ.get("AM_EMAIL_SUBJECT_PREFIX", "")
 AM_EMAIL_MAILER_OPTIONS = {}

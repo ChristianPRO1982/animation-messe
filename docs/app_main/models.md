@@ -71,6 +71,11 @@ admin_message_cooldown_minutes
 Les contenus d'accueil peuvent contenir une structure applicative légère, par
 exemple les cartes de page d'accueil sérialisées dans `home_text`.
 
+La page « Paramètres du site » expose également l'autorisation globale des
+e-mails portée par `app_email.EmailSettings`. Ce réglage n'est pas stocké
+dans `SiteParams` : il est indépendant de la langue et ses modifications
+passent par le service email pour historiser les périodes de blocage.
+
 ## Résolution par langue
 
 La résolution d'une ligne `SiteParams` doit suivre cet ordre :

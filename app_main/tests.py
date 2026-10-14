@@ -1408,6 +1408,9 @@ class LoginAndProvisionViewTests(SimpleTestCase):
 
 class AccountAndSettingsViewTests(SimpleTestCase):
     def setUp(self):
+        self.enterContext(
+            patch("app_main.views.get_email_settings", return_value=Mock(enabled=False))
+        )
         self.factory = RequestFactory()
 
     def test_account_requires_authentication(self):

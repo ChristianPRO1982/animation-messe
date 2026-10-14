@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-14 09:41+0200\n"
+"POT-Creation-Date: 2026-10-14 18:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,31 +18,83 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app_email/models.py:12 app_group/models.py:433
+#: app_email/forms.py:7
+msgid "Autoriser les envois d'e-mails"
+msgstr ""
+
+#: app_email/models.py:28 app_group/models.py:433
 msgid "En attente"
 msgstr ""
 
-#: app_email/models.py:13
+#: app_email/models.py:29
 msgid "Envoyé"
 msgstr ""
 
-#: app_email/models.py:14
+#: app_email/models.py:30
 msgid "Échec"
 msgstr ""
 
-#: app_email/models.py:15
+#: app_email/models.py:31
 msgid "Ignoré"
 msgstr ""
 
-#: app_email/services.py:97
+#: app_email/models.py:32
+msgid "Blocage environnement"
+msgstr ""
+
+#: app_email/models.py:33
+msgid "Blocage administratif courant"
+msgstr ""
+
+#: app_email/models.py:34
+msgid "Blocage administratif historique"
+msgstr ""
+
+#: app_email/models.py:36
+msgid "Notifications"
+msgstr ""
+
+#: app_email/models.py:36
+msgid "Planning"
+msgstr ""
+
+#: app_email/models.py:135 app_main/templates/main/site_params.html:51
+msgid "Impossible d'envoyer des emails"
+msgstr ""
+
+#: app_email/models.py:137 app_main/templates/main/site_params.html:52
+msgid "Impossible d'envoyer des emails - blocage administratif"
+msgstr ""
+
+#: app_email/services.py:47 app_email/services.py:143
+msgid "Profil d'expediteur inconnu."
+msgstr ""
+
+#: app_email/services.py:78
+msgid "Authentification SMTP refusee."
+msgstr ""
+
+#: app_email/services.py:80
+msgid "Delai d'envoi email depasse."
+msgstr ""
+
+#: app_email/services.py:82
+msgid "Template email introuvable."
+msgstr ""
+
+#: app_email/services.py:83
+msgid "Echec technique de l'envoi email."
+msgstr ""
+
+#: app_email/services.py:140
 msgid "Le type de notification est obligatoire."
 msgstr ""
 
-#: app_email/services.py:135
-msgid "Envoi email désactivé."
+#: app_email/services.py:185
+msgid "La notification doit etre enregistree avant l'envoi."
 msgstr ""
 
-#: app_email/services.py:155
+#: app_email/services.py:245
 msgid "Le backend email n'a envoyé aucun message."
 msgstr ""
 
@@ -833,8 +885,8 @@ msgid "Aucune appartenance commune trouvée."
 msgstr ""
 
 #: app_group/templates/app_group/group_settings.html:12
-#: app_main/templates/main/site_params.html:68
-#: app_main/templates/main/site_params.html:116
+#: app_main/templates/main/site_params.html:95
+#: app_main/templates/main/site_params.html:143
 msgid "Enregistrer les paramètres"
 msgstr ""
 
@@ -1053,7 +1105,7 @@ msgid "Demande groupe invalide."
 msgstr ""
 
 #: app_group/views.py:318 app_group/views.py:391 app_group/views.py:421
-#: app_group/views.py:503 app_main/views.py:625 app_main/views.py:661
+#: app_group/views.py:503 app_main/views.py:627 app_main/views.py:663
 msgid "Accès refusé."
 msgstr ""
 
@@ -1481,19 +1533,19 @@ msgid "Vous êtes membre authentifié sans droit privilégié global."
 msgstr ""
 
 #: app_main/templates/main/connexion.html:211
-#: app_main/templates/main/site_params.html:6
-#: app_main/templates/main/site_params.html:17
+#: app_main/templates/main/site_params.html:10
+#: app_main/templates/main/site_params.html:21
 msgid "Administration"
 msgstr ""
 
 #: app_main/templates/main/connexion.html:214
-#: app_main/templates/main/site_params.html:5
-#: app_main/templates/main/site_params.html:10
-#: app_main/templates/main/site_params.html:13
-#: app_main/templates/main/site_params.html:24
-#: app_main/templates/main/site_params.html:27
-#: app_main/templates/main/site_params.html:32
-#: app_main/templates/main/site_params.html:38
+#: app_main/templates/main/site_params.html:9
+#: app_main/templates/main/site_params.html:14
+#: app_main/templates/main/site_params.html:17
+#: app_main/templates/main/site_params.html:28
+#: app_main/templates/main/site_params.html:31
+#: app_main/templates/main/site_params.html:36
+#: app_main/templates/main/site_params.html:65
 msgid "Paramètres du site"
 msgstr ""
 
@@ -1583,14 +1635,14 @@ msgstr ""
 #: app_main/templates/main/connexion.html:332
 #: app_main/templates/main/language.html:98
 #: app_main/templates/main/language.html:127
-#: app_main/templates/main/site_params.html:49
+#: app_main/templates/main/site_params.html:76
 msgid "English"
 msgstr ""
 
 #: app_main/templates/main/connexion.html:334
 #: app_main/templates/main/language.html:98
 #: app_main/templates/main/language.html:106
-#: app_main/templates/main/site_params.html:48 templates/includes/nav.html:146
+#: app_main/templates/main/site_params.html:75 templates/includes/nav.html:146
 msgid "Français"
 msgstr ""
 
@@ -1802,7 +1854,7 @@ msgstr ""
 
 #: app_main/templates/main/language.html:5
 #: app_main/templates/main/language.html:7
-#: app_main/templates/main/site_params.html:42
+#: app_main/templates/main/site_params.html:69
 msgid "Langue"
 msgstr ""
 
@@ -2297,59 +2349,93 @@ msgid ""
 "Si la redirection automatique ne démarre pas, utilisez le lien ci-dessous."
 msgstr ""
 
-#: app_main/templates/main/site_params.html:19
+#: app_main/templates/main/site_params.html:23
 msgid "Retour au profil"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:21
+#: app_main/templates/main/site_params.html:25
 msgid "Site params"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:34
-msgid "Les paramètres sont enregistrés par langue."
+#: app_main/templates/main/site_params.html:38
+msgid "Les contenus sont enregistrés par langue."
+msgstr ""
+
+#: app_main/templates/main/site_params.html:43
+msgid "Envoi des e-mails"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:45
+msgid "Autorisation serveur"
 msgstr ""
 
 #: app_main/templates/main/site_params.html:46
+#: app_main/templates/main/site_params.html:48
+msgid "Activée"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:46
+#: app_main/templates/main/site_params.html:48
+msgid "Désactivée"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:47
+msgid "Autorisation administrateur"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:53
+msgid "Envois autorisés"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:55
+msgid "Autorisation globale des e-mails"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:61
+msgid "Enregistrer l'autorisation"
+msgstr ""
+
+#: app_main/templates/main/site_params.html:73
 msgid "Choisir la langue"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:51
+#: app_main/templates/main/site_params.html:78
 msgid "Charger"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:56
+#: app_main/templates/main/site_params.html:83
 msgid "Édition des paramètres"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:61 templates/includes/nav.html:7
+#: app_main/templates/main/site_params.html:88 templates/includes/nav.html:7
 msgid "Accueil"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:72
+#: app_main/templates/main/site_params.html:99
 msgid "Délais des messages popup"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:77
+#: app_main/templates/main/site_params.html:104
 msgid "Carte accueil 1"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:84
+#: app_main/templates/main/site_params.html:111
 msgid "Carte accueil 2"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:91
+#: app_main/templates/main/site_params.html:118
 msgid "Carte accueil 3"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:98
+#: app_main/templates/main/site_params.html:125
 msgid "Carte accueil 4"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:105
+#: app_main/templates/main/site_params.html:132
 msgid "Carte accueil 5"
 msgstr ""
 
-#: app_main/templates/main/site_params.html:112
+#: app_main/templates/main/site_params.html:139
 msgid "Carte accueil 6"
 msgstr ""
 
@@ -2402,175 +2488,179 @@ msgstr ""
 msgid "Activer ce thème"
 msgstr ""
 
-#: app_main/views.py:67
+#: app_main/views.py:69
 msgid "Normal"
 msgstr ""
 
-#: app_main/views.py:68
+#: app_main/views.py:70
 msgid "Palette chaude et classique pour l'habillage principal."
 msgstr ""
 
-#: app_main/views.py:72
+#: app_main/views.py:74
 msgid "Scout"
 msgstr ""
 
-#: app_main/views.py:74
+#: app_main/views.py:76
 msgid "Palette plus fraîche, plus nette, avec une ambiance vert-bleu."
 msgstr ""
 
-#: app_main/views.py:79
+#: app_main/views.py:81
 msgid "Taizé"
 msgstr ""
 
-#: app_main/views.py:81
+#: app_main/views.py:83
 msgid ""
 "Palette rouge et ocre, inspirée du parchemin et de la lumière des bougies."
 msgstr ""
 
-#: app_main/views.py:86
+#: app_main/views.py:88
 msgid "Me†al"
 msgstr ""
 
-#: app_main/views.py:87
+#: app_main/views.py:89
 msgid "Palette métal avec des néons de couleurs"
 msgstr ""
 
-#: app_main/views.py:308
+#: app_main/views.py:310
 #, python-format
 msgid "Compte de %(username)s"
 msgstr ""
 
-#: app_main/views.py:320
+#: app_main/views.py:322
 msgid "La connexion interactive n'est pas configurée pour cet environnement."
 msgstr ""
 
-#: app_main/views.py:383
+#: app_main/views.py:385
 msgid "Unsupported authentication mode."
 msgstr ""
 
-#: app_main/views.py:420
+#: app_main/views.py:422
 msgid ""
 "Votre compte Animation Messe doit être synchronisé depuis cARThographie."
 msgstr ""
 
-#: app_main/views.py:452
+#: app_main/views.py:454
 #, python-format
 msgid "Connecté en tant que %(username)s."
 msgstr ""
 
-#: app_main/views.py:472
+#: app_main/views.py:474
 msgid "Secret client Keycloak invalide ou non monté dans le conteneur AM."
 msgstr ""
 
-#: app_main/views.py:473
+#: app_main/views.py:475
 msgid "Client ID différent entre AM et Keycloak."
 msgstr ""
 
-#: app_main/views.py:474
+#: app_main/views.py:476
 msgid "Client Keycloak non configuré comme client confidentiel."
 msgstr ""
 
-#: app_main/views.py:478
+#: app_main/views.py:480
 msgid "URL de retour Keycloak différente de celle déclarée dans le client."
 msgstr ""
 
-#: app_main/views.py:479
+#: app_main/views.py:481
 msgid "Code OAuth déjà consommé ou expiré."
 msgstr ""
 
-#: app_main/views.py:480
+#: app_main/views.py:482
 msgid "Décalage d'horloge entre les services."
 msgstr ""
 
-#: app_main/views.py:484
+#: app_main/views.py:486
 msgid "Jeton d'accès refusé par l'endpoint userinfo."
 msgstr ""
 
-#: app_main/views.py:485
+#: app_main/views.py:487
 msgid "Realm ou endpoint userinfo incohérent avec le jeton reçu."
 msgstr ""
 
-#: app_main/views.py:489
+#: app_main/views.py:491
 msgid "Consultez les logs AM autour de keycloak_http_error."
 msgstr ""
 
-#: app_main/views.py:490
+#: app_main/views.py:492
 msgid "Vérifiez la configuration Keycloak non sensible affichée ci-dessous."
 msgstr ""
 
-#: app_main/views.py:500
+#: app_main/views.py:502
 msgid ""
 "Vérifier que KEYCLOAK_CLIENT_SECRET_FILE pointe vers un fichier monté dans "
 "le conteneur AM."
 msgstr ""
 
-#: app_main/views.py:502
+#: app_main/views.py:504
 msgid "Vérifier KEYCLOAK_CLIENT_ID et KEYCLOAK_REDIRECT_URI dans .env.prod."
 msgstr ""
 
-#: app_main/views.py:503
+#: app_main/views.py:505
 msgid "Chercher keycloak_http_error dans les logs AM."
 msgstr ""
 
-#: app_main/views.py:504
+#: app_main/views.py:506
 msgid ""
 "Vérifier le chemin du secret Home si le flux de provisioning est atteint."
 msgstr ""
 
-#: app_main/views.py:527
+#: app_main/views.py:529
 msgid "Aucune synchronisation de compte n'est en attente."
 msgstr ""
 
-#: app_main/views.py:546
+#: app_main/views.py:548
 msgid "Aucune finalisation de synchronisation n'est en attente."
 msgstr ""
 
-#: app_main/views.py:583
+#: app_main/views.py:585
 #, python-format
 msgid "Connecté en tant que %(username)s après synchronisation du compte."
 msgstr ""
 
-#: app_main/views.py:601
+#: app_main/views.py:603
 msgid "Vous êtes déconnecté."
 msgstr ""
 
-#: app_main/views.py:630
+#: app_main/views.py:632
 msgid "Les paramètres du site sont introuvables pour cette langue."
 msgstr ""
 
-#: app_main/views.py:640
+#: app_main/views.py:642
 msgid "Les réglages administrateur ont été enregistrés."
 msgstr ""
 
-#: app_main/views.py:671
+#: app_main/views.py:673
 msgid "administrateur"
 msgstr ""
 
-#: app_main/views.py:675
+#: app_main/views.py:677
 #, python-format
 msgid "Le rôle %(role)s a été attribué."
 msgstr ""
 
-#: app_main/views.py:680
+#: app_main/views.py:682
 #, python-format
 msgid "Le rôle %(role)s a été retiré."
 msgstr ""
 
-#: app_main/views.py:687
+#: app_main/views.py:689
 msgid "La demande de mise à jour des rôles est invalide."
 msgstr ""
 
-#: app_main/views.py:701
+#: app_main/views.py:703
 msgid "Action de compte inconnue."
 msgstr ""
 
-#: app_main/views.py:788
+#: app_main/views.py:742
+msgid "Autorisation des envois enregistrée."
+msgstr ""
+
+#: app_main/views.py:804
 #, python-format
 msgid ""
 "Enregistrement impossible: informations manquantes ou invalides (%(fields)s)."
 msgstr ""
 
-#: app_main/views.py:797
+#: app_main/views.py:813
 msgid "Enregistrement impossible: informations manquantes ou invalides."
 msgstr ""
 
