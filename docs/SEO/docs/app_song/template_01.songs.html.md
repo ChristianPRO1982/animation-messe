@@ -1,0 +1,101 @@
+# Template `songs.html`
+
+## Rôle
+
+Page racine de consultation, recherche et création des chants (`/songs/`).
+
+Cette page reste la recherche interactive destinée aux utilisateurs.
+Elle est `noindex, follow` côté SEO et conserve une canonical self vers `/songs/`.
+
+## Responsabilité front
+
+- affiche le titre de section et l’icône songs
+- affiche une phrase de contexte indiquant que la page est une bibliothèque de paroles de chants
+- affiche les compteurs `Chants`, `Recherche ⓘ`, `Total ⓘ`
+- affiche les tags de recherche active
+- affiche un panneau d’aide rappelant les marqueurs `✔️`, `✔️⁉️`, `📄`, `📱`, `🖨️`
+- le panneau d’aide explique aussi le marqueur `2️⃣` pour les chants en affichage double slide
+- expose des actions flottantes vers la recherche et la popup `Nouveau chant`
+- affiche la recherche simple
+- pour utilisateur authentifié, affiche la recherche avancée :
+  - `Inclure description et paroles`
+  - logique `OU/ET`
+  - filtre validation
+  - filtre `Favoris uniquement`
+  - sélections `genres / groupes / artistes`
+- pour utilisateur authentifié, expose `💫 Afficher mes favoris`
+- pour modérateur/admin avec éléments à traiter, expose `⚖️ Afficher les chants à modérer`
+- pour modérateur/admin avec chants non validés, expose `⚖️ Afficher les chants non validés`
+- pour modérateur/admin, expose toujours `⚖️ Hors règles`, sans pré-calcul de résultats afin d’éviter un scan des paroles au chargement de la page
+- les modes `favorites_quick`, `moderation_quick`, `non_validated_quick` et `rule_violations_only` sont temporaires et n’écrasent pas la recherche persistée
+- affiche en dernier dans le panneau outils un bouton vers le catalogue public léger `/songs/catalogue/`
+- affiche une liste desktop en cartes
+- affiche à part une liste compacte mobile avec panneau `⚙️`
+- chaque carte peut afficher :
+  - titre complet cliquable, sans préfixe `Paroles de`
+  - marqueurs `✔️`, `✔️⁉️` et `📄` séparés du texte du lien quand ils s’appliquent
+  - marqueur `2️⃣` à droite si `slide_display_mode != single`
+  - étoile favori éventuelle
+  - ordre des marqueurs à droite : `2️⃣` puis `⭐` quand les deux sont présents
+  - description résumée avec extension locale `[...]`
+  - tags `genres / groupes / artistes` avec liens d’ajout rapide à la recherche sauvegardée
+  - actions `Afficher`, `Modifier`, `Supprimer`, `📱`, `🖨️`
+- le lien `Modifier` et l’action `Supprimer` ne sont visibles que si l’utilisateur peut réellement éditer le chant
+- `Supprimer` passe par la popup partagée `LSSMessageBox`
+- l’action `🖨️` ouvre le menu d’impression existant
+- affiche l’état vide backend et l’état vide du filtre local JS
+- ouvre une popup `Nouveau chant` via le bouton flottant `+`
+
+## Contrat d’interface (variables attendues)
+
+- `search_params`
+- `reference_options`
+- `song_cards`
+- `displayed_count`
+- `search_count`
+- `catalog_count`
+- `song_search_count_help`
+- `song_catalog_count_help`
+- `can_use_favorites`
+- `can_use_moderation_quick`
+- `can_use_non_validated_quick`
+- `can_use_advanced_search`
+- `can_use_rule_violations_quick`
+- `can_create_song`
+- `favorites_quick_active`
+- `moderation_quick_active`
+- `non_validated_quick_active`
+- `rule_violations_quick_active`
+- `favorites_toggle_query`
+- `moderation_toggle_query`
+- `non_validated_toggle_query`
+- `rule_violations_toggle_query`
+- `song_identity_pairs`
+
+## Nouveau chant
+
+La popup `Nouveau chant` possède :
+
+- `Titre`
+- `Sous-titre`
+- le bouton `Créer`
+- le bouton `Annuler`
+- la croix de fermeture visible
+
+Le bouton flottant `+` ne change pas le scroll de la page.
+
+Pour utilisateur authentifié, la popup soumet un formulaire POST caché.
+
+La création est acceptée seulement si :
+
+- le titre n’est pas vide après normalisation
+- le couple `Titre / Sous-titre` n’existe pas déjà dans `song_identity_pairs`
+
+Si le couple existe déjà, le backend redirige vers `modify_song` du chant existant.
+
+Pour utilisateur invité, le bouton `+` ouvre une popup d’information indiquant que la création est réservée aux membres authentifiés.
+
+## Notes
+
+- les règles métier de droits, recherche et persistance sont définies dans `functional_requirements.md`
+- le filtre local JS sur `title + subtitle` doit fonctionner sur les rendus desktop et compact sans doublonner les résultats
