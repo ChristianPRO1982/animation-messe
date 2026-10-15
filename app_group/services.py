@@ -505,6 +505,59 @@ def save_am_member_title(title: AmMemberTitle) -> AmMemberTitle:
     return title
 
 
+def create_am_member_title(
+    group: Group, *, label: str, is_active: bool = True
+) -> AmMemberTitle:
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        last_position = AmMemberTitle.objects.filter(group=group).aggregate(
+            last=Max("position")
+        )["last"]
+        title = AmMemberTitle(
+            group=group,
+            label=label.strip(),
+            position=0 if last_position is None else last_position + 1,
+            is_active=is_active,
+        )
+        return save_am_member_title(title)
+
+
+def update_am_member_title(
+    group: Group, *, title_id: int, field: str, value: bool
+) -> list[AmMemberTitle]:
+    if field != "is_active" or type(value) is not bool:
+        raise ValidationError(_("Réglage de titre invalide."))
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        try:
+            title = AmMemberTitle.objects.get(group=group, pk=title_id)
+        except AmMemberTitle.DoesNotExist as exc:
+            raise ValidationError(_("Titre introuvable dans ce groupe.")) from exc
+        title.is_active = value
+        title.full_clean()
+        title.save(update_fields=["is_active"])
+        return list(
+            AmMemberTitle.objects.filter(group=group).order_by("position", "gamt_id")
+        )
+
+
+def reorder_am_member_titles(group: Group, title_ids: list[int]) -> list[AmMemberTitle]:
+    if any(type(pk) is not int or pk < 1 for pk in title_ids):
+        raise ValidationError(_("Ordre des titres invalide."))
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        titles = {
+            title.pk: title for title in AmMemberTitle.objects.filter(group=group)
+        }
+        if len(title_ids) != len(titles) or set(title_ids) != set(titles):
+            raise ValidationError(_("La liste des titres a changé. Rechargez la page."))
+        ordered = [titles[pk] for pk in title_ids]
+        for position, title in enumerate(ordered):
+            title.position = position
+        AmMemberTitle.objects.bulk_update(ordered, ["position"])
+        return ordered
+
+
 def save_group_location(location: GroupLocation) -> GroupLocation:
     location.full_clean()
     location.save()

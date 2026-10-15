@@ -287,6 +287,29 @@ gg_id
 Les titres sont configurables et ordonnés par groupe. Ne pas coder en dur une
 liste de titres.
 
+Les services `create_am_member_title`, `update_am_member_title` et
+`reorder_am_member_titles` portent la gestion du catalogue sous
+`transaction.atomic()` avec verrouillage de `g_group` par
+`select_for_update()`. La création utilise `max(position) + 1`, ou zéro pour le
+premier titre. L'activation modifie uniquement `is_active` ; le
+réordonnancement modifie uniquement les positions, sur la liste complète des
+titres du groupe, inactifs compris, avec des positions consécutives à partir
+de zéro. Les listes incomplètes, dupliquées ou contenant des identifiants
+étrangers sont refusées avant écriture.
+
+Ces opérations conservent `gamt_id`, le libellé existant et les références
+`g_am_member.gamt_id`. Une désactivation ne supprime ni le titre ni les liens
+des Membres AM qui l'utilisent. Aucune nouvelle contrainte de libellé ni
+migration n'est introduite pour ce catalogue.
+
+Sur `/groups/<id>/am-member-titles/`, les POST `create_am_member_title`,
+`update_am_member_title` et `reorder_am_member_titles` utilisent ces services.
+La création est un POST classique ; les autres opérations répondent en JSON
+avec `titles`, liste de `{id, position, is_active}`. La modification transmet
+`title_id`, `field = is_active` et `value = true/false` ; l'ordre transmet
+`title_ids` encodé en liste JSON. Les permissions et la protection CSRF restent
+obligatoires.
+
 ## `am.g_am_member`
 
 ```text

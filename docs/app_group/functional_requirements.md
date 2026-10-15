@@ -262,7 +262,8 @@ Le découpage cible est volontairement fin afin que chaque écran reste lisible 
 - `/groups/<id>/functions/` : catalogue des fonctions du groupe, création,
   activation, édition automatique des célébrations et ordre ; cette page ne
   propose plus d'affectations aux personnes ;
-- `/groups/<id>/am-member-titles/` : titres proposés pour les Membres AM ;
+- `/groups/<id>/am-member-titles/` : catalogue des titres Membre AM, création,
+  activation et ordre ;
 - `/groups/<id>/calendar/states/` : états planning configurables ;
 - `/groups/<id>/calendar/regular-rules/` : règles régulières de génération ;
 - `/groups/<id>/calendar/special-dates/` : dates particulières ;
@@ -311,6 +312,39 @@ Cette page n'offre ni renommage, ni suppression, ni attribution ou retrait de
 fonctions à des personnes. Les affectations existantes, leurs services métier
 et les données historiques sont conservés. Aucun nouvel écran d'affectation
 n'est introduit par cette évolution.
+
+## Gestion du catalogue des titres Membre AM
+
+Sur `/groups/<id>/am-member-titles/`, un Responsable ou Administrateur global
+gère les titres à gauche et en crée de nouveaux à droite. Comme pour les
+fonctions, la disposition utilise CSS Grid, sans tableau HTML ; à 980 px et
+moins, la gestion précède la création dans une seule colonne.
+
+Chaque titre présente son libellé, la poignée `⋮↕⋮` et la coche `Actif`. Les
+titres inactifs restent visibles et peuvent être réactivés. Le formulaire de
+création propose seulement `Libellé` et `Actif`, coché initialement ; chaque
+nouveau titre est ajouté en fin de liste, sans position numérique à saisir.
+Les validations actuelles du libellé restent inchangées.
+
+L'activation est enregistrée immédiatement. Le déplacement à la souris, au
+toucher ou au clavier reprend le comportement des fonctions : Espace pour
+saisir, flèches haut/bas pour déplacer, Entrée ou Espace pour confirmer et
+Échap pour annuler. L'ordre est enregistré au dépôt ou à la confirmation.
+Les deux catalogues partagent leur contrôleur JavaScript et leurs styles ; les
+opérations, identifiants, champs et messages sont configurés par les templates.
+
+L'état d'enregistrement est annoncé, les commandes sont temporairement
+désactivées pendant la requête et une erreur restaure le dernier état
+enregistré avec une explication via la message box commune. Sans JavaScript,
+la création reste disponible et la gestion interactive est désactivée avec un
+message explicatif. Le panneau outils suit le contrat de repli mobile commun.
+
+Les services effectuent les écritures sous transaction et verrouillent le
+groupe pour coordonner création et réordonnancement. L'ordre transmis doit
+contenir exactement tous les titres du groupe, inactifs compris, sans
+identifiant étranger ni doublon ; les positions deviennent consécutives à
+partir de zéro. Les identifiants et les références des Membres AM aux titres
+sont conservés. Cet écran ne propose ni renommage ni suppression de titre.
 
 ## Principe UI mobile
 
@@ -544,6 +578,10 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-FUNCTION-01** — La page des fonctions gère le catalogue sans proposer d'affectations aux personnes ; une création ajoute la fonction en fin de liste.
 
 **GROUP-FUNCTION-02** — Les coches et l'ordre des fonctions sont enregistrés immédiatement, avec gestion des erreurs et conservation des affectations et de l'historique.
+
+**GROUP-TITLE-01** — Le catalogue des titres Membre AM propose création en fin de liste, activation immédiate et réordonnancement avec la même interface responsive que les fonctions.
+
+**GROUP-TITLE-02** — La modification d'activation ou d'ordre conserve les identifiants des titres et leurs références dans les Membres AM ; une erreur restaure l'état enregistré dans l'interface.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

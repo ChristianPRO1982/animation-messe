@@ -158,29 +158,29 @@
     justify-self: start;
 }
 
-.site-theme-selection.group-functions-layout {
+.site-theme-selection.group-catalog-layout {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     align-items: start;
 }
 
-.group-functions-layout > *,
-.group-function-create .group-settings-form-row > * {
+.group-catalog-layout > *,
+.group-catalog-create .group-settings-form-row > * {
     min-width: 0;
 }
 
-.group-function-create .group-settings-form-row {
+.group-catalog-create .group-settings-form-row {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: 0.65rem;
 }
 
-.group-function-list {
+.group-catalog-list {
     display: grid;
     gap: 0.65rem;
     padding: 0;
     list-style: none;
 }
 
-.group-function-row {
+.group-catalog-row {
     display: grid;
     grid-template-columns: 2.75rem minmax(0, 1fr);
     gap: 0.65rem;
@@ -191,19 +191,19 @@
     background: var(--site-surface-alt);
 }
 
-.group-function-name {
+.group-catalog-name {
     overflow-wrap: anywhere;
     font-weight: 600;
 }
 
-.group-function-options {
+.group-catalog-options {
     grid-column: 2;
     display: flex;
     flex-wrap: wrap;
     gap: 0.65rem 1rem;
 }
 
-.group-function-options label {
+.group-catalog-options label {
     display: flex;
     align-items: baseline;
     gap: 0.4rem;
@@ -212,12 +212,12 @@
     cursor: pointer;
 }
 
-.group-function-options input {
+.group-catalog-options input {
     flex-shrink: 0;
     margin: 0;
 }
 
-.group-function-handle {
+.group-catalog-handle {
     grid-row: 1 / span 2;
     min-height: 2.75rem;
     padding: 0.25rem;
@@ -226,35 +226,35 @@
     font-family: inherit;
 }
 
-.group-function-handle[aria-pressed="true"] {
+.group-catalog-handle[aria-pressed="true"] {
     cursor: grabbing;
 }
 
-.group-function-row.is-moving {
+.group-catalog-row.is-moving {
     outline: 2px solid var(--site-ink);
 }
 
-.group-function-list.is-moving {
+.group-catalog-list.is-moving {
     user-select: none;
 }
 
-.group-function-status {
+.group-catalog-status {
     min-height: 1.5em;
     font-size: 0.9rem;
 }
 
 @media (max-width: 980px) {
-    .site-theme-selection.group-functions-layout {
+    .site-theme-selection.group-catalog-layout {
         grid-template-columns: minmax(0, 1fr);
     }
 }
 
 @media (max-width: 720px) {
-    .group-function-create .group-settings-form-row {
+    .group-catalog-create .group-settings-form-row {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .group-function-create .group-settings-form-row--checkbox {
+    .group-catalog-create .group-settings-form-row--checkbox {
         grid-template-columns: auto minmax(0, 1fr);
     }
 }

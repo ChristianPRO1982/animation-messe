@@ -1,27 +1,66 @@
 {% extends "app_group/group_page_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block group_page_content %}
-    <section class="site-theme-selection" aria-label="{% trans 'Titres Membre AM' %}">
-        <article class="site-theme-card">
-            <header class="site-theme-card-header"><div><h2>{% trans "Titres Membre AM" %}</h2></div></header>
-            {% for title in titles %}<p>{{ title.label }}</p>{% empty %}<p>{% trans "Aucun titre configuré." %}</p>{% endfor %}
-            <form method="post" class="group-settings-form" data-unsaved-guard>
+    <section class="site-theme-selection group-catalog-layout" aria-label="{% trans 'Titres Membre AM' %}">
+        <article class="site-theme-card group-catalog-management">
+            <header class="site-theme-card-header"><div><h2>{% trans "Gérer les titres Membre AM" %}</h2></div></header>
+            <p class="group-field-help" id="title-order-help">{% trans "Déplacez un titre avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler." %}</p>
+            <form method="post" action="{% url 'group_am_member_titles' common_group.group_id %}" data-catalog-manager
+                  data-update-action="update_am_member_title" data-reorder-action="reorder_am_member_titles"
+                  data-id-field="title_id" data-order-field="title_ids" data-response-key="titles"
+                  data-saving-label="{% trans 'Enregistrement…' %}"
+                  data-saved-label="{% trans 'Enregistré.' %}"
+                  data-error-label="{% trans 'Échec de l’enregistrement.' %}"
+                  data-error-title="{% trans 'Gestion des titres Membre AM' %}"
+                  data-error-message="{% trans 'Impossible d’enregistrer les modifications. Vérifiez votre connexion et réessayez.' %}"
+                  data-position-label="{% trans 'Position {position} sur {total}.' %}"
+                  data-cancel-label="{% trans 'Déplacement annulé.' %}">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="save_am_member_title">
-                {{ forms.title.non_field_errors }}
-                {% for field in forms.title.visible_fields %}
+                <ul class="group-catalog-list" data-catalog-list>
+                    {% for title in titles %}
+                        <li class="group-catalog-row" data-catalog-id="{{ title.gamt_id }}">
+                            <button type="button" class="site-action site-action--secondary group-catalog-handle" data-catalog-handle
+                                    aria-label="{% trans 'Déplacer le titre' %} {{ title.label }}"
+                                    aria-describedby="title-order-help" aria-pressed="false" disabled>⋮↕⋮</button>
+                            <span class="group-catalog-name">{{ title.label }}</span>
+                            <div class="group-catalog-options">
+                                <label for="title-{{ title.gamt_id }}-active">
+                                    <input id="title-{{ title.gamt_id }}-active" type="checkbox" data-catalog-field="is_active" {% if title.is_active %}checked{% endif %} disabled>
+                                    <span>{% trans "Actif" %}</span>
+                                </label>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="group-field-help">{% trans "Aucun titre configuré." %}</li>
+                    {% endfor %}
+                </ul>
+                <p class="group-catalog-status" data-catalog-status role="status" aria-live="polite" aria-atomic="true"></p>
+                <noscript><p>{% trans "Activez JavaScript pour modifier l’activation et l’ordre des titres. La création reste disponible." %}</p></noscript>
+            </form>
+        </article>
+        <article class="site-theme-card group-catalog-create">
+            <header class="site-theme-card-header"><div><h2>{% trans "Créer un titre Membre AM" %}</h2></div></header>
+            <form method="post" class="group-settings-form" data-catalog-create data-unsaved-guard>
+                {% csrf_token %}
+                {% for field in catalog_create_form.hidden_fields %}{{ field }}{% endfor %}
+                {% for error in catalog_create_form.non_field_errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
+                {% for field in catalog_create_form.visible_fields %}
                     <div class="group-settings-form-row{% if field.field.widget.input_type == 'checkbox' %} group-settings-form-row--checkbox{% endif %}">
                         {{ field.label_tag }}
                         <div class="group-settings-form-control">
                             {{ field }}
-                            {% if field.help_text %}<div class="group-field-help">{{ field.help_text }}</div>{% endif %}
                             {% for error in field.errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
                         </div>
                     </div>
                 {% endfor %}
-                <button class="site-action site-action--primary group-settings-form-submit" type="submit">{% trans "Enregistrer le titre" %}</button>
+                <button class="site-action site-action--primary group-settings-form-submit" type="submit">{% trans "Créer le titre" %}</button>
             </form>
         </article>
     </section>
+{% endblock %}
+
+{% block page_scripts %}
+    {{ block.super }}
+    <script src="{% static 'js/group_catalog.js' %}"></script>
 {% endblock %}

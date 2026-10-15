@@ -1,15 +1,16 @@
 (() => {
-    const manager = document.querySelector('[data-function-manager]');
+    const manager = document.querySelector('[data-catalog-manager]');
     if (!manager) return;
 
-    const list = manager.querySelector('[data-function-list]');
-    const status = manager.querySelector('[data-function-status]');
-    const createForm = document.querySelector('[data-function-create]');
-    const rows = () => Array.from(list.querySelectorAll('[data-function-id]'));
+    const list = manager.querySelector('[data-catalog-list]');
+    const status = manager.querySelector('[data-catalog-status]');
+    const createForm = document.querySelector('[data-catalog-create]');
+    const rows = () => Array.from(list.querySelectorAll('[data-catalog-id]'));
+    const fieldNames = [...new Set(Array.from(list.querySelectorAll('[data-catalog-field]'), (control) => control.dataset.catalogField))];
     const snapshot = () => rows().map((row) => ({
-        id: Number(row.dataset.functionId),
-        is_active: row.querySelector('[data-function-field="is_active"]').checked,
-        auto_edit_celebration: row.querySelector('[data-function-field="auto_edit_celebration"]').checked,
+        id: Number(row.dataset.catalogId),
+        ...Object.fromEntries(Array.from(row.querySelectorAll('[data-catalog-field]'),
+            (control) => [control.dataset.catalogField, control.checked])),
     }));
     let confirmed = snapshot();
     let saving = false;
@@ -26,13 +27,14 @@
         });
         createForm.querySelector('[type="submit"]').disabled = saving || Boolean(drag);
     };
-    const apply = (functions) => {
-        const byId = new Map(rows().map((row) => [Number(row.dataset.functionId), row]));
-        functions.forEach((state) => {
+    const apply = (items) => {
+        const byId = new Map(rows().map((row) => [Number(row.dataset.catalogId), row]));
+        items.forEach((state) => {
             const row = byId.get(state.id);
-            if (!row) return; // A function created in another session appears on the next page load.
-            row.querySelector('[data-function-field="is_active"]').checked = state.is_active;
-            row.querySelector('[data-function-field="auto_edit_celebration"]').checked = state.auto_edit_celebration;
+            if (!row) return; // Items created in another session appear on the next page load.
+            row.querySelectorAll('[data-catalog-field]').forEach((control) => {
+                control.checked = state[control.dataset.catalogField];
+            });
             list.append(row);
         });
     };
@@ -52,11 +54,11 @@
             });
             const payload = await response.json();
             if (!response.ok) throw new Error(payload.error || manager.dataset.errorMessage);
-            if (!Array.isArray(payload.functions) || !payload.functions.every((state) => (
-                Number.isInteger(state.id) && typeof state.is_active === 'boolean'
-                && typeof state.auto_edit_celebration === 'boolean'
+            const items = payload[manager.dataset.responseKey];
+            if (!Array.isArray(items) || !items.every((state) => (
+                Number.isInteger(state.id) && fieldNames.every((field) => typeof state[field] === 'boolean')
             ))) throw new Error(manager.dataset.errorMessage);
-            apply(payload.functions);
+            apply(items);
             confirmed = snapshot();
             setStatus(manager.dataset.savedLabel);
         } catch (error) {
@@ -87,15 +89,15 @@
         if (saving || drag) event.preventDefault();
     });
     manager.addEventListener('change', (event) => {
-        const control = event.target.closest('[data-function-field]');
+        const control = event.target.closest('[data-catalog-field]');
         if (!control) return;
         if (saving || drag) {
             apply(confirmed);
             return;
         }
-        save('update_function', {
-            function_id: control.closest('[data-function-id]').dataset.functionId,
-            field: control.dataset.functionField, value: String(control.checked),
+        save(manager.dataset.updateAction, {
+            [manager.dataset.idField]: control.closest('[data-catalog-id]').dataset.catalogId,
+            field: control.dataset.catalogField, value: String(control.checked),
         }, control);
     });
 
@@ -105,7 +107,7 @@
             .replace('{total}', String(rows().length)));
     };
     const begin = (handle, mode) => {
-        drag = { handle, row: handle.closest('[data-function-id]'), mode };
+        drag = { handle, row: handle.closest('[data-catalog-id]'), mode };
         handle.setAttribute('aria-pressed', 'true');
         drag.row.classList.add('is-moving');
         list.classList.add('is-moving');
@@ -133,7 +135,7 @@
         if (commit) {
             const ids = snapshot().map((state) => state.id);
             if (ids.some((id, index) => id !== confirmed[index].id)) {
-                save('reorder_functions', { function_ids: JSON.stringify(ids) }, handle);
+                save(manager.dataset.reorderAction, { [manager.dataset.orderField]: JSON.stringify(ids) }, handle);
             } else {
                 setStatus('');
             }
@@ -166,7 +168,7 @@
     };
 
     list.addEventListener('pointerdown', (event) => {
-        const handle = event.target.closest('[data-function-handle]');
+        const handle = event.target.closest('[data-catalog-handle]');
         if (!handle || saving || drag || event.button !== 0 || !event.isPrimary) return;
         event.preventDefault();
         begin(handle, 'pointer');
@@ -191,7 +193,7 @@
         if (drag) finish(false);
     });
     list.addEventListener('keydown', (event) => {
-        const handle = event.target.closest('[data-function-handle]');
+        const handle = event.target.closest('[data-catalog-handle]');
         if (!handle || saving) return;
         if (event.key === 'Escape' && drag) {
             event.preventDefault();

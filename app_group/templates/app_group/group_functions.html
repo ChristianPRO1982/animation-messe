@@ -2,11 +2,13 @@
 {% load i18n static %}
 
 {% block group_page_content %}
-    <section class="site-theme-selection group-functions-layout" aria-label="{% trans 'Fonctions' %}">
-        <article class="site-theme-card group-functions-management">
+    <section class="site-theme-selection group-catalog-layout" aria-label="{% trans 'Fonctions' %}">
+        <article class="site-theme-card group-catalog-management">
             <header class="site-theme-card-header"><div><h2>{% trans "Gérer les fonctions" %}</h2></div></header>
             <p class="group-field-help" id="function-order-help">{% trans "Déplacez une fonction avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler." %}</p>
-            <form method="post" action="{% url 'group_functions' common_group.group_id %}" data-function-manager
+            <form method="post" action="{% url 'group_functions' common_group.group_id %}" data-catalog-manager
+                  data-update-action="update_function" data-reorder-action="reorder_functions"
+                  data-id-field="function_id" data-order-field="function_ids" data-response-key="functions"
                   data-saving-label="{% trans 'Enregistrement…' %}"
                   data-saved-label="{% trans 'Enregistré.' %}"
                   data-error-label="{% trans 'Échec de l’enregistrement.' %}"
@@ -15,20 +17,20 @@
                   data-position-label="{% trans 'Position {position} sur {total}.' %}"
                   data-cancel-label="{% trans 'Déplacement annulé.' %}">
                 {% csrf_token %}
-                <ul class="group-function-list" data-function-list>
+                <ul class="group-catalog-list" data-catalog-list>
                     {% for function in functions %}
-                        <li class="group-function-row" data-function-id="{{ function.gf_id }}">
-                            <button type="button" class="site-action site-action--secondary group-function-handle" data-function-handle
+                        <li class="group-catalog-row" data-catalog-id="{{ function.gf_id }}">
+                            <button type="button" class="site-action site-action--secondary group-catalog-handle" data-catalog-handle
                                     aria-label="{% trans 'Déplacer la fonction' %} {{ function.name }}"
                                     aria-describedby="function-order-help" aria-pressed="false" disabled>⋮↕⋮</button>
-                            <span class="group-function-name">{{ function.name }}</span>
-                            <div class="group-function-options">
+                            <span class="group-catalog-name">{{ function.name }}</span>
+                            <div class="group-catalog-options">
                                 <label for="function-{{ function.gf_id }}-active">
-                                    <input id="function-{{ function.gf_id }}-active" type="checkbox" data-function-field="is_active" {% if function.is_active %}checked{% endif %} disabled>
+                                    <input id="function-{{ function.gf_id }}-active" type="checkbox" data-catalog-field="is_active" {% if function.is_active %}checked{% endif %} disabled>
                                     <span>{% trans "Actif" %}</span>
                                 </label>
                                 <label for="function-{{ function.gf_id }}-edit">
-                                    <input id="function-{{ function.gf_id }}-edit" type="checkbox" data-function-field="auto_edit_celebration" {% if function.auto_edit_celebration %}checked{% endif %} disabled>
+                                    <input id="function-{{ function.gf_id }}-edit" type="checkbox" data-catalog-field="auto_edit_celebration" {% if function.auto_edit_celebration %}checked{% endif %} disabled>
                                     <span>{% trans "Édition des célébrations" %}</span>
                                 </label>
                             </div>
@@ -37,17 +39,17 @@
                         <li class="group-field-help">{% trans "Aucune fonction configurée." %}</li>
                     {% endfor %}
                 </ul>
-                <p class="group-function-status" data-function-status role="status" aria-live="polite" aria-atomic="true"></p>
+                <p class="group-catalog-status" data-catalog-status role="status" aria-live="polite" aria-atomic="true"></p>
                 <noscript><p>{% trans "Activez JavaScript pour modifier les coches et l’ordre des fonctions. La création reste disponible." %}</p></noscript>
             </form>
         </article>
-        <article class="site-theme-card group-function-create">
+        <article class="site-theme-card group-catalog-create">
             <header class="site-theme-card-header"><div><h2>{% trans "Créer une fonction" %}</h2></div></header>
-            <form method="post" class="group-settings-form" data-function-create data-unsaved-guard>
+            <form method="post" class="group-settings-form" data-catalog-create data-unsaved-guard>
                 {% csrf_token %}
-                {% for field in function_create_form.hidden_fields %}{{ field }}{% endfor %}
-                {% for error in function_create_form.non_field_errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
-                {% for field in function_create_form.visible_fields %}
+                {% for field in catalog_create_form.hidden_fields %}{{ field }}{% endfor %}
+                {% for error in catalog_create_form.non_field_errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
+                {% for field in catalog_create_form.visible_fields %}
                     <div class="group-settings-form-row{% if field.field.widget.input_type == 'checkbox' %} group-settings-form-row--checkbox{% endif %}">
                         {{ field.label_tag }}
                         <div class="group-settings-form-control">
@@ -64,5 +66,5 @@
 
 {% block page_scripts %}
     {{ block.super }}
-    <script src="{% static 'js/group_functions.js' %}"></script>
+    <script src="{% static 'js/group_catalog.js' %}"></script>
 {% endblock %}

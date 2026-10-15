@@ -3054,3 +3054,55 @@ msgstr "Sign in again before changing functions."
 #: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
 msgid "La fonction est créée."
 msgstr "The function has been created."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gérer les titres Membre AM"
+msgstr "Manage AM member titles"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer un titre Membre AM"
+msgstr "Create an AM member title"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer le titre"
+msgstr "Create title"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacer le titre"
+msgstr "Move title"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacez un titre avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+msgstr "Move a title using its handle. Keyboard: Space to pick up, arrow keys to move, Enter or Space to confirm, Escape to cancel."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gestion des titres Membre AM"
+msgstr "AM member title management"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Activez JavaScript pour modifier l’activation et l’ordre des titres. La création reste disponible."
+msgstr "Enable JavaScript to change title activation and order. You can still create titles."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Ordre des titres invalide."
+msgstr "Invalid title order."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Réglage de titre invalide."
+msgstr "Invalid title setting."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Titre introuvable dans ce groupe."
+msgstr "Title not found in this group."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La liste des titres a changé. Rechargez la page."
+msgstr "The title list has changed. Reload the page."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Reconnectez-vous avant de modifier ce catalogue."
+msgstr "Sign in again before changing this catalog."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Le titre est créé."
+msgstr "The title has been created."

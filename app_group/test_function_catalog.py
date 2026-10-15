@@ -363,7 +363,7 @@ class FunctionCatalogViewTests(SimpleTestCase):
         response = views.group_functions(self.request(), 7)
         self.assertContains(response, "Chantre")
         self.assertContains(response, "⋮↕⋮")
-        self.assertContains(response, 'data-function-field="auto_edit_celebration"')
+        self.assertContains(response, 'data-catalog-field="auto_edit_celebration"')
         self.assertContains(response, 'name="action" value="create_function"')
         self.assertNotContains(response, 'name="position"')
         self.assertNotContains(response, "Affectations")

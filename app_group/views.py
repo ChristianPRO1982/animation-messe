@@ -80,7 +80,11 @@ GROUP_PAGE_CONFIG = {
         "template": "app_group/group_am_member_titles.html",
         "title": _("Titres Membre AM"),
         "route": "group_am_member_titles",
-        "actions": {"save_am_member_title"},
+        "actions": {
+            "create_am_member_title",
+            "update_am_member_title",
+            "reorder_am_member_titles",
+        },
     },
     "consent": {
         "template": "app_group/group_consent.html",
@@ -123,6 +127,40 @@ GROUP_PAGE_CONFIG = {
         "title": _("Recueil"),
         "route": "group_songs",
         "actions": {"add_song", "tag_song", "set_tag_verse_selection"},
+    },
+}
+
+
+GROUP_CATALOG_CONFIG = {
+    "functions": {
+        "create_action": "create_function",
+        "update_action": "update_function",
+        "order_action": "reorder_functions",
+        "create_form": forms.GroupFunctionCreateForm,
+        "flag_form": forms.GroupFunctionFlagForm,
+        "order_form": forms.GroupFunctionOrderForm,
+        "create_service": "create_group_function",
+        "flag_service": "update_group_function_flag",
+        "order_service": "reorder_group_functions",
+        "order_field": "function_ids",
+        "response_key": "functions",
+        "state_fields": ("is_active", "auto_edit_celebration"),
+        "created_message": _("La fonction est créée."),
+    },
+    "am_member_titles": {
+        "create_action": "create_am_member_title",
+        "update_action": "update_am_member_title",
+        "order_action": "reorder_am_member_titles",
+        "create_form": forms.AmMemberTitleCreateForm,
+        "flag_form": forms.AmMemberTitleFlagForm,
+        "order_form": forms.AmMemberTitleOrderForm,
+        "create_service": "create_am_member_title",
+        "flag_service": "update_am_member_title",
+        "order_service": "reorder_am_member_titles",
+        "order_field": "title_ids",
+        "response_key": "titles",
+        "state_fields": ("is_active",),
+        "created_message": _("Le titre est créé."),
     },
 }
 
@@ -411,15 +449,17 @@ def _handle_detail_post(request, common_group: CommonGroup, group: Group | None)
 
 
 def _group_management_page(request, group_id: int, page_key: str):
-    function_json = (
-        page_key == "functions"
+    catalog = GROUP_CATALOG_CONFIG.get(page_key)
+    catalog_json = (
+        catalog is not None
         and request.method == "POST"
-        and request.POST.get("action") in {"update_function", "reorder_functions"}
+        and request.POST.get("action")
+        in {catalog["update_action"], catalog["order_action"]}
     )
     if not request.user.is_authenticated:
-        if function_json:
+        if catalog_json:
             return JsonResponse(
-                {"error": str(_("Reconnectez-vous avant de modifier les fonctions."))},
+                {"error": str(_("Reconnectez-vous avant de modifier ce catalogue."))},
                 status=403,
             )
         return redirect("login")
@@ -428,22 +468,22 @@ def _group_management_page(request, group_id: int, page_key: str):
     group = Group.objects.filter(gg_id=group_id).first()
     access_context = _build_group_access_context(request.user, common_group, group)
     if not access_context.can_manage_group:
-        if function_json:
+        if catalog_json:
             return JsonResponse({"error": str(_("Accès refusé."))}, status=403)
         return HttpResponseForbidden(_("Accès refusé."))
 
     config = GROUP_PAGE_CONFIG[page_key]
     if group is None:
-        if function_json:
+        if catalog_json:
             return JsonResponse(
                 {"error": str(_("Activez l'espace AM avant cette action."))}, status=404
             )
         messages.error(request, _("Activez l'espace AM avant cette action."))
         return redirect("group_detail", group_id=group_id)
 
-    function_create_form = None
-    if request.method == "POST" and page_key == "functions":
-        response, function_create_form = _handle_function_catalog_post(request, group)
+    catalog_create_form = None
+    if request.method == "POST" and catalog is not None:
+        response, catalog_create_form = _handle_catalog_post(request, group, page_key)
         if response is not None:
             return response
     elif request.method == "POST":
@@ -467,11 +507,11 @@ def _group_management_page(request, group_id: int, page_key: str):
             "page_title": config["title"],
         }
     )
-    if page_key == "functions":
-        context["function_create_form"] = (
-            function_create_form
-            if function_create_form is not None
-            else forms.GroupFunctionCreateForm(initial={"action": "create_function"})
+    if catalog is not None:
+        context["catalog_create_form"] = (
+            catalog_create_form
+            if catalog_create_form is not None
+            else catalog["create_form"](initial={"action": catalog["create_action"]})
         )
     if page_key == "consent":
         consent_draft = services.get_or_create_group_consent_draft(group)
@@ -496,38 +536,42 @@ def _group_management_page(request, group_id: int, page_key: str):
         request,
         config["template"],
         context,
-        status=400 if function_create_form is not None else 200,
+        status=400 if catalog_create_form is not None else 200,
     )
 
 
-def _handle_function_catalog_post(request, group):
+def _handle_catalog_post(request, group, page_key):
+    catalog = GROUP_CATALOG_CONFIG[page_key]
     action = request.POST.get("action", "")
     try:
         services.require_group_manager(request.user, group)
     except PermissionDenied:
         return JsonResponse({"error": str(_("Accès refusé."))}, status=403), None
 
-    if action == "create_function":
-        form = forms.GroupFunctionCreateForm(request.POST)
+    if action == catalog["create_action"]:
+        form = catalog["create_form"](request.POST)
         if form.is_valid():
             try:
-                services.create_group_function(
+                getattr(services, catalog["create_service"])(
                     group,
                     **{
-                        field: form.cleaned_data[field]
-                        for field in ("name", "is_active", "auto_edit_celebration")
+                        field: value
+                        for field, value in form.cleaned_data.items()
+                        if field != "action"
                     },
                 )
             except ValidationError as exc:
                 form.add_error(None, _validation_message(exc))
             else:
-                messages.success(request, _("La fonction est créée."))
-                return redirect("group_functions", group_id=group.pk), None
+                messages.success(request, catalog["created_message"])
+                return redirect(
+                    GROUP_PAGE_CONFIG[page_key]["route"], group_id=group.pk
+                ), None
         return None, form
 
     form_class = {
-        "update_function": forms.GroupFunctionFlagForm,
-        "reorder_functions": forms.GroupFunctionOrderForm,
+        catalog["update_action"]: catalog["flag_form"],
+        catalog["order_action"]: catalog["order_form"],
     }.get(action)
     if form_class is None:
         return JsonResponse(
@@ -540,30 +584,32 @@ def _handle_function_catalog_post(request, group):
         )
         return JsonResponse({"error": error}, status=400), None
     try:
-        if action == "update_function":
-            functions = services.update_group_function_flag(
+        if action == catalog["update_action"]:
+            items = getattr(services, catalog["flag_service"])(
                 group,
                 **{
-                    field: form.cleaned_data[field]
-                    for field in ("function_id", "field", "value")
+                    field: value
+                    for field, value in form.cleaned_data.items()
+                    if field != "action"
                 },
             )
         else:
-            functions = services.reorder_group_functions(
-                group, form.cleaned_data["function_ids"]
+            items = getattr(services, catalog["order_service"])(
+                group, form.cleaned_data[catalog["order_field"]]
             )
     except ValidationError as exc:
         return JsonResponse({"error": _validation_message(exc)}, status=400), None
     return JsonResponse(
         {
-            "functions": [
+            catalog["response_key"]: [
                 {
-                    "id": function.pk,
-                    "position": function.position,
-                    "is_active": function.is_active,
-                    "auto_edit_celebration": function.auto_edit_celebration,
+                    "id": item.pk,
+                    "position": item.position,
+                    **{
+                        field: getattr(item, field) for field in catalog["state_fields"]
+                    },
                 }
-                for function in functions
+                for item in items
             ]
         }
     ), None

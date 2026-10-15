@@ -160,6 +160,32 @@ class AmMemberTitleForm(ActionForm):
     is_active = forms.BooleanField(label=_("Actif"), required=False, initial=True)
 
 
+class AmMemberTitleCreateForm(ActionForm):
+    label = forms.CharField(label=_("Libellé"), max_length=255)
+    is_active = forms.BooleanField(label=_("Actif"), required=False, initial=True)
+
+
+class AmMemberTitleFlagForm(ActionForm):
+    title_id = forms.IntegerField(min_value=1)
+    field = forms.ChoiceField(choices=[("is_active", "is_active")])
+    value = forms.TypedChoiceField(
+        choices=[("true", "true"), ("false", "false")],
+        coerce=lambda value: value == "true",
+    )
+
+
+class AmMemberTitleOrderForm(ActionForm):
+    title_ids = forms.JSONField()
+
+    def clean_title_ids(self):
+        ids = self.cleaned_data["title_ids"]
+        if not isinstance(ids, list) or any(
+            type(pk) is not int or pk < 1 for pk in ids
+        ):
+            raise ValidationError(_("Ordre des titres invalide."))
+        return ids
+
+
 class GroupLocationForm(NamedGroupObjectForm):
     address = forms.CharField(
         label=_("Adresse"),

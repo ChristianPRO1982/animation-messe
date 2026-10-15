@@ -3055,3 +3055,55 @@ msgstr "Reconnectez-vous avant de modifier les fonctions."
 #: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
 msgid "La fonction est créée."
 msgstr "La fonction est créée."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gérer les titres Membre AM"
+msgstr "Gérer les titres Membre AM"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer un titre Membre AM"
+msgstr "Créer un titre Membre AM"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer le titre"
+msgstr "Créer le titre"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacer le titre"
+msgstr "Déplacer le titre"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacez un titre avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+msgstr "Déplacez un titre avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gestion des titres Membre AM"
+msgstr "Gestion des titres Membre AM"
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Activez JavaScript pour modifier l’activation et l’ordre des titres. La création reste disponible."
+msgstr "Activez JavaScript pour modifier l’activation et l’ordre des titres. La création reste disponible."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Ordre des titres invalide."
+msgstr "Ordre des titres invalide."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Réglage de titre invalide."
+msgstr "Réglage de titre invalide."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Titre introuvable dans ce groupe."
+msgstr "Titre introuvable dans ce groupe."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La liste des titres a changé. Rechargez la page."
+msgstr "La liste des titres a changé. Rechargez la page."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Reconnectez-vous avant de modifier ce catalogue."
+msgstr "Reconnectez-vous avant de modifier ce catalogue."
+
+#: app_group/templates/app_group/group_am_member_titles.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Le titre est créé."
+msgstr "Le titre est créé."
