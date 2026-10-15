@@ -54,6 +54,21 @@ Les blocs chants de célébration référencent LSS par une FK vivante nullable 
 - les paramètres durables de planning ;
 - l’identité externe des utilisateurs.
 
+## Principe UI mobile
+
+Les pages de liste, de consultation et d'édition des célébrations, des gabarits
+et des feuilles de messe doivent appliquer le
+[contrat UI responsive universel](../ui_responsive.md), règles `UI-MOBILE-*`.
+À 980 px et moins, le repli initial des outils limite le volume avant le
+contenu principal, notamment le déroulé de célébration.
+
+La zone dépliée contient l'intégralité des outils PC autorisés pour la page,
+dans le même ordre, avec les mêmes séparateurs et styles. Les conditions liées
+au rôle, à la validation, à la date ou à l'archivage restent identiques. Les
+boutons d'enregistrement et de validation conservent leurs associations de
+formulaire et leurs confirmations. Les futurs écrans utilisent le mécanisme
+commun de `app_main`, sans liste mobile indépendante.
+
 ---
 
 # 2. Célébration
@@ -171,6 +186,8 @@ Les feuilles :
 **CELEBRATION-ID-02** — Une ligne de planning correspond à une célébration.
 
 **CELEBRATION-ID-03** — `groupe + date + heure + lieu` est unique pour chaque groupe participant.
+
+**CELEBRATION-UI-01** — Les panneaux outils des pages de célébration respectent `UI-MOBILE-*`, avec repli initial sur mobile et équivalence complète des outils PC et mobiles selon les permissions et l'état métier.
 
 **CELEBRATION-TEMPLATE-01** — Un gabarit de célébration prépare une structure de déroulé.
 

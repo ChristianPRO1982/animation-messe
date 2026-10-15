@@ -50,8 +50,8 @@
 }
 
 .site-section-panel > :not(.site-panel-header):not(style) > *,
-.site-tools-panel > :not(.site-panel-header):not(style) > *,
-.site-mobile-side > :not(.site-panel-header):not(style) > *,
+.site-page-tools > :not(style) > *,
+.site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) > *,
 .site-main-heading,
 .site-main-aside,
 .site-main-content > *,

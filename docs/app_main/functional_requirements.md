@@ -155,6 +155,35 @@ groupe :
 Ce lien n'ouvre aucun droit supplémentaire : la route cible reste protégée par
 les règles de `app_group`.
 
+## Panneaux outils responsive
+
+Le [contrat UI responsive universel](../ui_responsive.md), règles
+`UI-MOBILE-01` à `UI-MOBILE-05`, est un principe fondamental du socle : réduire
+le volume du haut de page sur smartphone pour donner rapidement accès au
+contenu principal. Il s'applique à toutes les pages communes, dont l'accueil,
+la connexion, le compte, les préférences et les paramètres du site.
+`app_main` fournit le mécanisme commun utilisé par toutes les apps Django.
+
+Les pages utilisant le template commun partagent un seul contenu de panneau
+outils. À plus de 980 px, les outils sont directement visibles dans le panneau
+latéral. À 980 px et moins, ils sont déplacés dans le panneau mobile et repliés
+par défaut derrière un bouton `Afficher les actions` / `Masquer les actions`.
+Les panneaux contenant uniquement des informations ou illustrations suivent
+la même règle ; les panneaux vides ne présentent pas de bouton.
+
+Le titre, l'illustration et le contexte propre au panneau mobile restent
+visibles hors du repli. L'ouverture ne déclenche ni navigation ni soumission,
+ne se ferme pas automatiquement et conserve son état lors d'un changement de
+largeur. Une nouvelle page démarre avec les outils mobiles repliés. Sans
+JavaScript, les outils restent directement accessibles.
+
+Le déplacement conserve les permissions, l'ordre, les séparateurs, les styles,
+les associations de formulaires et les confirmations via la message box
+commune. Les actions repliées sont également exclues de la navigation clavier.
+Pour une même page et un même utilisateur, la zone mobile dépliée doit
+contenir l'intégralité du panneau outils PC, sans sélection réduite ni seconde
+liste maintenue dans `mobile_side_content`.
+
 ---
 
 # 6. Règles fonctionnelles
@@ -184,6 +213,12 @@ les règles de `app_group`.
 **MAIN-PAGE-02** — Les préférences de thème et de langue sont des préférences navigateur tant qu’aucune synchronisation serveur n’est spécifiée.
 
 **MAIN-PAGE-03** — La page d'accueil expose un accès vers la gestion des groupes uniquement aux Administrateurs globaux et aux Responsables d'au moins un groupe.
+
+**MAIN-UI-01** — Les panneaux outils non vides sont repliables et initialement fermés à 980 px et moins ; sur ordinateur, leurs contenus restent directement visibles.
+
+**MAIN-UI-02** — Un seul contenu d'outils est partagé entre ordinateur et mobile, avec conservation des permissions, des formulaires et des confirmations.
+
+**MAIN-UI-03** — Le socle applique le contrat universel `UI-MOBILE-*` à toutes les apps Django : réduire le volume avant le contenu principal sur mobile et assurer l'équivalence complète des outils PC et mobiles.
 
 **MAIN-ADMIN-01** — La gestion complète des paramètres globaux est réservée aux administrateurs globaux AM.
 

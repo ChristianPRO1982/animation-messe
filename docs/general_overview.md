@@ -41,6 +41,7 @@ cible AM. Les chants sont couverts par `SFD-03-chants.md` et par les contrats
 
 Les contrats techniques transverses déjà disponibles sont :
 
+- [Principes fondamentaux de l'UI responsive](ui_responsive.md) — contrat universel à lire avant de créer ou modifier un template : outils mobiles repliés par défaut et équivalence complète avec le panneau outils PC.
 - `docs/keycloak_connexion.md` — authentification Keycloak, session AM, provisioning, diagnostics.
 - `docs/app_email/` — e-mails transactionnels et e-mails de vie métier gérés par Django.
 - [Guide d'utilisation de app_email](app_email/usage.md) — à lire avant d'intégrer un envoi depuis une app : API, templates, idempotence et envoi après commit.
@@ -66,6 +67,9 @@ Pour concevoir une fonctionnalité technique :
 - vérifier ensuite les SFD transverses impactées ;
 - chercher les règles identifiées par préfixe ;
 - vérifier les points encore à spécifier avant d’inventer une règle.
+
+Pour tout travail UI/UX, lire aussi [le contrat UI responsive](ui_responsive.md),
+puis sa déclinaison dans les exigences de chaque app concernée.
 
 ---
 
@@ -120,6 +124,24 @@ Il peut être affecté à des plannings ou célébrations, mais ne possède aucu
 
 Les règles de consentement, retrait, secret personnel et minimisation RGPD de `SFD-01` doivent être relues avant toute conception touchant aux personnes sans compte.
 
+## 3.5. UI mobile : priorité au contenu et repli des outils
+
+Le **repli des outils sur smartphone est un principe fondamental de l'UI** :
+le haut de la page HTML doit occuper le moins de volume possible avant le
+contenu principal. À **980 px et moins**, y compris sur certaines tablettes,
+les outils sont fermés par défaut derrière `Afficher les actions` /
+`Masquer les actions`. Sur PC, ils restent directement visibles.
+
+Pour chaque app Django et chaque page, la zone mobile dépliée reprend
+**l'intégralité du contenu du panneau outils PC**, dans le même ordre, avec
+les mêmes styles, séparateurs, permissions et comportements de formulaire.
+Le titre, l'illustration et le contexte mobile restent visibles hors du repli.
+Les contenus d'outils purement informatifs sont aussi repliés.
+
+Le contrat universel [UI responsive](ui_responsive.md) précise l'interaction,
+l'accessibilité, le mécanisme commun et les vérifications. Il s'applique aux
+templates existants et futurs, app Django par app Django.
+
 ---
 
 # 4. Identifiants de règles
@@ -130,6 +152,7 @@ Les SFD utilisent des identifiants de règles pour faciliter la conception techn
 - `PLAN-*` — planning, génération, cellules, fonctions, validation du planning.
 - `CHANT-*` — chants, LSS, recueils, tags, synchronisation, références cassées.
 - `CELEB-*` — célébrations, déroulé, AELF, validation, archivage, feuilles.
+- `UI-MOBILE-*` — principes UI transverses définis dans `docs/ui_responsive.md`, déclinés dans les exigences par app.
 
 Lorsqu’une règle technique est créée, elle doit autant que possible pointer vers un ou plusieurs identifiants SFD.
 

@@ -115,6 +115,20 @@ Les noms et couleurs sont configurables, mais ne changent pas le sens fonctionne
 
 Les cellules persistantes appartiennent à `app_celebration`.
 
+## Principe UI mobile
+
+Les écrans de calendrier, de tableau de planning et les workflows de génération
+ou de validation doivent appliquer le
+[contrat UI responsive universel](../ui_responsive.md), règles `UI-MOBILE-*`.
+À 980 px et moins, leurs outils sont repliés par défaut afin de donner
+rapidement accès au planning. La zone dépliée doit reprendre tous les outils
+du panneau PC pour la même page, le même utilisateur et le même état métier,
+avec les mêmes permissions, séparateurs, styles et soumissions.
+
+Les futurs templates utilisent le mécanisme commun de `app_main`, sans liste
+mobile indépendante. Cette exigence est acquise même si l'UX détaillée du
+tableau et du calendrier reste à préciser.
+
 ---
 
 # 5. Validation du planning
@@ -159,6 +173,8 @@ Une célébration passée ne peut plus être dévalidée côté planning.
 **PLANNING-GEN-06** — Modifier ou supprimer une règle après génération ne modifie pas rétroactivement les célébrations déjà créées.
 
 **PLANNING-TAB-01** — Une cellule associe une personne, une célébration, un état et une ou plusieurs fonctions.
+
+**PLANNING-UI-01** — Les panneaux outils des écrans de planning respectent `UI-MOBILE-*`, avec repli initial sur mobile et équivalence complète des outils PC et mobiles selon les permissions et l'état du planning.
 
 **PLANNING-STATE-01** — Le groupe doit disposer d’au moins deux états.
 

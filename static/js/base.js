@@ -16,6 +16,71 @@
         }
     }
 
+    const pageTools = document.querySelector("[data-page-tools]");
+    const pageToolsHome = document.querySelector("[data-page-tools-home]");
+    const mobileActions = document.querySelector("[data-mobile-actions]");
+    const mobileActionsToggle = document.querySelector("[data-mobile-actions-toggle]");
+
+    if (pageTools && pageToolsHome && mobileActions && mobileActionsToggle) {
+        const mobileLayout = window.matchMedia("(max-width: 980px)");
+        const hasTools = Boolean(pageTools.textContent.trim() || pageTools.querySelector(
+            "a[href], button, input:not([type='hidden']), select, textarea, img, svg, video, audio, canvas, iframe, hr"
+        ));
+        let mobileActionsExpanded = false;
+        let focusedToolsElement = null;
+        const toolsDestination = () => mobileLayout.matches ? mobileActions : pageToolsHome;
+
+        document.addEventListener("focusin", (event) => {
+            focusedToolsElement = pageTools.contains(event.target) || event.target === mobileActionsToggle
+                ? event.target
+                : null;
+        });
+        document.addEventListener("focusout", (event) => {
+            // CSS can hide the focused panel before the media query's change event.
+            // Keep its focus target only while a responsive move is pending.
+            if (event.relatedTarget || pageTools.parentElement === toolsDestination()) {
+                focusedToolsElement = null;
+            }
+        });
+
+        const syncPageTools = () => {
+            const activeElement = document.activeElement === document.body && focusedToolsElement
+                ? focusedToolsElement
+                : document.activeElement;
+            const toolsHadFocus = pageTools.contains(activeElement);
+            const toggleHadFocus = activeElement === mobileActionsToggle;
+            const destination = toolsDestination();
+
+            if (pageTools.parentElement !== destination) {
+                // Move the original nodes to preserve IDs, form associations and listeners.
+                destination.append(pageTools);
+            }
+
+            mobileActions.hidden = !mobileLayout.matches || !hasTools;
+            pageTools.hidden = mobileLayout.matches && !mobileActionsExpanded;
+            mobileActionsToggle.setAttribute("aria-expanded", String(mobileActionsExpanded));
+            mobileActionsToggle.textContent = mobileActionsExpanded
+                ? mobileActionsToggle.dataset.closeLabel
+                : mobileActionsToggle.dataset.openLabel;
+
+            if (toolsHadFocus && pageTools.hidden && hasTools) {
+                mobileActionsToggle.focus({ preventScroll: true });
+            } else if (toolsHadFocus && !pageTools.hidden) {
+                activeElement.focus({ preventScroll: true });
+            } else if (toggleHadFocus && !mobileLayout.matches) {
+                pageTools.focus({ preventScroll: true });
+            }
+        };
+
+        mobileActionsToggle.addEventListener("click", () => {
+            mobileActionsExpanded = !mobileActionsExpanded;
+            syncPageTools();
+        });
+        mobileLayout.addEventListener("change", syncPageTools);
+        syncPageTools();
+        root.classList.add("site-tools-ready");
+    }
+
     const getStoredTheme = () => {
         if (!themeConfig) {
             return "normal";

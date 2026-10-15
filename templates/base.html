@@ -191,12 +191,14 @@
                             {% block section_nav %}{% endblock %}
                         </section>
 
-                        <section class="site-panel site-tools-panel">
+                        <section class="site-panel site-tools-panel" data-page-tools-home>
                             <header class="site-panel-header">
                                 <h2>{% block tools_title %}{% trans "Outils" %}{% endblock %}</h2>
                                 {% block tools_intro %}{% endblock %}
                             </header>
-                            {% block page_tools %}{% endblock %}
+                            <div id="site-page-tools" class="site-page-tools" data-page-tools tabindex="-1">
+                                {% block page_tools %}{% endblock %}
+                            </div>
                         </section>
                     </aside>
 
@@ -212,6 +214,17 @@
                                 </div>
                             </header>
                             {% block mobile_side_content %}{% endblock %}
+                            <div class="site-mobile-actions" data-mobile-actions hidden>
+                                <button
+                                    type="button"
+                                    class="site-action site-action--primary"
+                                    data-mobile-actions-toggle
+                                    data-open-label="{% trans 'Afficher les actions' %}"
+                                    data-close-label="{% trans 'Masquer les actions' %}"
+                                    aria-expanded="false"
+                                    aria-controls="site-page-tools"
+                                >{% trans "Afficher les actions" %}</button>
+                            </div>
                         </section>
 
                         <section class="site-main-header">

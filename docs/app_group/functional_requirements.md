@@ -275,6 +275,20 @@ vivre sur ces pages dédiées. Le tableau de bord `/groups/<id>/` conserve
 seulement les indicateurs, les listes principales en lecture ou consultation
 rapide, et les boutons de navigation vers ces écrans.
 
+## Principe UI mobile
+
+Le [contrat UI responsive universel](../ui_responsive.md), règles
+`UI-MOBILE-*`, s'applique à toutes les pages de `app_group` : liste publique,
+gestion des groupes, tableau de bord et pages dédiées sous `/groups/<id>/`,
+recueil de chants compris.
+
+Le repli des outils à 980 px et moins est fondamental pour réduire le volume
+avant les listes et formulaires. La zone mobile dépliée reprend l'intégralité
+du panneau outils PC, avec les mêmes liens, boutons, séparateurs, styles et
+conditions de permission. Le contexte du groupe reste visible hors du repli.
+Les pages utilisent le mécanisme commun de `app_main` et ne définissent pas
+une liste d'actions mobile indépendante.
+
 ## Workflows utilisateur actuels
 
 ### Consultation publique et demande de rattachement
@@ -487,6 +501,8 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-UI-02** — Les listes visibles de personnes affichent prénom et nom lorsque l'annuaire les fournit, jamais l'UUID technique ni l'email.
 
 **GROUP-UI-03** — Les listes de personnes affichent les badges de statut utiles : accès AM, Responsable, Responsable impression et fonctions affectées.
+
+**GROUP-UI-04** — Tous les panneaux outils de `app_group` respectent `UI-MOBILE-*` : repli initial à 980 px et moins, équivalence complète avec les outils PC et conservation des permissions de groupe.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

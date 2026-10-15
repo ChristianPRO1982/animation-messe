@@ -995,14 +995,33 @@ body.lss-messagebox-open {
     padding: 22px;
 }
 
+.site-page-tools {
+    min-width: 0;
+}
+
+.site-mobile-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.site-mobile-actions > button {
+    width: 100%;
+    white-space: normal;
+}
+
+[data-page-tools][hidden],
+[data-mobile-actions][hidden] {
+    display: none !important;
+}
+
 .site-section-panel > :not(.site-panel-header):not(style),
-.site-tools-panel > :not(.site-panel-header):not(style) {
+.site-page-tools > :not(style) {
     display: grid;
     gap: 10px;
 }
 
 .site-section-panel > :not(.site-panel-header):not(style) > *,
-.site-tools-panel > :not(.site-panel-header):not(style) > * {
+.site-page-tools > :not(style) > * {
     padding: 12px 14px;
     border: 1px solid var(--site-line);
     border-radius: var(--site-radius-md);
@@ -1010,14 +1029,13 @@ body.lss-messagebox-open {
 }
 
 .site-section-panel > :not(.site-panel-header):not(style) + :not(.site-panel-header):not(style),
-.site-tools-panel > :not(.site-panel-header):not(style) + :not(.site-panel-header):not(style) {
+.site-page-tools > :not(style) + :not(style) {
     margin-top: 10px;
 }
 
-.site-tools-panel > :not(.site-panel-header):not(style) > hr,
-.site-mobile-side > :not(.site-panel-header):not(style) > hr,
-.site-tools-panel > :not(.site-panel-header):not(style) > * > hr,
-.site-mobile-side > :not(.site-panel-header):not(style) > * > hr {
+.site-page-tools hr,
+.site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) > hr,
+.site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) > * > hr {
     display: block;
     height: 1px;
     min-height: 0;
@@ -1095,12 +1113,12 @@ body.lss-messagebox-open {
     font-size: 1.1rem;
 }
 
-.site-mobile-side > :not(.site-panel-header):not(style) {
+.site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) {
     display: grid;
     gap: 10px;
 }
 
-.site-mobile-side > :not(.site-panel-header):not(style) > * {
+.site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) > * {
     padding: 12px 14px;
     border: 1px solid var(--site-line);
     border-radius: var(--site-radius-md);
@@ -1972,7 +1990,8 @@ body.lss-messagebox-open {
         grid-template-columns: 1fr;
     }
 
-    .site-side-stack {
+    .site-side-stack > .site-section-panel,
+    .site-tools-ready .site-side-stack {
         display: none;
     }
 
@@ -2103,8 +2122,8 @@ body.lss-messagebox-open {
     }
 
     .site-section-panel > :not(.site-panel-header):not(style) > *,
-    .site-tools-panel > :not(.site-panel-header):not(style) > *,
-    .site-mobile-side > :not(.site-panel-header):not(style) > * {
+    .site-page-tools > :not(style) > *,
+    .site-mobile-side > :not(.site-panel-header):not(style):not(.site-mobile-actions) > * {
         background: rgba(255, 248, 241, 0.06);
         color: var(--site-ink);
     }

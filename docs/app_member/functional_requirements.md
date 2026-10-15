@@ -151,6 +151,21 @@ Toute migration corrective devra préserver l’information Administrateur exist
 
 # 8. Règles fonctionnelles
 
+## Principe UI mobile
+
+Les écrans présentant le profil, les préférences ou la gestion des rôles
+globaux appliquent le [contrat UI responsive universel](../ui_responsive.md),
+y compris lorsqu'ils sont exposés par la page compte de `app_main`.
+À 980 px et moins, le repli des outils réduit le volume avant le contenu
+principal ; la zone dépliée contient tous les outils PC autorisés pour le
+même utilisateur, dans le même ordre. La visibilité des commandes
+administrateur reste soumise au rôle global. Tout futur écran propre à
+`app_member` doit reprendre le mécanisme commun.
+
+## Règles identifiées
+
+**MEMBER-UI-01** — Les écrans du périmètre membre respectent `UI-MOBILE-*`, avec outils repliés par défaut sur mobile et équivalence complète avec le panneau outils PC.
+
 **MEMBER-ID-01** — `app_member` référence les membres authentifiés par le UUID externe `users.users.id`.
 
 **MEMBER-ID-02** — `app_member` ne duplique pas les données d’identité du répertoire externe.

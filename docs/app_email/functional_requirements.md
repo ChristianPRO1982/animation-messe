@@ -281,6 +281,19 @@ Elle permet de consulter :
 
 Elle ne doit pas être un éditeur complexe d'e-mails.
 
+## Principe UI mobile
+
+Les commandes email présentées dans les pages du site, notamment les
+paramètres d'envoi administrés via `app_main`, suivent le
+[contrat UI responsive universel](../ui_responsive.md), règles `UI-MOBILE-*`,
+pour leurs panneaux outils. À 980 px et moins, les outils sont repliés par
+défaut afin de réduire le volume avant le contenu principal ; leur zone
+dépliée reprend tous les outils PC, avec les mêmes permissions et soumissions.
+
+Tout futur écran web propre à `app_email` disposant d'un panneau outils doit
+utiliser le mécanisme commun. Ce contrat ne concerne ni les corps des e-mails
+envoyés ni l'administration Django native utilisée pour les notifications.
+
 ---
 
 # 12. Hors périmètre V1
@@ -343,6 +356,8 @@ e-mails à envoyer.
 automatique.
 
 **EMAIL-ADMIN-01** — La V1 expose les notifications dans Django Admin.
+
+**EMAIL-UI-01** — Les panneaux outils des pages du site relevant du périmètre email respectent `UI-MOBILE-*`, y compris lorsque ces pages sont portées par `app_main`.
 
 **EMAIL-OUTLOOK-01** — Outlook reste hors implémentation spécifique en V1.
 

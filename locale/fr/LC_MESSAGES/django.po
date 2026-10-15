@@ -2967,3 +2967,11 @@ msgstr ""
 #: templates/includes/nav.html:22
 msgid "Anglais"
 msgstr ""
+
+#: templates/base.html
+msgid "Afficher les actions"
+msgstr "Afficher les actions"
+
+#: templates/base.html
+msgid "Masquer les actions"
+msgstr "Masquer les actions"

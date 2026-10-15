@@ -119,19 +119,6 @@
     {% endif %}
 {% endblock %}
 
-{% block mobile_side_content %}
-    <div>
-        {% if request.user.is_authenticated %}
-            <a href="{% url 'logout' %}">{% trans "Déconnexion" %}</a>
-        {% else %}
-            {% if auth_mode == "mock" %}
-                <a href="{% url 'login' %}?start=1">{% trans "Continuer avec le mock SSO" %}</a>
-            {% else %}
-                <a href="{% url 'login' %}?start=1">{% trans "Continuer avec Keycloak" %}</a>
-            {% endif %}
-        {% endif %}
-    </div>
-{% endblock %}
 
 {% block page_kicker %}
     {% if page_mode == "account" %}
