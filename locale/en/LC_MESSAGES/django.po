@@ -2974,3 +2974,83 @@ msgstr "Show actions"
 #: templates/base.html
 msgid "Masquer les actions"
 msgstr "Hide actions"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gérer les fonctions"
+msgstr "Manage functions"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer une fonction"
+msgstr "Create a function"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer la fonction"
+msgstr "Create function"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Édition des célébrations"
+msgstr "Celebration editing"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacer la fonction"
+msgstr "Move function"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacez une fonction avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+msgstr "Move a function using its handle. Keyboard: Space to pick up, arrow keys to move, Enter or Space to confirm, Escape to cancel."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Enregistrement…"
+msgstr "Saving…"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Enregistré."
+msgstr "Saved."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Échec de l’enregistrement."
+msgstr "Saving failed."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gestion des fonctions"
+msgstr "Function management"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Impossible d’enregistrer les modifications. Vérifiez votre connexion et réessayez."
+msgstr "Unable to save changes. Check your connection and try again."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Position {position} sur {total}."
+msgstr "Position {position} of {total}."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacement annulé."
+msgstr "Move cancelled."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Activez JavaScript pour modifier les coches et l’ordre des fonctions. La création reste disponible."
+msgstr "Enable JavaScript to change function settings and order. You can still create functions."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Ordre des fonctions invalide."
+msgstr "Invalid function order."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Réglage de fonction invalide."
+msgstr "Invalid function setting."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Fonction introuvable dans ce groupe."
+msgstr "Function not found in this group."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La liste des fonctions a changé. Rechargez la page."
+msgstr "The function list has changed. Reload the page."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Reconnectez-vous avant de modifier les fonctions."
+msgstr "Sign in again before changing functions."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La fonction est créée."
+msgstr "The function has been created."

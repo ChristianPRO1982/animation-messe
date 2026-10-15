@@ -2975,3 +2975,83 @@ msgstr "Afficher les actions"
 #: templates/base.html
 msgid "Masquer les actions"
 msgstr "Masquer les actions"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gérer les fonctions"
+msgstr "Gérer les fonctions"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer une fonction"
+msgstr "Créer une fonction"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Créer la fonction"
+msgstr "Créer la fonction"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Édition des célébrations"
+msgstr "Édition des célébrations"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacer la fonction"
+msgstr "Déplacer la fonction"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacez une fonction avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+msgstr "Déplacez une fonction avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Enregistrement…"
+msgstr "Enregistrement…"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Enregistré."
+msgstr "Enregistré."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Échec de l’enregistrement."
+msgstr "Échec de l’enregistrement."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Gestion des fonctions"
+msgstr "Gestion des fonctions"
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Impossible d’enregistrer les modifications. Vérifiez votre connexion et réessayez."
+msgstr "Impossible d’enregistrer les modifications. Vérifiez votre connexion et réessayez."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Position {position} sur {total}."
+msgstr "Position {position} sur {total}."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Déplacement annulé."
+msgstr "Déplacement annulé."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Activez JavaScript pour modifier les coches et l’ordre des fonctions. La création reste disponible."
+msgstr "Activez JavaScript pour modifier les coches et l’ordre des fonctions. La création reste disponible."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Ordre des fonctions invalide."
+msgstr "Ordre des fonctions invalide."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Réglage de fonction invalide."
+msgstr "Réglage de fonction invalide."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Fonction introuvable dans ce groupe."
+msgstr "Fonction introuvable dans ce groupe."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La liste des fonctions a changé. Rechargez la page."
+msgstr "La liste des fonctions a changé. Rechargez la page."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "Reconnectez-vous avant de modifier les fonctions."
+msgstr "Reconnectez-vous avant de modifier les fonctions."
+
+#: app_group/templates/app_group/group_functions.html app_group/forms.py app_group/services.py app_group/views.py
+msgid "La fonction est créée."
+msgstr "La fonction est créée."

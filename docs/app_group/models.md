@@ -484,6 +484,21 @@ sans enum rigide.
 avec cette fonction peut recevoir automatiquement le droit de modification de
 cette célébration, selon le service métier.
 
+Le catalogue `/groups/<id>/functions/` expose `is_active` et
+`auto_edit_celebration` en modification immédiate. Il ne modifie ni le nom d'une
+fonction existante ni les affectations aux personnes. La création utilise
+`max(position) + 1`, ou zéro pour la première fonction. Le réordonnancement
+réécrit uniquement les positions et la date de modification, sur la liste
+complète des fonctions du groupe, inactives comprises ; les positions deviennent
+consécutives à partir de zéro.
+
+Les services `create_group_function`, `update_group_function_flag` et
+`reorder_group_functions` exécutent ces écritures sous `transaction.atomic()`
+avec verrouillage de `g_group` par `select_for_update()`. Ils conservent les
+identifiants des fonctions, les affectations et les références historiques.
+Les identifiants d'un autre groupe, les doublons ou une liste incomplète sont
+refusés avant toute écriture de position.
+
 ## `am.g_group_member_function`
 
 ```text

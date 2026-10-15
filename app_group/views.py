@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -74,7 +74,7 @@ GROUP_PAGE_CONFIG = {
         "template": "app_group/group_functions.html",
         "title": _("Fonctions"),
         "route": "group_functions",
-        "actions": {"save_function", "assign_function", "remove_function"},
+        "actions": {"create_function", "update_function", "reorder_functions"},
     },
     "am_member_titles": {
         "template": "app_group/group_am_member_titles.html",
@@ -411,21 +411,42 @@ def _handle_detail_post(request, common_group: CommonGroup, group: Group | None)
 
 
 def _group_management_page(request, group_id: int, page_key: str):
+    function_json = (
+        page_key == "functions"
+        and request.method == "POST"
+        and request.POST.get("action") in {"update_function", "reorder_functions"}
+    )
     if not request.user.is_authenticated:
+        if function_json:
+            return JsonResponse(
+                {"error": str(_("Reconnectez-vous avant de modifier les fonctions."))},
+                status=403,
+            )
         return redirect("login")
 
     common_group = _get_common_group(group_id)
     group = Group.objects.filter(gg_id=group_id).first()
     access_context = _build_group_access_context(request.user, common_group, group)
     if not access_context.can_manage_group:
+        if function_json:
+            return JsonResponse({"error": str(_("Accès refusé."))}, status=403)
         return HttpResponseForbidden(_("Accès refusé."))
 
     config = GROUP_PAGE_CONFIG[page_key]
     if group is None:
+        if function_json:
+            return JsonResponse(
+                {"error": str(_("Activez l'espace AM avant cette action."))}, status=404
+            )
         messages.error(request, _("Activez l'espace AM avant cette action."))
         return redirect("group_detail", group_id=group_id)
 
-    if request.method == "POST":
+    function_create_form = None
+    if request.method == "POST" and page_key == "functions":
+        response, function_create_form = _handle_function_catalog_post(request, group)
+        if response is not None:
+            return response
+    elif request.method == "POST":
         return _handle_group_post(
             request,
             common_group,
@@ -446,6 +467,12 @@ def _group_management_page(request, group_id: int, page_key: str):
             "page_title": config["title"],
         }
     )
+    if page_key == "functions":
+        context["function_create_form"] = (
+            function_create_form
+            if function_create_form is not None
+            else forms.GroupFunctionCreateForm(initial={"action": "create_function"})
+        )
     if page_key == "consent":
         consent_draft = services.get_or_create_group_consent_draft(group)
         context.update(
@@ -465,7 +492,81 @@ def _group_management_page(request, group_id: int, page_key: str):
                 },
             }
         )
-    return render(request, config["template"], context)
+    return render(
+        request,
+        config["template"],
+        context,
+        status=400 if function_create_form is not None else 200,
+    )
+
+
+def _handle_function_catalog_post(request, group):
+    action = request.POST.get("action", "")
+    try:
+        services.require_group_manager(request.user, group)
+    except PermissionDenied:
+        return JsonResponse({"error": str(_("Accès refusé."))}, status=403), None
+
+    if action == "create_function":
+        form = forms.GroupFunctionCreateForm(request.POST)
+        if form.is_valid():
+            try:
+                services.create_group_function(
+                    group,
+                    **{
+                        field: form.cleaned_data[field]
+                        for field in ("name", "is_active", "auto_edit_celebration")
+                    },
+                )
+            except ValidationError as exc:
+                form.add_error(None, _validation_message(exc))
+            else:
+                messages.success(request, _("La fonction est créée."))
+                return redirect("group_functions", group_id=group.pk), None
+        return None, form
+
+    form_class = {
+        "update_function": forms.GroupFunctionFlagForm,
+        "reorder_functions": forms.GroupFunctionOrderForm,
+    }.get(action)
+    if form_class is None:
+        return JsonResponse(
+            {"error": str(_("Action groupe invalide sur cette page."))}, status=400
+        ), None
+    form = form_class(request.POST)
+    if not form.is_valid():
+        error = " ".join(
+            str(error) for errors in form.errors.values() for error in errors
+        )
+        return JsonResponse({"error": error}, status=400), None
+    try:
+        if action == "update_function":
+            functions = services.update_group_function_flag(
+                group,
+                **{
+                    field: form.cleaned_data[field]
+                    for field in ("function_id", "field", "value")
+                },
+            )
+        else:
+            functions = services.reorder_group_functions(
+                group, form.cleaned_data["function_ids"]
+            )
+    except ValidationError as exc:
+        return JsonResponse({"error": _validation_message(exc)}, status=400), None
+    return JsonResponse(
+        {
+            "functions": [
+                {
+                    "id": function.pk,
+                    "position": function.position,
+                    "is_active": function.is_active,
+                    "auto_edit_celebration": function.auto_edit_celebration,
+                }
+                for function in functions
+            ]
+        }
+    ), None
 
 
 def _handle_group_post(

@@ -259,8 +259,9 @@ Le découpage cible est volontairement fin afin que chaque écran reste lisible 
   `common.g_group_user.is_group_admin` ;
 - `/groups/<id>/am-members/` : Membres AM, demandes de création, consentements,
   refus et expiration ;
-- `/groups/<id>/functions/` : fonctions possibles du groupe et affectations aux
-  personnes ;
+- `/groups/<id>/functions/` : catalogue des fonctions du groupe, création,
+  activation, édition automatique des célébrations et ordre ; cette page ne
+  propose plus d'affectations aux personnes ;
 - `/groups/<id>/am-member-titles/` : titres proposés pour les Membres AM ;
 - `/groups/<id>/calendar/states/` : états planning configurables ;
 - `/groups/<id>/calendar/regular-rules/` : règles régulières de génération ;
@@ -274,6 +275,42 @@ Les formulaires longs, les listes éditables et les actions de masse doivent
 vivre sur ces pages dédiées. Le tableau de bord `/groups/<id>/` conserve
 seulement les indicateurs, les listes principales en lecture ou consultation
 rapide, et les boutons de navigation vers ces écrans.
+
+## Gestion du catalogue des fonctions
+
+Sur `/groups/<id>/functions/`, un Responsable ou Administrateur global gère les
+fonctions existantes à gauche et en crée de nouvelles à droite. La disposition
+utilise CSS Grid, sans tableau HTML. À 980 px et moins, la gestion précède la
+création dans une seule colonne. Les fonctions inactives restent affichées.
+
+La création propose le nom, `Actif` (coché initialement) et `Édition des
+célébrations` (décoché initialement). La nouvelle fonction est ajoutée en fin
+de liste ; aucune position numérique n'est saisie. La coche d'édition utilise
+`auto_edit_celebration` et n'est pas un droit d'impression.
+
+Dans la liste, chaque changement de coche est enregistré immédiatement. Le
+bouton poignée `⋮↕⋮` permet de déplacer une fonction à la souris ou au toucher.
+Au clavier, Espace saisit la fonction, les flèches haut/bas la déplacent,
+Entrée ou Espace confirme et Échap annule. L'ordre est enregistré au dépôt ou
+à la confirmation, sans bouton d'enregistrement global.
+
+L'interface annonce l'enregistrement en cours puis sa réussite. Les commandes
+de gestion sont temporairement désactivées pendant la requête. En cas d'échec,
+le dernier état enregistré est restauré et la message box commune explique
+l'erreur. Sans JavaScript, la création reste disponible et la gestion
+interactive est désactivée avec un message explicatif.
+
+Les opérations de création, de modification d'une coche et de réordonnancement
+passent par les services du groupe. Le réordonnancement porte sur toutes les
+fonctions, actives ou non, et refuse les identifiants étrangers, manquants ou
+dupliqués. Les positions enregistrées sont consécutives à partir de zéro.
+Les écritures sont transactionnelles et verrouillent le groupe pour coordonner
+la création et le réordonnancement.
+
+Cette page n'offre ni renommage, ni suppression, ni attribution ou retrait de
+fonctions à des personnes. Les affectations existantes, leurs services métier
+et les données historiques sont conservés. Aucun nouvel écran d'affectation
+n'est introduit par cette évolution.
 
 ## Principe UI mobile
 
@@ -503,6 +540,10 @@ Les gabarits de célébration et les gabarits d’impression appartiennent à `a
 **GROUP-UI-03** — Les listes de personnes affichent les badges de statut utiles : accès AM, Responsable, Responsable impression et fonctions affectées.
 
 **GROUP-UI-04** — Tous les panneaux outils de `app_group` respectent `UI-MOBILE-*` : repli initial à 980 px et moins, équivalence complète avec les outils PC et conservation des permissions de groupe.
+
+**GROUP-FUNCTION-01** — La page des fonctions gère le catalogue sans proposer d'affectations aux personnes ; une création ajoute la fonction en fin de liste.
+
+**GROUP-FUNCTION-02** — Les coches et l'ordre des fonctions sont enregistrés immédiatement, avec gestion des erreurs et conservation des affectations et de l'historique.
 
 **GROUP-AM-01** — Un Membre AM est une personne réelle sans compte CARThographie.
 

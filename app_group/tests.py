@@ -979,7 +979,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
                 "group_am_members",
                 "Créer une demande Membre AM",
             ),
-            (group_views.group_functions, "group_functions", "Affectations"),
+            (group_views.group_functions, "group_functions", "Gérer les fonctions"),
             (
                 group_views.group_am_member_titles,
                 "group_am_member_titles",
@@ -1473,7 +1473,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
     @patch("app_group.views._build_group_access_context")
     @patch("app_group.views.Group")
     @patch("app_group.views._get_common_group")
-    def test_detail_post_assigns_functions_to_am_members_via_service(
+    def test_functions_page_rejects_person_assignments(
         self,
         get_common_group,
         group_model,
@@ -1507,11 +1507,8 @@ class AppGroupManagementViewTests(SimpleTestCase):
 
         response = group_views.group_functions(request, 7)
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            response.url, reverse("group_functions", kwargs={"group_id": 7})
-        )
-        assign_function.assert_called_once_with(group_member, function)
+        self.assertEqual(response.status_code, 400)
+        assign_function.assert_not_called()
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.add_song_to_repertoire")

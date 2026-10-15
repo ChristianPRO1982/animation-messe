@@ -1,57 +1,68 @@
 {% extends "app_group/group_page_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block group_page_content %}
-    <section class="site-theme-selection" aria-label="{% trans 'Fonctions' %}">
-        <article class="site-theme-card">
-            <header class="site-theme-card-header"><div><h2>{% trans "Fonctions" %}</h2></div></header>
-            {% for function in functions %}<p>{{ function.name }}{% if not function.is_active %} — {% trans "inactive" %}{% endif %}</p>{% empty %}<p>{% trans "Aucune fonction configurée." %}</p>{% endfor %}
-            <form method="post" class="group-settings-form" data-unsaved-guard>
+    <section class="site-theme-selection group-functions-layout" aria-label="{% trans 'Fonctions' %}">
+        <article class="site-theme-card group-functions-management">
+            <header class="site-theme-card-header"><div><h2>{% trans "Gérer les fonctions" %}</h2></div></header>
+            <p class="group-field-help" id="function-order-help">{% trans "Déplacez une fonction avec sa poignée. Au clavier : Espace pour saisir, flèches pour déplacer, Entrée ou Espace pour confirmer, Échap pour annuler." %}</p>
+            <form method="post" action="{% url 'group_functions' common_group.group_id %}" data-function-manager
+                  data-saving-label="{% trans 'Enregistrement…' %}"
+                  data-saved-label="{% trans 'Enregistré.' %}"
+                  data-error-label="{% trans 'Échec de l’enregistrement.' %}"
+                  data-error-title="{% trans 'Gestion des fonctions' %}"
+                  data-error-message="{% trans 'Impossible d’enregistrer les modifications. Vérifiez votre connexion et réessayez.' %}"
+                  data-position-label="{% trans 'Position {position} sur {total}.' %}"
+                  data-cancel-label="{% trans 'Déplacement annulé.' %}">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="save_function">
-                {{ forms.function.non_field_errors }}
-                {% for field in forms.function.visible_fields %}
+                <ul class="group-function-list" data-function-list>
+                    {% for function in functions %}
+                        <li class="group-function-row" data-function-id="{{ function.gf_id }}">
+                            <button type="button" class="site-action site-action--secondary group-function-handle" data-function-handle
+                                    aria-label="{% trans 'Déplacer la fonction' %} {{ function.name }}"
+                                    aria-describedby="function-order-help" aria-pressed="false" disabled>⋮↕⋮</button>
+                            <span class="group-function-name">{{ function.name }}</span>
+                            <div class="group-function-options">
+                                <label for="function-{{ function.gf_id }}-active">
+                                    <input id="function-{{ function.gf_id }}-active" type="checkbox" data-function-field="is_active" {% if function.is_active %}checked{% endif %} disabled>
+                                    <span>{% trans "Actif" %}</span>
+                                </label>
+                                <label for="function-{{ function.gf_id }}-edit">
+                                    <input id="function-{{ function.gf_id }}-edit" type="checkbox" data-function-field="auto_edit_celebration" {% if function.auto_edit_celebration %}checked{% endif %} disabled>
+                                    <span>{% trans "Édition des célébrations" %}</span>
+                                </label>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="group-field-help">{% trans "Aucune fonction configurée." %}</li>
+                    {% endfor %}
+                </ul>
+                <p class="group-function-status" data-function-status role="status" aria-live="polite" aria-atomic="true"></p>
+                <noscript><p>{% trans "Activez JavaScript pour modifier les coches et l’ordre des fonctions. La création reste disponible." %}</p></noscript>
+            </form>
+        </article>
+        <article class="site-theme-card group-function-create">
+            <header class="site-theme-card-header"><div><h2>{% trans "Créer une fonction" %}</h2></div></header>
+            <form method="post" class="group-settings-form" data-function-create data-unsaved-guard>
+                {% csrf_token %}
+                {% for field in function_create_form.hidden_fields %}{{ field }}{% endfor %}
+                {% for error in function_create_form.non_field_errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
+                {% for field in function_create_form.visible_fields %}
                     <div class="group-settings-form-row{% if field.field.widget.input_type == 'checkbox' %} group-settings-form-row--checkbox{% endif %}">
                         {{ field.label_tag }}
                         <div class="group-settings-form-control">
                             {{ field }}
-                            {% if field.help_text %}<div class="group-field-help">{{ field.help_text }}</div>{% endif %}
                             {% for error in field.errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
                         </div>
                     </div>
                 {% endfor %}
-                <button class="site-action site-action--primary group-settings-form-submit" type="submit">{% trans "Enregistrer la fonction" %}</button>
+                <button class="site-action site-action--primary group-settings-form-submit" type="submit">{% trans "Créer la fonction" %}</button>
             </form>
         </article>
-        <article class="site-theme-card">
-            <header class="site-theme-card-header"><div><h2>{% trans "Affectations" %}</h2></div></header>
-            {% for row in function_member_rows %}
-                <p>
-                    {{ row.display_name }}
-                    <span class="site-role-banner">{{ row.kind_label }}</span>
-                </p>
-                {% if row.function_names %}
-                    <p>{% trans "Fonctions" %} : {{ row.function_names|join:", " }}</p>
-                {% endif %}
-                {% for function in functions %}
-                    <form method="post" style="display: inline-block;">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="assign_function">
-                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
-                        <input type="hidden" name="function_id" value="{{ function.gf_id }}">
-                        <button class="site-action site-action--secondary" type="submit">{{ function.name }}</button>
-                    </form>
-                    <form method="post" style="display: inline-block;" data-app-group-confirm="{% trans 'Retirer cette fonction ?' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="remove_function">
-                        <input type="hidden" name="group_member_id" value="{{ row.group_member.ggm_id }}">
-                        <input type="hidden" name="function_id" value="{{ function.gf_id }}">
-                        <button class="site-action site-action--danger" type="submit">- {{ function.name }}</button>
-                    </form>
-                {% endfor %}
-            {% empty %}
-                <p>{% trans "Aucune personne active pour l’instant." %}</p>
-            {% endfor %}
-        </article>
     </section>
+{% endblock %}
+
+{% block page_scripts %}
+    {{ block.super }}
+    <script src="{% static 'js/group_functions.js' %}"></script>
 {% endblock %}

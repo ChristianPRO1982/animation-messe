@@ -428,6 +428,71 @@ def save_group_function(function: GroupFunction) -> GroupFunction:
     return function
 
 
+def create_group_function(
+    group: Group,
+    *,
+    name: str,
+    is_active: bool = True,
+    auto_edit_celebration: bool = False,
+) -> GroupFunction:
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        last_position = GroupFunction.objects.filter(group=group).aggregate(
+            last=Max("position")
+        )["last"]
+        function = GroupFunction(
+            group=group,
+            name=name.strip(),
+            position=0 if last_position is None else last_position + 1,
+            is_active=is_active,
+            auto_edit_celebration=auto_edit_celebration,
+        )
+        return save_group_function(function)
+
+
+def update_group_function_flag(
+    group: Group, *, function_id: int, field: str, value: bool
+) -> list[GroupFunction]:
+    if field not in {"is_active", "auto_edit_celebration"} or type(value) is not bool:
+        raise ValidationError(_("Réglage de fonction invalide."))
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        try:
+            function = GroupFunction.objects.get(group=group, pk=function_id)
+        except GroupFunction.DoesNotExist as exc:
+            raise ValidationError(_("Fonction introuvable dans ce groupe.")) from exc
+        setattr(function, field, value)
+        function.full_clean()
+        function.save(update_fields=[field, "updated_at"])
+        return list(
+            GroupFunction.objects.filter(group=group).order_by("position", "gf_id")
+        )
+
+
+def reorder_group_functions(
+    group: Group, function_ids: list[int]
+) -> list[GroupFunction]:
+    if any(type(pk) is not int or pk < 1 for pk in function_ids):
+        raise ValidationError(_("Ordre des fonctions invalide."))
+    with transaction.atomic():
+        Group.objects.select_for_update().get(pk=group.pk)
+        functions = {
+            function.pk: function
+            for function in GroupFunction.objects.filter(group=group)
+        }
+        if len(function_ids) != len(functions) or set(function_ids) != set(functions):
+            raise ValidationError(
+                _("La liste des fonctions a changé. Rechargez la page.")
+            )
+        ordered = [functions[pk] for pk in function_ids]
+        now = timezone.now()
+        for position, function in enumerate(ordered):
+            function.position = position
+            function.updated_at = now
+        GroupFunction.objects.bulk_update(ordered, ["position", "updated_at"])
+        return ordered
+
+
 def save_group_settings(group: Group) -> Group:
     group.full_clean()
     group.save(update_fields=["celebration_retention_months", "updated_at"])

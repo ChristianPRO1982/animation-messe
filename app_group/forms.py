@@ -118,6 +118,37 @@ class GroupFunctionForm(NamedGroupObjectForm):
     )
 
 
+class GroupFunctionCreateForm(ActionForm):
+    name = forms.CharField(label=_("Nom"), max_length=255)
+    is_active = forms.BooleanField(label=_("Actif"), required=False, initial=True)
+    auto_edit_celebration = forms.BooleanField(
+        label=_("Édition des célébrations"), required=False
+    )
+
+
+class GroupFunctionFlagForm(ActionForm):
+    function_id = forms.IntegerField(min_value=1)
+    field = forms.ChoiceField(
+        choices=[(field, field) for field in ("is_active", "auto_edit_celebration")]
+    )
+    value = forms.TypedChoiceField(
+        choices=[("true", "true"), ("false", "false")],
+        coerce=lambda value: value == "true",
+    )
+
+
+class GroupFunctionOrderForm(ActionForm):
+    function_ids = forms.JSONField()
+
+    def clean_function_ids(self):
+        ids = self.cleaned_data["function_ids"]
+        if not isinstance(ids, list) or any(
+            type(pk) is not int or pk < 1 for pk in ids
+        ):
+            raise ValidationError(_("Ordre des fonctions invalide."))
+        return ids
+
+
 class AmMemberTitleForm(ActionForm):
     object_id = forms.IntegerField(
         min_value=1,
