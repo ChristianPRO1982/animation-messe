@@ -6,11 +6,21 @@
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Titres Membre AM" %}</h2></div></header>
             {% for title in titles %}<p>{{ title.label }}</p>{% empty %}<p>{% trans "Aucun titre configuré." %}</p>{% endfor %}
-            <form method="post" data-unsaved-guard>
+            <form method="post" class="group-settings-form" data-unsaved-guard>
                 {% csrf_token %}
                 <input type="hidden" name="action" value="save_am_member_title">
-                {% for field in forms.title.visible_fields %}<div>{{ field.label_tag }} {{ field }}</div>{% endfor %}
-                <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer le titre" %}</button>
+                {{ forms.title.non_field_errors }}
+                {% for field in forms.title.visible_fields %}
+                    <div class="group-settings-form-row{% if field.field.widget.input_type == 'checkbox' %} group-settings-form-row--checkbox{% endif %}">
+                        {{ field.label_tag }}
+                        <div class="group-settings-form-control">
+                            {{ field }}
+                            {% if field.help_text %}<div class="group-field-help">{{ field.help_text }}</div>{% endif %}
+                            {% for error in field.errors %}<p class="group-field-error">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <button class="site-action site-action--primary group-settings-form-submit" type="submit">{% trans "Enregistrer le titre" %}</button>
             </form>
         </article>
     </section>
