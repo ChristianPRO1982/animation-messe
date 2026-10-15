@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#203e35">
+  <meta name="description" content="Animation Messe : préparez vos chants et textes, créez vos feuilles de messe et organisez votre équipe. Gratuit et sans publicité. Ouverture prévue début 2027.">
+  <title>Animation Messe — Préparer, rassembler, célébrer. Dès début 2027.</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f5ef;
+      --white: #fffefa;
+      --ink: #203e35;
+      --muted: #56645d;
+      --line: #d9ddd2;
+      --accent: #ad4b2d;
+      --soft: #e9eddf;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 2rem; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.65; }
+    a { color: inherit; text-underline-offset: .25em; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 6px; }
+    ::selection { background: #d9e4c5; color: var(--ink); }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2 { font-family: var(--serif); font-weight: 400; line-height: 1.08; letter-spacing: -.045em; }
+    h2 { font-size: clamp(2.25rem, 4.5vw, 3.8rem); }
+    .wrap { width: min(1160px, calc(100% - 96px)); margin-inline: auto; }
+    .skip { position: absolute; top: -100px; left: 1rem; padding: .7rem 1rem; background: var(--white); z-index: 10; }
+    .skip:focus { top: 1rem; }
+    .eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .intro { color: var(--muted); font-size: 1.07rem; max-width: 560px; }
+    .pill { display: inline-flex; align-items: center; gap: .6rem; border: 1px solid var(--line); border-radius: 40px; padding: .45rem .9rem; font-size: .75rem; font-weight: 600; }
+    .pill::before { content: ""; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 1.5rem; padding: .9rem 1.35rem; border-radius: 6px; background: var(--ink); color: var(--white); text-decoration: none; font-size: .88rem; font-weight: 600; transition: background .2s; }
+    .button:hover { background: #35584b; }
+    .arrow { font-size: 1.15rem; font-weight: 400; }
+
+    header { border-bottom: 1px solid var(--line); }
+    .header-inner { min-height: 104px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+    .brand { display: flex; align-items: center; gap: .85rem; text-decoration: none; }
+    .brand-mark { display: grid; place-items: center; width: 43px; height: 49px; border: 1px solid var(--ink); border-radius: 22px 22px 3px 3px; font-family: var(--serif); font-size: 1.25rem; letter-spacing: -.12em; padding-right: .15em; }
+    .brand-name { font-size: 1.08rem; font-weight: 700; letter-spacing: -.04em; }
+    .brand-note { display: block; color: var(--muted); font-size: .68rem; letter-spacing: .06em; }
+    nav { display: flex; align-items: center; gap: 2rem; font-size: .8rem; }
+    nav a { text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    .nav-date { padding-left: 2rem; border-left: 1px solid var(--line); color: var(--accent); font-weight: 700; }
+
+    .hero { display: grid; grid-template-columns: 1.12fr 1fr; align-items: center; gap: 3rem; padding-block: 76px 80px; }
+    h1 { font-size: clamp(3.25rem, 5.7vw, 5.2rem); margin-block: 25px; }
+    h1 em { color: var(--accent); font-weight: 400; }
+    .hero-copy > p { max-width: 490px; }
+    .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-top: 30px; }
+    .hero-actions span { font-size: .78rem; color: var(--muted); }
+    .hero-visual { position: relative; min-height: 470px; display: grid; place-items: center; isolation: isolate; }
+    .hero-visual::before { content: ""; position: absolute; inset: 4px 0 10px; border-radius: 48% 48% 9px 9px; background: var(--soft); z-index: -2; }
+    .orbit { position: absolute; inset: 25px 22px 35px; border: 1px solid #c9d2bd; border-radius: 48% 48% 4px 4px; z-index: -1; }
+    .sheet { width: 290px; margin: 32px 0 30px; padding: 29px 30px 25px; border: 1px solid #e0dfd4; background: var(--white); transform: rotate(-5deg); box-shadow: 4px 16px 30px #203e3512, 8px 8px 0 #f1f0e7, 9px 9px 0 #d6d8c9; }
+    .sheet-kicker { text-align: center; font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; }
+    .sheet-title { margin-top: 12px; font: 1.9rem/1.12 var(--serif); text-align: center; letter-spacing: -.04em; }
+    .sheet-subtitle { margin: 9px 0 20px; font-size: .62rem; color: var(--muted); text-align: center; }
+    .sheet-divider { width: 30px; height: 1px; background: var(--accent); margin: auto auto 18px; }
+    .sheet-part { margin-top: 15px; }
+    .sheet-part strong { font-size: .59rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+    .sheet-part p { margin-top: 4px; font: .83rem/1.65 var(--serif); }
+    .text-lines { margin-top: 7px; display: grid; gap: 5px; }
+    .text-lines i { display: block; height: 3px; background: #e4e6dd; border-radius: 2px; }
+    .text-lines i:last-child { width: 68%; }
+    .sheet-footer { margin-top: 22px; padding-top: 10px; border-top: 1px solid var(--line); text-align: center; font-size: .5rem; letter-spacing: .12em; text-transform: uppercase; }
+    .visual-note { position: absolute; bottom: 28px; right: -7px; padding: 13px 18px; background: var(--ink); color: var(--white); border-radius: 5px; box-shadow: 0 8px 20px #203e3512; transform: rotate(3deg); font-size: .75rem; }
+    .visual-note span { display: block; color: #c9d9bc; font-size: .63rem; }
+    .visual-spark { position: absolute; top: 35px; right: 26px; font: 3.8rem/1 var(--serif); color: var(--accent); transform: rotate(12deg); }
+
+    .principles { display: flex; justify-content: space-between; gap: 1rem; padding-block: 22px; border-block: 1px solid var(--line); font-size: .8rem; font-weight: 600; }
+    .principles span { display: flex; align-items: center; gap: .65rem; }
+    .principles span::before { content: "✓"; color: var(--accent); }
+    .public { padding-block: 90px; }
+    .section-head { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 4rem; }
+    .section-head .eyebrow { margin-bottom: 17px; color: var(--accent); }
+    .section-head > p { max-width: 430px; padding-bottom: 4px; }
+    .public-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 45px; }
+    .feature { padding-top: 24px; border-top: 1px solid var(--line); }
+    .feature-number { font: italic 1.4rem var(--serif); color: var(--accent); }
+    .feature h3 { margin-block: 16px 12px; font-size: 1.2rem; letter-spacing: -.03em; }
+    .feature p { color: var(--muted); font-size: .95rem; max-width: 460px; }
+    .feature-foot { display: inline-block; margin-top: 20px; padding: .35rem .7rem; border-radius: 4px; background: var(--soft); font-size: .7rem; font-weight: 600; }
+
+    .team { background: var(--ink); color: var(--white); padding-block: 70px; }
+    .team-inner { display: grid; grid-template-columns: .95fr 1fr; gap: 90px; }
+    .team .eyebrow { color: #c7d9b0; margin-bottom: 20px; }
+    .team h2 { max-width: 420px; }
+    .team-intro { margin-top: 22px; color: #d1dbd2; font-size: .96rem; max-width: 420px; }
+    .team-caption { display: inline-block; margin-top: 25px; padding: .4rem .8rem; border: 1px solid #698074; border-radius: 30px; color: #d1dbd2; font-size: .72rem; }
+    .team-features { list-style: none; padding: 0; margin: 0; }
+    .team-features li { position: relative; padding: 22px 0 22px 38px; border-top: 1px solid #53695d; }
+    .team-features li:first-child { padding-top: 0; border-top: 0; }
+    .team-features li:last-child { padding-bottom: 0; }
+    .team-features li::before { content: "+"; position: absolute; left: 0; color: #c7d9b0; font: 1.6rem/1 var(--serif); }
+    .team-features h3 { font-size: 1rem; margin-bottom: 7px; font-weight: 600; }
+    .team-features p { font-size: .87rem; color: #d1dbd2; }
+
+    .values { padding-block: 83px; display: grid; grid-template-columns: 1fr 1fr; gap: 75px; align-items: start; }
+    .values .eyebrow { color: var(--accent); margin-bottom: 20px; }
+    .values h2 { font-size: clamp(2.15rem, 4vw, 3.35rem); }
+    .values-copy { display: grid; gap: 17px; color: var(--muted); font-size: .95rem; }
+    .values-copy strong { color: var(--ink); font-weight: 600; }
+    .launch { position: relative; padding: 52px 30px; background: var(--soft); border: 1px solid #d8decb; border-radius: 10px; text-align: center; }
+    .launch .eyebrow { color: var(--muted); }
+    .launch h2 { margin-block: 16px 18px; font-size: clamp(2.8rem, 6vw, 4.5rem); }
+    .launch h2 em { color: var(--accent); font-weight: 400; }
+    .launch > p:last-child { max-width: 570px; margin-inline: auto; font-size: .92rem; color: var(--muted); }
+    footer { margin-top: 70px; padding-block: 30px; border-top: 1px solid var(--line); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+    .footer-title { font: 1.2rem var(--serif); }
+    .footer-note { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+    .support { font-size: .78rem; color: var(--muted); text-align: right; }
+    .support a { color: var(--ink); font-weight: 700; }
+
+    @media (min-width: 1500px) {
+      .hero { padding-block: 96px; }
+    }
+    @media (max-width: 980px) {
+      .wrap { width: calc(100% - 64px); }
+      nav { gap: 1.2rem; }
+      .nav-date { padding-left: 1.2rem; }
+      .hero { gap: 2rem; }
+      h1 { font-size: clamp(2.8rem, 6vw, 4.2rem); }
+      .hero-visual { min-height: 440px; }
+      .sheet { width: 250px; padding: 25px; }
+      .visual-note { right: -10px; bottom: 17px; }
+      .principles { flex-wrap: wrap; justify-content: center; column-gap: 2rem; }
+      .team-inner { gap: 45px; }
+      .values { gap: 40px; }
+    }
+    @media (max-width: 700px) {
+      .wrap { width: calc(100% - 40px); }
+      .header-inner { min-height: 84px; gap: 1rem; }
+      .brand-name { font-size: 1rem; }
+      .brand-mark { width: 35px; height: 43px; font-size: 1.1rem; }
+      nav { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 35px; padding-block: 40px; }
+      h1 { font-size: clamp(2.9rem, 10vw, 4.5rem); }
+      .hero-copy > p { max-width: 520px; }
+      .hero-visual { min-height: 440px; width: min(100%, 410px); margin-inline: auto; }
+      .sheet { width: 270px; }
+      .visual-note { right: 0; bottom: 26px; }
+      .principles { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; font-size: .72rem; }
+      .public { padding-block: 55px; }
+      .section-head, .public-grid, .team-inner, .values { grid-template-columns: 1fr; gap: 28px; }
+      .section-head > p { max-width: 100%; }
+      .public-grid { margin-top: 30px; gap: 32px; }
+      .feature h3 { margin-top: 10px; }
+      .feature p { max-width: 100%; }
+      .feature-foot { margin-top: 15px; }
+      .team { padding-block: 50px; }
+      .team-inner { gap: 38px; }
+      .team h2, .team-intro { max-width: 100%; }
+      .values { padding-block: 55px; }
+      .launch { padding: 40px 20px; }
+      footer { margin-top: 45px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; gap: 18px; }
+      .support { text-align: left; }
+    }
+    @media (max-width: 360px) {
+      .wrap { width: calc(100% - 32px); }
+      .hero-actions { gap: 1rem; }
+      .sheet { width: 235px; padding: 23px; }
+      .visual-note { font-size: .7rem; padding: 10px 12px; }
+      .principles { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .button { transition: none; }
+    }
+    @media print {
+      body { background: white; color: black; }
+      .wrap { width: 100%; }
+      .skip, nav, .hero-actions, .hero-visual { display: none; }
+      .hero, .public, .team, .values { padding-block: 20px; }
+      .hero, .team-inner, .values { display: block; }
+      .team { background: white; color: black; }
+      .team .eyebrow, .team-intro, .team-features p, .team-caption { color: #333; }
+      .team-features { margin-top: 20px; }
+      .launch { break-inside: avoid; }
+      footer { margin-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au contenu</a>
+  <header>
+    <div class="wrap header-inner">
+      <a class="brand" href="#" aria-label="Animation Messe, accueil">
+        <span class="brand-mark" aria-hidden="true">am</span>
+        <span><span class="brand-name">Animation Messe</span><span class="brand-note">Préparer · Rassembler · Célébrer</span></span>
+      </a>
+      <nav aria-label="Navigation principale">
+        <a href="#sans-compte">Le projet</a>
+        <a href="#en-equipe">En équipe</a>
+        <a class="nav-date" href="#ouverture">Rendez-vous début 2027 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenu">
+    <section class="wrap hero" aria-labelledby="titre">
+      <div class="hero-copy">
+        <div class="pill">En développement · Ouverture prévue début 2027</div>
+        <h1 id="titre">Préparer la messe.<br>Faire place à<br><em>l’essentiel.</em></h1>
+        <p class="intro">Un même lieu pour réunir les chants et les textes, créer votre feuille de messe et coordonner celles et ceux qui font vivre la célébration.</p>
+        <div class="hero-actions">
+          <a class="button" href="#sans-compte">Découvrir le projet <span class="arrow" aria-hidden="true">↓</span></a>
+          <span>Gratuit. Sans publicité.</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit"></div>
+        <span class="visual-spark">✳</span>
+        <div class="sheet">
+          <p class="sheet-kicker">Le plaisir de célébrer ensemble</p>
+          <p class="sheet-title">Chanter.<br>Prier. Partager.</p>
+          <p class="sheet-subtitle">Votre feuille de messe</p>
+          <div class="sheet-divider"></div>
+          <div class="sheet-part"><strong>01 · Ouverture</strong><p>Un chant pour nous rassembler</p><div class="text-lines"><i></i><i></i><i></i></div></div>
+          <div class="sheet-part"><strong>02 · Liturgie de la Parole</strong><p>Un texte pour nous éclairer</p><div class="text-lines"><i></i><i></i><i></i><i></i></div></div>
+          <div class="sheet-part"><strong>03 · Communion</strong><p>Une même voix, une même prière</p><div class="text-lines"><i></i><i></i></div></div>
+          <p class="sheet-footer">Animation Messe · Illustration du projet</p>
+        </div>
+        <div class="visual-note">Tout préparer, simplement.<span>Des premiers chants à la feuille de messe.</span></div>
+      </div>
+    </section>
+
+    <div class="wrap principles" aria-label="Les engagements du projet">
+      <span>Gratuit pour tous</span>
+      <span>Sans publicité</span>
+      <span>Sans cookies intrusifs ou tiers</span>
+      <span>Préparer sans compte</span>
+    </div>
+
+    <section class="wrap public" id="sans-compte" aria-labelledby="titre-public">
+      <div class="section-head">
+        <div><p class="eyebrow">Pour préparer une célébration · Sans connexion</p><h2 id="titre-public">Vos chants, vos textes.<br>Un déroulé qui prend vie.</h2></div>
+        <p class="intro">Pour une messe dominicale ou une célébration particulière, les outils essentiels seront accessibles directement, sans créer de compte.</p>
+      </div>
+      <div class="public-grid">
+        <article class="feature">
+          <span class="feature-number" aria-hidden="true">01 /</span>
+          <h3>Composer votre animation</h3>
+          <p>Réunissez les chants et les textes de votre célébration. Organisez-les dans l’ordre du déroulé, choisissez les couplets utiles et préparez chaque étape, du chant d’entrée à l’envoi.</p>
+          <span class="feature-foot">Un déroulé clair, à votre rythme</span>
+        </article>
+        <article class="feature">
+          <span class="feature-number" aria-hidden="true">02 /</span>
+          <h3>Créer votre feuille de messe</h3>
+          <p>À partir de votre préparation, générez une feuille de messe réunissant les chants et les textes choisis. Un document lisible, prêt à être imprimé pour accompagner la participation de l’assemblée.</p>
+          <span class="feature-foot">De la préparation à l’impression</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="team" id="en-equipe" aria-labelledby="titre-equipe">
+      <div class="wrap team-inner">
+        <div>
+          <p class="eyebrow">Avec une connexion · Toujours gratuit</p>
+          <h2 id="titre-equipe">Une équipe accordée.<br>Des dimanches<br>mieux préparés.</h2>
+          <p class="team-intro">Pour les chantres, les musiciens, les organistes et les responsables d’équipes, un compte permettra de suivre les célébrations dans la durée et de faciliter l’organisation du groupe.</p>
+          <span class="team-caption">Moins de dispersion, plus de temps pour célébrer.</span>
+        </div>
+        <ul class="team-features">
+          <li><h3>Retrouver vos propres animations</h3><p>Conservez vos préparations, retrouvez vos célébrations et reprenez vos chants et textes sans repartir de zéro à chaque messe.</p></li>
+          <li><h3>Rassembler les personnes qui animent</h3><p>Organisez votre équipe et retrouvez les chantres, musiciens et organistes qui prennent part à la célébration, avec leurs responsables musicaux.</p></li>
+          <li><h3>Construire un planning commun</h3><p>Anticipez les prochaines messes, recueillez les disponibilités et répartissez les fonctions d’animation entre les chantres, les organistes et les équipes musicales. Chacun pourra savoir quand et avec qui il participe.</p></li>
+          <li><h3>Préparer dans un cadre partagé</h3><p>Retrouvez les lieux de célébration, les habitudes de votre groupe et son recueil de chants pour garder un fil commun d’une messe à l’autre.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="wrap values" aria-labelledby="titre-engagements">
+      <div><p class="eyebrow">Un outil au service de la célébration</p><h2 id="titre-engagements">Simple, ouvert.<br>Et respectueux de vous.</h2></div>
+      <div class="values-copy">
+        <p><strong>La gratuité et l’absence de publicité font partie du projet.</strong> Animation Messe se construit pour accompagner la vie des paroisses et des équipes, sans détourner l’attention de ce qui compte.</p>
+        <p><strong>Pas de cookies intrusifs ou tiers.</strong> La préparation d’une animation et la génération d’une feuille de messe seront possibles sans connexion. Le compte apportera les outils de suivi personnel et d’organisation en équipe.</p>
+        <p>Cette page de présentation suit déjà cet esprit : aucun traceur, aucun cookie, aucune ressource externe chargée.</p>
+      </div>
+    </section>
+
+    <section class="wrap launch" id="ouverture" aria-labelledby="titre-ouverture">
+      <p class="eyebrow">Le projet se construit, les premières notes s’écrivent.</p>
+      <h2 id="titre-ouverture">Rendez-vous <em>début 2027.</em></h2>
+      <p>Animation Messe est actuellement en développement. Les fonctionnalités présentées ici sont en préparation et ne sont pas encore accessibles. La mise en ligne est prévue début 2027. À bientôt pour préparer et célébrer ensemble !</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div><p class="footer-title">Animation Messe</p><p class="footer-note">Au service de celles et ceux qui font vivre la liturgie.</p></div>
+      <p class="support">Un projet soutenu et propulsé par<br><a href="https://carthographie.fr" rel="external noreferrer">cARThographie <span aria-hidden="true">↗</span></a></p>
+    </div>
+  </footer>
+</body>
+</html>
