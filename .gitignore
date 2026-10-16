@@ -2,7 +2,7 @@ chris/
 .uv-cache/
 staticfiles/*
 !staticfiles/.gitkeep
-
+.env.dev
 
 
 
