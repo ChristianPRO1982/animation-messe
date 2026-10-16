@@ -327,7 +327,8 @@ last_name
 gamt_id
 consented_at
 consent_version
-consent_email_fingerprint
+public_id
+consent_body_markdown
 withdrawal_secret_hash
 created_at
 updated_at
@@ -660,7 +661,9 @@ gg_id
 requested_by_ggm_id
 first_name
 last_name
-email
+public_id
+withdrawal_secret_hash
+consent_body_markdown
 consent_token_hash
 consent_version
 status
@@ -694,7 +697,13 @@ Validations service :
 - le refus ne crée aucun Membre AM et conserve seulement un indicateur
   pseudonymisé temporaire visible des Responsables.
 
-L'adresse email en clair ne doit pas être conservée dans le Membre AM actif.
+L'adresse email n'est jamais conservée dans les modèles métier, ni dans la
+trace email de ce flux. Le champ historique `email` de la demande et
+`consent_email_fingerprint` du profil sont supprimés par migration.
+`public_id` est un UUID unique et opaque ; il est transféré de la demande au
+profil lors de l'acceptation, comme le consentement figé et l'empreinte du
+secret de retrait. Voir [invitations.md](invitations.md) pour les routes publiques,
+les droits, les délais et la purge manuelle.
 
 ---
 

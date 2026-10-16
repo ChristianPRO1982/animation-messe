@@ -1,0 +1,46 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>{% trans "Consentement Membre AM" %} | Animation Messe</title>
+    <link rel="stylesheet" href="{% static 'css/am_consent.css' %}">
+</head>
+<body>
+    <header><img src="{% static 'icons/ui/normal/512/light/groups.png' %}" alt="" width="48" height="48"><span>Animation Messe</span></header>
+    <main>
+        <h1>{% if withdrawal %}{% trans "Supprimer mon Membre AM" %}{% else %}{% trans "Consentement Membre AM" %}{% endif %}</h1>
+        {% if error %}<p role="alert">{{ error }}</p>
+        {% elif done %}
+            <p role="status">{% if withdrawal %}{% trans "Votre demande ou votre Membre AM a été supprimé." %}{% elif accepted %}{% trans "Votre consentement est enregistré. Votre Membre AM est créé." %}{% else %}{% trans "Votre invitation a été refusée et supprimée." %}{% endif %}</p>
+        {% elif ready %}
+            <h2>{{ first_name }} {{ last_name }}</h2>
+            <p>{{ group_name }}</p>
+            {% if not withdrawal %}
+                <p>{% trans "Version du consentement" %} : {{ consent_version }}</p>
+                <section aria-label="{% trans 'Texte du consentement' %}">{{ consent_html }}</section>
+            {% else %}<p>{% trans "Cette suppression est définitive." %}</p>{% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="secret" value="{{ secret }}">
+                <label class="confirmation"><input type="checkbox" name="confirmed"> {% if withdrawal %}{% trans "Je confirme la suppression." %}{% else %}{% trans "J’accepte ce consentement et la création de mon Membre AM sous cette identité." %}{% endif %}</label>
+                <div class="actions">
+                    {% if withdrawal %}<button name="action" value="delete" type="submit">{% trans "Supprimer définitivement" %}</button>
+                    {% else %}<button name="action" value="accept" type="submit" data-requires-confirmation disabled>{% trans "Accepter" %}</button><button name="action" value="refuse" type="submit" class="secondary">{% trans "Refuser" %}</button>{% endif %}
+                </div>
+            </form>
+        {% else %}
+            <form method="post" data-consent-preview>
+                {% csrf_token %}
+                <input type="hidden" name="secret" value="">
+                <input type="hidden" name="action" value="preview">
+                <p data-link-error hidden>{% trans "Ce lien est incomplet. Ouvrez le lien personnel reçu par email." %}</p>
+                <noscript><p>{% trans "JavaScript est nécessaire pour ouvrir ce lien personnel sans exposer son secret dans l’adresse envoyée au serveur." %}</p></noscript>
+            </form>
+        {% endif %}
+    </main>
+    <script src="{% static 'js/am_consent.js' %}" defer></script>
+</body>
+</html>

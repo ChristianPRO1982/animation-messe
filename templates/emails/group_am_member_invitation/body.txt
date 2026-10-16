@@ -1,0 +1,15 @@
+Bonjour {{ first_name }} {{ last_name }},
+
+Le groupe {{ group_name }} vous propose de devenir Membre AM, sans compte de connexion.
+Votre identité ne pourra pas être modifiée après validation.
+
+Consentement {{ consent_version }} :
+{{ consent_body }}
+
+Pour consulter, accepter ou refuser cette invitation avant le {{ expires_at }} :
+{{ consent_url }}
+
+Conservez cet email. Ce lien permet d'annuler votre invitation ou de supprimer votre Membre AM après confirmation, même après validation :
+{{ withdrawal_url }}
+
+Si vous perdez cet email, contactez un Responsable du groupe ou l'Administrateur AM pour demander votre suppression.

@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="fr"><body>
+<p>Bonjour {{ first_name }} {{ last_name }},</p>
+<p>Le groupe {{ group_name }} vous propose de devenir Membre AM, sans compte de connexion. Votre identité ne pourra pas être modifiée après validation.</p>
+<h2>Consentement {{ consent_version }}</h2>
+<div>{{ consent_body|linebreaksbr }}</div>
+<p><a href="{{ consent_url }}">Consulter, accepter ou refuser l'invitation</a> avant le {{ expires_at }}.</p>
+<p>Conservez cet email : <a href="{{ withdrawal_url }}">annuler l'invitation ou supprimer votre Membre AM</a>, après confirmation, même après validation.</p>
+<p>Si vous perdez cet email, contactez un Responsable du groupe ou l'Administrateur AM pour demander votre suppression.</p>
+</body></html>

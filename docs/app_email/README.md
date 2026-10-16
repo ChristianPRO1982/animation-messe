@@ -6,10 +6,10 @@ L'objectif est de permettre à Django d'envoyer les e-mails transactionnels et
 les e-mails de vie métier de l'application, sans dépendre de n8n pour les cas
 simples.
 
-La V1 implémentée cible l'infrastructure seulement : modèle de notification,
-service d'envoi, rendu des templates, configuration et consultation Django
-Admin. Aucun déclencheur métier n'est encore branché automatiquement dans
-`app_group`, `app_planning` ou `app_celebration`.
+Le socle V1 fournit les notifications, le rendu, l'envoi, la configuration et
+la consultation Django Admin. Un premier flux métier est raccordé :
+l'invitation et le consentement des Membres AM dans `app_group`, via un envoi
+sans destinataire persisté. Planning et célébrations ne déclenchent aucun email.
 
 Deux limites techniques restent présentes : l'absence d'atomicité entre SMTP
 et PostgreSQL, et la sérialisation des envois autorisés par le verrou global.

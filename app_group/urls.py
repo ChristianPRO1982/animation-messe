@@ -1,8 +1,19 @@
 from django.urls import path
 
-from app_group import views
+from app_group import public_views, views
 
 urlpatterns = [
+    path(
+        "am-members/<uuid:public_id>/consent/",
+        public_views.member_consent,
+        name="am_member_consent",
+    ),
+    path(
+        "am-members/<uuid:public_id>/withdraw/",
+        public_views.member_consent,
+        {"withdrawal": True},
+        name="am_member_withdraw",
+    ),
     path("", views.groups_home, name="groups_home"),
     path("manage/", views.groups_manage, name="groups_manage"),
     path("<int:group_id>/members/", views.group_members, name="group_members"),

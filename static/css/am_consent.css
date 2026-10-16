@@ -1,0 +1,15 @@
+* { box-sizing: border-box; }
+body { margin: 0; color: #17251f; background: #f4f7f5; font: 1rem/1.6 system-ui, sans-serif; letter-spacing: 0; }
+header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; background: #fff; border-bottom: 1px solid #cdd8d0; font-weight: 700; }
+main { max-width: 48rem; margin: 2rem auto; padding: 0 1.25rem 3rem; overflow-wrap: anywhere; }
+h1 { font-size: 1.75rem; line-height: 1.25; }
+h1[tabindex="-1"]:focus { outline: none; }
+h2 { font-size: 1.25rem; }
+section { border-block: 1px solid #cdd8d0; margin-block: 1.5rem; }
+.confirmation { display: flex; align-items: baseline; gap: .75rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+button { border: 1px solid #176346; border-radius: 4px; padding: .7rem 1.2rem; font: inherit; color: #fff; background: #176346; cursor: pointer; }
+button.secondary { background: #fff; color: #17251f; border-color: #69756e; }
+button:disabled { color: #56605b; background: #dce1de; border-color: #b8c2bc; cursor: not-allowed; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #e4ad28; outline-offset: 3px; }
+[role="alert"] { color: #9b2424; }

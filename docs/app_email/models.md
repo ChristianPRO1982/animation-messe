@@ -24,8 +24,8 @@ Le module email possède :
 - l'administration minimale des notifications ;
 - les tests transverses d'envoi.
 
-En V1, aucun déclencheur automatique n'est branché dans les apps métier
-existantes.
+Le premier raccordement métier est l'invitation Membre AM dans `app_group`,
+avec destinataire transitoire. Les autres flux restent futurs.
 
 Le module email ne possède pas :
 
@@ -72,10 +72,8 @@ templates/
             body.html
 ```
 
-Les templates métier réels, par exemple `group_am_member_invitation` ou
-`planning_personal_schedule`, restent à créer au moment où le flux métier
-correspondant est branché. La V1 ne fournit que le template de test nécessaire
-aux tests d'infrastructure email.
+Les templates `group_am_member_invitation` sont fournis pour le premier flux
+métier. `planning_personal_schedule` reste à créer lors de son raccordement.
 
 Des sous-modules peuvent être ajoutés si le service grossit :
 
@@ -241,7 +239,9 @@ account_inactivity_warning
 
 Adresse utilisée pour l'envoi.
 
-Elle doit être conservée seulement si nécessaire à la traçabilité.
+Elle est conservée pour l'API ordinaire. Elle reste vide pour
+`send_private_email_now()`, utilisé par les invitations Membre AM ; aucune
+empreinte de cette adresse n'est enregistrée dans le stockage métier.
 
 `recipient_member_id`
 
@@ -276,7 +276,7 @@ Clé d'idempotence métier.
 Exemples :
 
 ```text
-group_am_member_invitation:7:42:alice@example.test
+group_am_member_invitation:<public_id_demande>
 planning_personal_schedule:7:2026-10:11111111-1111-1111-1111-111111111111
 celebration_sheet_available:88:11111111-1111-1111-1111-111111111111
 ```
@@ -375,7 +375,7 @@ Contraintes recommandées :
 business_key unique lorsque non null
 status dans la liste des statuts connus
 notification_type non vide
-recipient_email non vide pour une notification envoyable par email
+destinataire valide : persisté pour l'API ordinaire, transitoire pour l'API privée
 ```
 
 La contrainte d'unicité sur `business_key` doit rester compatible avec les
@@ -483,10 +483,8 @@ Le sujet rendu doit être normalisé sur une seule ligne, préfixe de configurat
 inclus. Un HTML absent permet un envoi texte seul ; un HTML présent mais cassé
 (par exemple une inclusion introuvable) fait échouer le rendu et l'envoi.
 
-En V1, seuls les templates `test_notification` existent dans le dépôt. Les
-types métier cités ci-dessous sont des exemples de flux futurs et ne doivent
-pas être appelés tant que leurs templates et services métier dédiés ne sont pas
-ajoutés.
+Les templates `test_notification` et `group_am_member_invitation` existent.
+Les autres types cités ci-dessous restent des exemples de flux futurs.
 
 ---
 
@@ -591,13 +589,13 @@ group_am_member_invitation
 Déclencheur :
 
 ```text
-app_group.services.create_am_member_request
+app_group.invitations.invite_am_member
 ```
 
 Destinataire :
 
 ```text
-AmMemberRequest.email
+Adresse saisie par le Responsable, utilisée uniquement en mémoire
 ```
 
 Objet métier :
@@ -609,7 +607,7 @@ AmMemberRequest
 Idempotence :
 
 ```text
-type + gamr_id + recipient_email
+group_am_member_invitation:<public_id_demande>
 ```
 
 ## 11.2. Planning personnel

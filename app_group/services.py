@@ -11,7 +11,6 @@ from django.core.validators import validate_email
 from django.db import DatabaseError, transaction
 from django.db.models import Max
 from django.utils import timezone
-from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext_lazy as _
 
 from app_group.models import (
@@ -176,17 +175,6 @@ def hash_personal_secret(raw_secret: str) -> str:
 
 def check_personal_secret(raw_secret: str, encoded_secret: str) -> bool:
     return check_password(str(raw_secret or ""), encoded_secret)
-
-
-def email_fingerprint(email: str) -> str:
-    normalized_email = str(email or "").strip().lower()
-    if not normalized_email:
-        raise ValidationError(_("L'adresse email est obligatoire."))
-    return salted_hmac(
-        "app_group.am_member_email",
-        normalized_email,
-        algorithm="sha1",
-    ).hexdigest()
 
 
 def _user_member_id(user) -> str:
@@ -685,6 +673,8 @@ def create_am_member_request(
     consent_token: str,
     consent_version: str,
     consent_message: GroupConsentMessage | None = None,
+    consent_body_markdown: str | None = None,
+    withdrawal_secret: str | None = None,
     expires_at=None,
     now=None,
 ) -> AmMemberRequest:
@@ -716,8 +706,17 @@ def create_am_member_request(
         requested_by=requested_by,
         first_name=first_name,
         last_name=last_name,
-        email=email,
         consent_token_hash=hash_personal_secret(consent_token),
+        withdrawal_secret_hash=(
+            hash_personal_secret(withdrawal_secret) if withdrawal_secret else ""
+        ),
+        consent_body_markdown=(
+            consent_body_markdown
+            if consent_body_markdown is not None
+            else consent_message.body_markdown
+            if consent_message is not None
+            else default_consent_markdown()
+        ),
         consent_version=consent_version,
         consent_message=consent_message,
         expires_at=expires_at,
@@ -739,7 +738,6 @@ def expire_am_member_request(request: AmMemberRequest, *, now=None) -> bool:
     request.display_hint = _display_hint(request.first_name, request.last_name)
     request.first_name = ""
     request.last_name = ""
-    request.email = ""
     request.consent_token_hash = hash_personal_secret("expired")
     request.purge_at = now
     request.save(
@@ -748,7 +746,6 @@ def expire_am_member_request(request: AmMemberRequest, *, now=None) -> bool:
             "display_hint",
             "first_name",
             "last_name",
-            "email",
             "consent_token_hash",
             "purge_at",
             "updated_at",
@@ -764,7 +761,6 @@ def refuse_am_member_request(request: AmMemberRequest, *, now=None) -> None:
     request.display_hint = _display_hint(request.first_name, request.last_name)
     request.first_name = ""
     request.last_name = ""
-    request.email = ""
     request.consent_token_hash = hash_personal_secret("refused")
     request.purge_at = now + timedelta(days=REFUSED_REQUEST_PURGE_DAYS)
     request.save(
@@ -774,7 +770,6 @@ def refuse_am_member_request(request: AmMemberRequest, *, now=None) -> None:
             "display_hint",
             "first_name",
             "last_name",
-            "email",
             "consent_token_hash",
             "purge_at",
             "updated_at",
@@ -786,7 +781,7 @@ def accept_am_member_request(
     request: AmMemberRequest,
     *,
     consent_token: str,
-    withdrawal_secret: str,
+    withdrawal_secret: str | None = None,
     functions: Iterable[GroupFunction] = (),
     title=None,
     now=None,
@@ -817,8 +812,13 @@ def accept_am_member_request(
             consented_at=now,
             consent_version=request.consent_version,
             consent_message=request.consent_message,
-            consent_email_fingerprint=email_fingerprint(request.email),
-            withdrawal_secret_hash=hash_personal_secret(withdrawal_secret),
+            public_id=request.public_id,
+            consent_body_markdown=request.consent_body_markdown,
+            withdrawal_secret_hash=(
+                hash_personal_secret(withdrawal_secret)
+                if withdrawal_secret is not None
+                else request.withdrawal_secret_hash
+            ),
         )
         for function in functions:
             assign_group_function(group_member, function)

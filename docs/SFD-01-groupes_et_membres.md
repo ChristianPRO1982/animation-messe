@@ -400,6 +400,11 @@ Le Responsable saisit :
 - le prénom ;
 - une adresse email temporaire permettant de contacter la personne.
 
+L'adresse est uniquement utilisée en mémoire pour l'envoi : elle n'est jamais
+enregistrée dans la demande, le profil ou la trace email, même sous forme
+d'empreinte. Le parcours technique est décrit dans
+[les invitations Membre AM](app_group/invitations.md).
+
 À ce stade, aucun Membre AM actif n’est créé.
 
 Il existe uniquement une **demande de création de Membre AM**.
@@ -429,6 +434,10 @@ L’absence de réponse n’est jamais considérée comme une acceptation.
 
 Une demande de création reste valable pendant **14 jours**.
 
+En cas de blocage ou d'échec d'envoi, son échéance de purge est ramenée à
+**7 jours**. La suppression effective repose sur une commande manuelle ; sans
+son exécution, les lignes restent présentes mais les liens échus sont invalides.
+
 Pendant cette période :
 - la personne n’est pas encore Membre AM ;
 - elle ne doit pas être utilisable comme Membre AM actif.
@@ -438,7 +447,7 @@ Si aucune réponse n’est donnée au terme des 14 jours :
 - la demande expire ;
 - le nom est supprimé ;
 - le prénom est supprimé ;
-- l’adresse email est supprimée ;
+- aucune adresse email n'a été persistée ;
 - les autres données personnelles associées à cette demande sont supprimées.
 
 La demande ne doit pas devenir un historique permanent des personnes sollicitées.
@@ -450,10 +459,14 @@ La demande ne doit pas devenir un historique permanent des personnes sollicitée
 Si la personne refuse :
 
 - aucun Membre AM n’est créé ;
-- son adresse email est supprimée ;
+- aucune adresse email n'a été persistée ;
 - son nom et son prénom complets sont supprimés.
 
-Un indicateur temporaire minimal peut rester visible uniquement aux Responsables afin qu’ils comprennent le résultat de leur demande.
+Dans le parcours public implémenté, la demande refusée est entièrement
+supprimée. Aucun indicateur personnel n'est conservé pour ce refus.
+
+Pour les anciens traitements administratifs, un indicateur temporaire minimal
+peut rester visible uniquement aux Responsables.
 
 Exemple :
 
@@ -473,7 +486,7 @@ Le refus ne doit pas devenir une liste permanente des personnes ayant dit non.
 En cas d’acceptation :
 
 - le véritable Membre AM est créé ;
-- l’adresse email utilisée pour le consentement n’est plus conservée en clair pour l’usage courant ;
+- aucune adresse email ni empreinte de cette adresse n'est conservée ;
 - les informations nécessaires au fonctionnement du Membre AM sont conservées ;
 - la preuve du consentement est conservée.
 
@@ -497,14 +510,9 @@ Le système repose sur un modèle de **confiance raisonnable entre personnes de 
 
 ## 16.1 Empreinte de l’adresse
 
-L’adresse email utilisée pour valider peut être transformée en une empreinte cryptographique protégée avant suppression de l’adresse en clair.
-
-Cette empreinte permet, en cas d’audit :
-- de comparer ultérieurement une adresse candidate ;
-- de savoir si cette adresse est ou non celle qui a servi au consentement ;
-- de détecter qu’une même adresse a servi à valider plusieurs Membres AM.
-
-Cette empreinte reste une donnée personnelle pseudonymisée et doit être protégée comme telle.
+Le choix retenu est de ne conserver aucune empreinte de l'adresse. La preuve
+locale porte sur l'utilisation du secret personnel, la date, le groupe et le
+consentement figé, pas sur la possibilité de retrouver ou comparer une adresse.
 
 ## 16.2 Contrôles simples
 
@@ -525,9 +533,9 @@ Le site ne cherche pas à certifier juridiquement l’identité physique de chaq
 
 Après acceptation, le Membre AM doit disposer d’un moyen autonome de revenir sur son consentement sans créer de compte CARThographie.
 
-Un email de confirmation lui est envoyé.
-
-Cet email contient un lien personnel reposant sur un secret individuel.
+L'email d'invitation contient déjà un lien personnel reposant sur un secret
+individuel distinct de celui de validation. Ce même lien reste utilisable après
+acceptation ; aucun second email de confirmation n'est envoyé.
 
 Ce secret :
 - appartient à la personne ;
@@ -553,7 +561,9 @@ Le système doit expliquer clairement les conséquences avant confirmation.
 
 Les effets détaillés sur l’antériorité, les anciens plannings ou autres contenus historiques relèvent des spécifications métier correspondantes.
 
-Le présent document garantit uniquement qu’un Membre AM possède un moyen autonome de demander la fin de son profil.
+Le choix retenu est la suppression complète du profil, de son ancre et de ses
+associations locales, sans anonymisation historique. Les futurs liens métier
+devront respecter cette règle.
 
 ---
 
@@ -561,11 +571,9 @@ Le présent document garantit uniquement qu’un Membre AM possède un moyen aut
 
 Si le Membre AM perd l’email contenant son lien ou son secret :
 
-- il peut contacter l’équipe ;
-- un Responsable peut lancer une nouvelle procédure de vérification ;
-- une nouvelle adresse temporaire peut être utilisée ;
-- un nouveau secret peut remplacer l’ancien après validation ;
-- l’adresse temporaire est ensuite de nouveau supprimée.
+- il contacte un Responsable du groupe ou l'Administrateur AM ;
+- cette personne autorisée peut supprimer le Membre AM après confirmation ;
+- aucune récupération ou rotation automatique du secret n'est implémentée.
 
 Cette procédure reste exceptionnelle.
 
@@ -580,7 +588,9 @@ Une fois le consentement obtenu et le Membre AM créé :
 
 peuvent manipuler les informations nécessaires à son utilisation quotidienne.
 
-La création et la suppression d’un Membre AM restent réservées aux Responsables.
+La création reste réservée aux Responsables. La suppression assistée est
+réservée aux Responsables et à l'Administrateur AM. Le titre et les fonctions
+sont modifiables par les membres du groupe disposant de l'accès AM.
 
 Le but est de ne pas faire porter toute la gestion opérationnelle des personnes sans compte sur les Responsables.
 
@@ -592,9 +602,9 @@ Le consentement est donné pour une personne donnée.
 
 Un Membre ou Responsable ne doit pas pouvoir transformer progressivement un Membre AM en une autre personne.
 
-Une modification substantielle de l’identité, notamment nom/prénom, doit être considérée comme une opération sensible.
-
-Si la modification revient fonctionnellement à représenter une autre personne, une nouvelle procédure de consentement doit être nécessaire.
+Le nom et le prénom sont immuables après validation, y compris pour
+l'Administrateur AM. Toute correction exige une suppression puis une nouvelle
+invitation avec consentement. Le titre n'appartient pas à cette identité immuable.
 
 ---
 

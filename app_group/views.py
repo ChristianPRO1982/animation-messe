@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import secrets
 from types import SimpleNamespace
 
 from django.contrib import messages
@@ -10,8 +8,10 @@ from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 
-from app_group import forms, services
+from app_email.models import EmailNotification
+from app_group import forms, invitations, services
 from app_group.consent_markdown import render_consent_markdown
 from app_group.models import (
     MEMBER_KIND_ACCOUNT,
@@ -65,7 +65,8 @@ GROUP_PAGE_CONFIG = {
         "route": "group_am_members",
         "actions": {
             "create_am_member_request",
-            "accept_am_member_request",
+            "update_am_member",
+            "delete_am_member",
             "refuse_am_member_request",
             "expire_am_member_request",
         },
@@ -448,6 +449,8 @@ def _handle_detail_post(request, common_group: CommonGroup, group: Group | None)
     )
 
 
+@sensitive_post_parameters()
+@sensitive_variables()
 def _group_management_page(request, group_id: int, page_key: str):
     catalog = GROUP_CATALOG_CONFIG.get(page_key)
     catalog_json = (
@@ -467,7 +470,9 @@ def _group_management_page(request, group_id: int, page_key: str):
     common_group = _get_common_group(group_id)
     group = Group.objects.filter(gg_id=group_id).first()
     access_context = _build_group_access_context(request.user, common_group, group)
-    if not access_context.can_manage_group:
+    if not access_context.can_manage_group and not (
+        page_key == "am_members" and access_context.can_enter_group
+    ):
         if catalog_json:
             return JsonResponse({"error": str(_("Accès refusé."))}, status=403)
         return HttpResponseForbidden(_("Accès refusé."))
@@ -615,6 +620,8 @@ def _handle_catalog_post(request, group, page_key):
     ), None
 
 
+@sensitive_post_parameters()
+@sensitive_variables()
 def _handle_group_post(
     request,
     common_group: CommonGroup,
@@ -644,7 +651,10 @@ def _handle_group_post(
         return redirect(redirect_name, group_id=group_id)
 
     try:
-        services.require_group_manager(request.user, group)
+        if action == "update_am_member":
+            invitations.require_am_access(request.user, group)
+        else:
+            services.require_group_manager(request.user, group)
         _dispatch_group_action(request, group, action)
     except PermissionDenied:
         return HttpResponseForbidden(_("Accès refusé."))
@@ -751,30 +761,52 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         form = forms.AmMemberRequestForm(request.POST)
         _validate_action_form(form, action)
         requested_by = _current_group_member(group, request.user)
-        token = secrets.token_urlsafe(24)
-        current_consent = services.get_current_group_consent(group)
-        services.create_am_member_request(
+
+        def show_result(notification):
+            if notification is None:
+                messages.error(
+                    request,
+                    _(
+                        "La demande est créée, mais le résultat de l'envoi n'a pas pu être confirmé."
+                    ),
+                )
+            elif notification.status == EmailNotification.STATUS_SENT:
+                messages.success(request, _("L'invitation Membre AM a été envoyée."))
+            else:
+                messages.error(request, notification.error_message)
+
+        invitations.invite_am_member(
             group,
             requested_by,
             first_name=form.cleaned_data["first_name"],
             last_name=form.cleaned_data["last_name"],
             email=form.cleaned_data["email"],
-            consent_token=token,
-            consent_version=current_consent.version_label,
-            consent_message=current_consent.message,
+            on_result=show_result,
         )
-        request.session[INVITATION_NOTICE_SESSION_KEY] = {
-            "title": str(_("Invitation Membre AM")),
-            "messageMarkdown": str(
-                _(
-                    "Transmettre ce jeton à la personne invitée :\n\n`%(token)s`\n\n"
-                    "Il ne sera plus affiché après cette page."
-                )
-            )
-            % {"token": token},
-        }
-        request.session.modified = True
-        messages.success(request, _("La demande de Membre AM est créée."))
+        return
+
+    if action == "update_am_member":
+        form = forms.AmMemberUpdateForm(request.POST, group=group)
+        _validate_action_form(form, action)
+        if {"first_name", "last_name"} & request.POST.keys():
+            raise ValidationError(_("L'identité d'un Membre AM est immuable."))
+        invitations.update_am_member(
+            request.user,
+            group,
+            form.cleaned_data["group_member_id"],
+            title_id=form.cleaned_data["title_id"],
+            function_ids=form.cleaned_data["function_ids"],
+        )
+        messages.success(request, _("Le titre et les fonctions sont enregistrés."))
+        return
+
+    if action == "delete_am_member":
+        form = forms.AmMemberDeleteForm(request.POST)
+        _validate_action_form(form, action)
+        invitations.delete_am_member(
+            request.user, group, form.cleaned_data["group_member_id"]
+        )
+        messages.success(request, _("Le Membre AM a été supprimé."))
         return
 
     if action == "save_consent_draft":
@@ -809,20 +841,6 @@ def _dispatch_group_action(request, group: Group, action: str) -> None:
         else:
             services.expire_am_member_request(am_request, now=timezone.now())
             messages.success(request, _("La demande de Membre AM est expirée."))
-        return
-
-    if action == "accept_am_member_request":
-        form = forms.AmMemberAcceptForm(request.POST)
-        _validate_action_form(form, action)
-        am_request = group.am_member_requests.get(
-            pk=form.cleaned_data["am_member_request_id"]
-        )
-        services.accept_am_member_request(
-            am_request,
-            consent_token=form.cleaned_data["consent_token"],
-            withdrawal_secret=form.cleaned_data["withdrawal_secret"],
-        )
-        messages.success(request, _("Le Membre AM est créé."))
         return
 
     if action == "save_function":
@@ -1004,8 +1022,8 @@ def _build_group_context(
     *,
     access_context=None,
 ):
-    invitation_notice = request.session.pop(INVITATION_NOTICE_SESSION_KEY, None)
-    request.session.modified = True
+    # Discard legacy notices; never render an old personal token again.
+    request.session.pop(INVITATION_NOTICE_SESSION_KEY, None)
     access_context = access_context or _build_group_access_context(
         request.user,
         common_group,
@@ -1027,7 +1045,7 @@ def _build_group_context(
         "selected_group": common_group,
         "common_memberships": common_memberships,
         "access_context": access_context,
-        "invitation_notice_json": json.dumps(invitation_notice or {}),
+        "invitation_notice_json": "{}",
         "forms": {
             "settings": forms.GroupSettingsForm(
                 initial={
@@ -1083,6 +1101,21 @@ def _build_group_context(
         .prefetch_related("function_assignments__function", "role_assignments__role")
         .order_by("member_kind", "ggm_id")
     )
+    for member in members:
+        if member.member_kind != MEMBER_KIND_ACCOUNT:
+            member.am_edit_form = forms.AmMemberUpdateForm(
+                group=group,
+                initial={
+                    "action": "update_am_member",
+                    "group_member_id": member.pk,
+                    "title_id": member.am_profile.title_id,
+                    "function_ids": [
+                        assignment.function_id
+                        for assignment in member.function_assignments.all()
+                    ],
+                },
+                auto_id=f"member-{member.pk}-%s",
+            )
     songs = list(
         group.songs.prefetch_related(
             "verses",

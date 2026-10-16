@@ -16,10 +16,30 @@
                     </p>
                 {% endif %}
                 <p>{% trans "Aucun droit applicatif ne peut être attribué à un Membre AM." %}</p>
+                <form method="post" class="group-stack-form">
+                    {% csrf_token %}
+                    {{ member.am_edit_form.action }}{{ member.am_edit_form.group_member_id }}
+                    <div>{{ member.am_edit_form.title_id.label_tag }}{{ member.am_edit_form.title_id }}</div>
+                    <fieldset><legend>{% trans "Fonctions" %}</legend>{{ member.am_edit_form.function_ids }}</fieldset>
+                    <button class="site-action site-action--primary" type="submit">{% trans "Enregistrer" %}</button>
+                </form>
+                {% if access_context.can_manage_group %}
+                <details>
+                    <summary>{% trans "Supprimer ce Membre AM" %}</summary>
+                    <form method="post" class="group-stack-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_am_member">
+                        <input type="hidden" name="group_member_id" value="{{ member.pk }}">
+                        <label><input type="checkbox" name="confirmed" required> {% trans "Je confirme la suppression définitive." %}</label>
+                        <button class="site-action site-action--secondary" type="submit">{% trans "Supprimer définitivement" %}</button>
+                    </form>
+                </details>
+                {% endif %}
             {% empty %}
                 <p>{% trans "Aucun Membre AM actif." %}</p>
             {% endfor %}
         </article>
+        {% if access_context.can_manage_group %}
         <article class="site-theme-card">
             <header class="site-theme-card-header"><div><h2>{% trans "Créer une demande Membre AM" %}</h2></div></header>
             <p>
@@ -40,5 +60,13 @@
                 <button class="site-action site-action--primary" type="submit">{% trans "Créer l’invitation" %}</button>
             </form>
         </article>
+        <article class="site-theme-card">
+            <h2>{% trans "Invitations en attente" %}</h2>
+            {% for invitation in am_member_requests %}
+                <p>{{ invitation.first_name }} {{ invitation.last_name }} — {{ invitation.get_status_display }}</p>
+                <p>{% trans "Expiration" %} : {{ invitation.expires_at }}{% if invitation.purge_at %} · {% trans "Purge possible à partir du" %} {{ invitation.purge_at }}{% endif %}</p>
+            {% empty %}<p>{% trans "Aucune invitation en attente." %}</p>{% endfor %}
+        </article>
+        {% endif %}
     </section>
 {% endblock %}

@@ -91,13 +91,30 @@ class AmMemberRequestDecisionForm(ActionForm):
     am_member_request_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput())
 
 
-class AmMemberAcceptForm(AmMemberRequestDecisionForm):
-    consent_token = forms.CharField(label=_("Jeton de consentement"), max_length=255)
-    withdrawal_secret = forms.CharField(
-        label=_("Secret personnel"),
-        max_length=255,
-        widget=forms.PasswordInput,
+class AmMemberDeleteForm(GroupMemberActionForm):
+    confirmed = forms.BooleanField(label=_("Je confirme la suppression définitive."))
+
+
+class AmMemberUpdateForm(GroupMemberActionForm):
+    title_id = forms.TypedChoiceField(
+        label=_("Titre"), coerce=int, empty_value=None, required=False
     )
+    function_ids = forms.TypedMultipleChoiceField(
+        label=_("Fonctions"),
+        coerce=int,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def __init__(self, *args, group, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title_id"].choices = [
+            ("", "—"),
+            *group.am_member_titles.filter(is_active=True).values_list("pk", "label"),
+        ]
+        self.fields["function_ids"].choices = group.functions.filter(
+            is_active=True
+        ).values_list("pk", "name")
 
 
 class NamedGroupObjectForm(ActionForm):

@@ -1,3 +1,6 @@
+import uuid
+
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -248,13 +251,26 @@ class AmMember(models.Model):
         blank=True,
         null=True,
     )
-    consent_email_fingerprint = models.CharField(max_length=255)
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    consent_body_markdown = models.TextField(blank=True)
     withdrawal_secret_hash = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'am"."g_am_member'
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            original = (
+                type(self).objects.using(self._state.db or "default").get(pk=self.pk)
+            )
+            if (self.first_name, self.last_name) != (
+                original.first_name,
+                original.last_name,
+            ):
+                raise ValidationError(_("L'identité d'un Membre AM est immuable."))
+        return super().save(*args, **kwargs)
 
 
 class GroupRole(models.Model):
@@ -452,7 +468,9 @@ class AmMemberRequest(models.Model):
     )
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(blank=True)
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    withdrawal_secret_hash = models.CharField(max_length=255, blank=True)
+    consent_body_markdown = models.TextField(blank=True)
     consent_token_hash = models.CharField(max_length=255)
     consent_version = models.CharField(max_length=64)
     consent_message = models.ForeignKey(

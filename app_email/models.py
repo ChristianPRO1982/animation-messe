@@ -40,7 +40,7 @@ class EmailNotification(models.Model):
     sender_key = models.CharField(
         max_length=32, choices=SENDER_CHOICES, default="default"
     )
-    recipient_email = models.EmailField(max_length=254)
+    recipient_email = models.EmailField(max_length=254, blank=True)
     recipient_member_id = models.UUIDField(blank=True, null=True)
     group = models.ForeignKey(
         "app_group.Group",

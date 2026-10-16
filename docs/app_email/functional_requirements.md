@@ -3,8 +3,9 @@
 Le module email porte les e-mails transactionnels et les e-mails de vie métier
 d'Animation Messe.
 
-En V1, le module fournit la mécanique transversale mais ne branche aucun
-déclencheur métier automatique dans les autres apps Django.
+Le module fournit la mécanique transversale. Le premier déclencheur métier
+raccordé est l'invitation Membre AM dans `app_group`. Les autres flux restent
+hors implémentation.
 
 Sources fonctionnelles principales :
 
@@ -352,8 +353,8 @@ données des autres membres.
 **EMAIL-N8N-01** — n8n ne lit pas directement PostgreSQL pour déterminer les
 e-mails à envoyer.
 
-**EMAIL-V1-01** — La V1 fournit l'infrastructure email sans déclencheur métier
-automatique.
+**EMAIL-V1-01** — Le socle V1 est transversal ; son premier raccordement métier
+est l'invitation Membre AM, sans persistance du destinataire ni du contenu.
 
 **EMAIL-ADMIN-01** — La V1 expose les notifications dans Django Admin.
 

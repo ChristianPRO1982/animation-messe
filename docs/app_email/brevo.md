@@ -122,4 +122,20 @@ puis procéder à un essai réel explicitement autorisé avant activation durabl
 
 Le réglage BDD est initialisé à `False` lors de la migration sur chaque base.
 L'activation durable reste distincte du branchement des premiers flux métier :
-les templates de consentement et de planning ne sont pas encore fournis.
+le flux d'invitation Membre AM est désormais fourni ; le planning reste à raccorder.
+
+## 6. Essai du parcours Membre AM
+
+Après application des migrations, configurer `AM_PUBLIC_ORIGIN` avec l'origine
+accessible au destinataire (`http://localhost:8000` pour un essai sur cette
+machine, HTTPS en production). Recréer le conteneur après modification du `.env`.
+Activer explicitement les deux autorisations, puis créer une invitation depuis
+la page Membres AM d'un groupe dont le testeur est Responsable avec accès AM.
+Utiliser uniquement une adresse de test autorisée.
+
+Vérifier la réception des deux liens, la présentation du consentement, puis
+l'acceptation et l'apparition du Membre AM. Ouvrir ensuite le lien de suppression
+du même email : seule la confirmation doit supprimer le profil et son ancre.
+Vérifier que la demande et la trace ne contiennent aucune adresse email et
+que les liens ne sont jamais affichés au Responsable. Refermer les deux
+autorisations après l'essai. Ne pas copier les liens secrets dans le chat.

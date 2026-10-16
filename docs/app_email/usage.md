@@ -14,6 +14,7 @@ Toutes les apps Django du site peuvent importer `app_email.services`.
 | Fonction | Utilisation |
 | --- | --- |
 | `send_email_now()` | Créer ou retrouver une notification, rendre les templates et tenter l'envoi immédiatement. Point d'entrée habituel. |
+| `send_private_email_now()` | Envoyer avec une adresse transitoire, sans la persister dans la trace ; clé métier obligatoire. |
 | `queue_email()` | Créer ou retrouver la trace sans rendre ni envoyer de message. |
 | `send_notification()` | Envoyer une notification déjà enregistrée, avec son contexte de rendu. |
 | `render_email()` | Rendre le sujet, le texte et le HTML sans créer de notification ni envoyer de message. |
@@ -22,10 +23,26 @@ Les apps métier déterminent l'événement, les destinataires autorisés et le
 contexte minimal. Elles passent par ce service central ; elles n'appellent pas
 directement `send_mail()`, `EmailMultiAlternatives`, SMTP ou un provider externe.
 
-La V1 ne branche encore aucun événement métier automatiquement. Seul le type
-`test_notification` dispose de templates fournis. Les noms comme
-`planning_personal_schedule` sont des exemples de futurs flux, pas des types
-déjà utilisables.
+Les types fournis sont `test_notification` et `group_am_member_invitation`.
+Ce dernier est orchestré par `app_group.invitations.invite_am_member()` pour
+garantir les secrets personnels, le consentement et l'envoi après commit.
+`planning_personal_schedule` reste un futur flux non utilisable.
+
+### Destinataire non persisté
+
+`send_private_email_now(type, recipient_email, context, *, business_key,
+group=None, content_object=None, sender_key="default")` utilise le même moteur,
+les mêmes verrous et les mêmes statuts que l'envoi ordinaire, mais laisse
+`EmailNotification.recipient_email` vide. Il ne conserve ni contexte ni adresse,
+et ne permet pas de reprendre automatiquement une trace `pending` sans fournir
+à nouveau son destinataire transitoire. Le backend console est refusé pour
+éviter l'impression du message et de l'adresse ; utiliser le backend mémoire
+en tests et SMTP pour l'essai réel.
+
+Ne pas mettre l'adresse dans la clé, le contexte de diagnostic ou les
+métadonnées. Pour les Membres AM, ne pas appeler ce service directement depuis
+une vue : utiliser l'orchestrateur métier décrit dans
+[le parcours d'invitation](../app_group/invitations.md).
 
 ## 2. Appel direct et résultat
 

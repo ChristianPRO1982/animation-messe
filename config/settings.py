@@ -193,6 +193,9 @@ AM_EMAIL_PLANNING_FROM_NAME = os.environ.get(
     "AM_EMAIL_PLANNING_FROM_NAME", "Animation Messe - Planning"
 )
 AM_EMAIL_ENABLED = env_bool("AM_EMAIL_ENABLED", False)
+AM_PUBLIC_ORIGIN = os.environ.get(
+    "AM_PUBLIC_ORIGIN", "http://localhost:8000" if DEBUG else ""
+)
 AM_EMAIL_SUBJECT_PREFIX = os.environ.get("AM_EMAIL_SUBJECT_PREFIX", "")
 AM_EMAIL_MAILER_OPTIONS = {}
 if AM_EMAIL_BACKEND == "django.core.mail.backends.smtp.EmailBackend":

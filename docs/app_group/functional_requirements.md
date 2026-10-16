@@ -421,6 +421,8 @@ attente, le membre peut refaire une demande d'accès AM.
 
 # 4. Membres AM et consentement
 
+Le parcours implémenté est détaillé dans [invitations.md](invitations.md).
+
 La création d’un Membre AM est initiée par un Responsable.
 
 Elle nécessite :
@@ -440,6 +442,19 @@ Un Membre AM :
 - peut être affecté à une célébration ou à une cellule de planning.
 
 Le secret personnel ne doit jamais être stocké en clair.
+
+L'adresse email est uniquement transitoire pour l'envoi : ni la demande,
+ni le profil, ni la trace email ne la conservent, même sous forme d'empreinte.
+L'email contient un lien de consentement et un lien personnel de suppression.
+Seule une confirmation explicite sur la page publique crée ou supprime le membre.
+Le Responsable et l'Administrateur AM peuvent aussi supprimer un membre après
+confirmation. Le nom et le prénom validés sont immuables pour tous ; le titre
+et les fonctions sont modifiables par tous les membres du groupe avec accès AM.
+
+Les demandes envoyées expirent à 14 jours. Celles dont l'envoi est bloqué ou
+échoue sont conservées jusqu'à une échéance de purge à 7 jours. La purge
+effective nécessite l'exécution de la commande manuelle ; aucune reprise
+d'envoi automatique n'est prévue.
 
 Le retrait de consentement ne doit jamais être déclenché par une simple ouverture de lien : il doit passer par une confirmation explicite.
 

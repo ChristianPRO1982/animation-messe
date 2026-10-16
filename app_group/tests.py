@@ -1396,9 +1396,7 @@ class AppGroupManagementViewTests(SimpleTestCase):
         )
 
     @patch("app_group.views.messages")
-    @patch("app_group.views.services.create_am_member_request")
-    @patch("app_group.views.services.get_current_group_consent")
-    @patch("app_group.views.secrets.token_urlsafe", return_value="token-public")
+    @patch("app_group.views.invitations.invite_am_member")
     @patch("app_group.views._current_group_member")
     @patch("app_group.views.services.require_group_manager")
     @patch("app_group.views._build_group_access_context")
@@ -1411,24 +1409,10 @@ class AppGroupManagementViewTests(SimpleTestCase):
         build_access,
         _require_manager,
         current_group_member,
-        _token,
-        get_current_consent,
         create_request,
         _messages,
     ):
         requested_by = build_group_member(group=self.group, member=build_member())
-        consent_message = group_models.GroupConsentMessage(
-            group=self.group,
-            version=2,
-            status=group_models.GroupConsentMessage.STATUS_PUBLISHED,
-            body_markdown="Consentement",
-        )
-        get_current_consent.return_value = group_services.ConsentSnapshot(
-            version=2,
-            version_label="v2",
-            body_markdown="Consentement",
-            message=consent_message,
-        )
         current_group_member.return_value = requested_by
         request = build_request(
             self.factory,
@@ -1453,17 +1437,9 @@ class AppGroupManagementViewTests(SimpleTestCase):
             response.url, reverse("group_am_members", kwargs={"group_id": 7})
         )
         create_request.assert_called_once()
-        self.assertEqual(
-            create_request.call_args.kwargs["consent_token"], "token-public"
-        )
-        self.assertEqual(create_request.call_args.kwargs["consent_version"], "v2")
-        self.assertIs(
-            create_request.call_args.kwargs["consent_message"], consent_message
-        )
-        self.assertIn(
-            "token-public",
-            request.session["app_group_invitation_notice"]["messageMarkdown"],
-        )
+        self.assertEqual(create_request.call_args.kwargs["email"], "alice@example.test")
+        self.assertNotIn("app_group_invitation_notice", request.session)
+        self.assertTrue(callable(create_request.call_args.kwargs["on_result"]))
 
     @patch("app_group.views.messages")
     @patch("app_group.views.services.assign_group_function")
@@ -1932,9 +1908,7 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
 
         group_views._dispatch_group_action(request, group, "accept_am_member_request")
 
-        accept_request.assert_called_once_with(
-            am_request, consent_token="token", withdrawal_secret="secret"
-        )
+        accept_request.assert_not_called()
 
     @patch("app_group.views.messages")
     @patch("app_group.views._object_or_new")
@@ -2111,7 +2085,8 @@ class AppGroupManagementDispatchCoverageTests(SimpleTestCase):
         )
 
         self.assertIsNone(inactive_context["group"])
-        self.assertIn("token", inactive_context["invitation_notice_json"])
+        self.assertEqual("{}", inactive_context["invitation_notice_json"])
+        self.assertNotIn(group_views.INVITATION_NOTICE_SESSION_KEY, request.session)
 
         manager = Mock()
         manager.all.return_value = []
@@ -2451,20 +2426,15 @@ class AppGroupConsentMarkdownTests(SimpleTestCase):
 
 
 class AppGroupServiceTests(SimpleTestCase):
-    def test_secret_and_email_helpers_never_return_raw_values(self):
+    def test_secret_helpers_never_return_raw_values(self):
         encoded = group_services.hash_personal_secret("secret-value")
 
         self.assertNotEqual(encoded, "secret-value")
         self.assertTrue(group_services.check_personal_secret("secret-value", encoded))
         self.assertFalse(group_services.check_personal_secret("bad", encoded))
-        self.assertNotIn(
-            "alice@example.test", group_services.email_fingerprint("Alice@Example.Test")
-        )
 
         with self.assertRaises(ValidationError):
             group_services.hash_personal_secret("")
-        with self.assertRaises(ValidationError):
-            group_services.email_fingerprint("")
 
     def test_group_consent_snapshots_use_published_or_default(self):
         manager = Mock()
@@ -3334,7 +3304,7 @@ class AppGroupServiceTests(SimpleTestCase):
 
         create_kwargs = request_model.objects.create.call_args.kwargs
         self.assertNotEqual(create_kwargs["consent_token_hash"], "token-123")
-        self.assertEqual(create_kwargs["email"], "alice@example.test")
+        self.assertNotIn("email", create_kwargs)
         self.assertIs(create_kwargs["consent_message"], consent_message)
 
     @patch("app_group.services.is_group_responsable_with_am_access", return_value=True)
@@ -3525,14 +3495,12 @@ class AppGroupServiceTests(SimpleTestCase):
             expires_at=now,
             first_name="Alice",
             last_name="Doe",
-            email="alice@example.test",
         )
 
         self.assertTrue(group_services.expire_am_member_request(request, now=now))
         self.assertEqual(request.status, group_models.AmMemberRequest.STATUS_EXPIRED)
         self.assertEqual(request.first_name, "")
         self.assertEqual(request.last_name, "")
-        self.assertEqual(request.email, "")
         self.assertNotEqual(request.consent_token_hash, "alice@example.test")
         request.save.assert_called_once()
 
@@ -3540,11 +3508,10 @@ class AppGroupServiceTests(SimpleTestCase):
             status=group_models.AmMemberRequest.STATUS_PENDING,
             first_name="Bob",
             last_name="Smith",
-            email="bob@example.test",
         )
         group_services.refuse_am_member_request(refused, now=now)
         self.assertEqual(refused.status, group_models.AmMemberRequest.STATUS_REFUSED)
-        self.assertEqual(refused.email, "")
+        self.assertEqual(refused.first_name, "")
         self.assertGreater(refused.purge_at, now)
 
     def test_expire_am_member_request_ignores_non_expired_or_non_pending_requests(self):
@@ -3622,10 +3589,7 @@ class AppGroupServiceTests(SimpleTestCase):
         profile_kwargs = am_member_model.objects.create.call_args.kwargs
         self.assertIs(profile_kwargs["consent_message"], consent_message)
         self.assertNotEqual(profile_kwargs["withdrawal_secret_hash"], "withdraw-me")
-        self.assertNotEqual(
-            profile_kwargs["consent_email_fingerprint"],
-            "alice@example.test",
-        )
+        self.assertNotIn("consent_email_fingerprint", profile_kwargs)
         assign_function.assert_called_once_with(group_member, function)
         request.delete.assert_called_once()
 

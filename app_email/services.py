@@ -181,6 +181,15 @@ def send_notification(
     notification: EmailNotification,
     context: dict[str, Any] | None = None,
 ) -> EmailNotification:
+    return _deliver_notification(notification, context)
+
+
+def _deliver_notification(
+    notification: EmailNotification,
+    context: dict[str, Any] | None = None,
+    *,
+    transient_recipient: str | None = None,
+) -> EmailNotification:
     if notification._state.adding or notification.pk is None:
         raise ValueError(_("La notification doit etre enregistree avant l'envoi."))
 
@@ -211,24 +220,36 @@ def send_notification(
         if configuration is None or not configuration.enabled:
             notification.mark_blocked(EmailNotification.STATUS_BLOCKED_ADMIN)
             return notification
-        return _send_pending_notification(notification, context)
+        return _send_pending_notification(
+            notification, context, transient_recipient=transient_recipient
+        )
 
 
 def _send_pending_notification(
     notification: EmailNotification,
     context: dict[str, Any] | None = None,
+    *,
+    transient_recipient: str | None = None,
 ) -> EmailNotification:
     context = context or {}
     if notification.status != EmailNotification.STATUS_PENDING:
         return notification
 
     try:
+        if (
+            transient_recipient is not None
+            and settings.MAILERS["default"]["BACKEND"]
+            == "django.core.mail.backends.console.EmailBackend"
+        ):
+            raise ValueError("Console transport is not allowed for private emails.")
+        recipient = transient_recipient or notification.recipient_email
+        validate_email(recipient)
         rendered = render_email(notification.notification_type, context)
         message = EmailMultiAlternatives(
             subject=rendered.subject,
             body=rendered.body_text,
             from_email=get_sender_address(notification.sender_key),
-            to=[notification.recipient_email],
+            to=[recipient],
         )
         if rendered.body_html:
             message.attach_alternative(rendered.body_html, "text/html")
@@ -255,6 +276,44 @@ def _send_pending_notification(
     )
     notification.mark_failed(error_message)
     return notification
+
+
+def send_private_email_now(
+    notification_type: str,
+    recipient_email: str,
+    context: dict[str, Any] | None = None,
+    *,
+    business_key: str,
+    group=None,
+    content_object=None,
+    sender_key: str = "default",
+) -> EmailNotification:
+    """Send with an in-memory recipient; never persist the address or context."""
+    validate_email(recipient_email)
+    if not notification_type.strip() or not business_key.strip():
+        raise ValueError(_("Le type et la cle metier sont obligatoires."))
+    if sender_key not in {"default", "planning"}:
+        raise ValueError(_("Profil d'expediteur inconnu."))
+    object_type, object_id = _content_object_identity(content_object)
+    notification, _created = EmailNotification.objects.get_or_create(
+        business_key=business_key,
+        defaults={
+            "notification_type": notification_type,
+            "recipient_email": "",
+            "sender_key": sender_key,
+            "group_id": _group_id(group),
+            "content_object_type": object_type,
+            "content_object_id": object_id,
+        },
+    )
+    if (
+        notification.recipient_email
+        or notification.notification_type != notification_type
+    ):
+        raise ValueError(_("Cle metier incompatible avec un envoi confidentiel."))
+    return _deliver_notification(
+        notification, context, transient_recipient=recipient_email
+    )
 
 
 def send_email_now(
