@@ -55,18 +55,17 @@ def animations(request):
 
     if group_selected:
         if request.method == "POST":
-            if request.method == "POST":
-                new_animation = Animation(
-                    group_id=group_id,
-                    name=request.POST.get("txt_new_name"),
-                    description=request.POST.get("txt_new_description"),
-                    date=request.POST.get("dt_new_date"),
-                )
-                new_animation.save()
-                request.POST = request.POST.copy()
-                request.POST["txt_new_name"] = ""
-                request.POST["txt_new_description"] = ""
-                request.POST["txt_new_date"] = ""
+            new_animation = Animation(
+                group_id=group_id,
+                name=request.POST.get("txt_new_name"),
+                description=request.POST.get("txt_new_description"),
+                date=request.POST.get("dt_new_date"),
+            )
+            new_animation.save()
+            request.POST = request.POST.copy()
+            request.POST["txt_new_name"] = ""
+            request.POST["txt_new_description"] = ""
+            request.POST["txt_new_date"] = ""
 
         animations = Animation.get_all_animations(group_id)
 
@@ -225,7 +224,6 @@ def modify_animation(request, animation_id):
             animation.all_songs()
 
         # import song's lyrics
-        database = ""
         list_lyrics = []
         for song in animation.songs:
             song_lyrics = Song.get_song_by_id(
@@ -238,7 +236,6 @@ def modify_animation(request, animation_id):
             ]
             song_lyrics.get_verses()
 
-            full_title = song_lyrics.full_title
             list_lyrics.append(
                 {
                     "song_id": song["song_id"],
@@ -597,7 +594,7 @@ def all_songs_all_lyrics(request, animation_id):
         img.save(buffer, format="PNG")
         img_qr_code = base64.b64encode(buffer.getvalue()).decode("utf-8")
     except Exception:
-        error = "[ERR35]"
+        img_qr_code = ""
 
     return render(
         request,
@@ -664,10 +661,6 @@ def submit_image(request: HttpRequest) -> HttpResponse:
                         fh.write(chunk)
 
                 rel_path = str(dest_path.relative_to(Path(settings.MEDIA_ROOT)))
-                user_id: int | None = (
-                    request.user.id if request.user.is_authenticated else None
-                )
-                ip = _client_ip(request)
 
                 try:
                     with Image.open(dest_path) as im:
@@ -731,7 +724,6 @@ def _sync_images_with_db(img_dir: Path, db_table: str):
         except Exception:
             width, height, size_bytes, mime = 0, 0, 0, "application/octet-stream"
 
-        rel_img_dir = str(img_dir.relative_to(settings.MEDIA_ROOT))
         file_path_name = str(img_dir).split("media/")[1] + "/" + file_path.name
         if db_table == "l_image_submissions":
             if not BackgroundImageSubmission.image_exists(stored_path=file_path_name):
@@ -812,12 +804,10 @@ def _delete_db_image_without_image_file(img_dir: Path, db_table: str):
             if str(file) == stored_path_file:
                 to_delete = False
 
-        if db_table == "l_image_submissions":
-            if to_delete:
-                BackgroundImageSubmission.delete_by_stored_path(stored_path)
-        elif db_table == "l_image_backgrounds":
-            if to_delete:
-                BackgroundImage.delete_by_stored_path(stored_path)
+        if to_delete and db_table == "l_image_submissions":
+            BackgroundImageSubmission.delete_by_stored_path(stored_path)
+        elif to_delete and db_table == "l_image_backgrounds":
+            BackgroundImage.delete_by_stored_path(stored_path)
 
 
 def _clean_submissions_and_images():
