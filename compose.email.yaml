@@ -3,17 +3,17 @@ services:
     environment:
       AM_EMAIL_ENABLED: ${AM_EMAIL_ENABLED:-false}
       EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
-      EMAIL_HOST: smtp-relay.brevo.com
-      EMAIL_PORT: "587"
-      EMAIL_USE_TLS: "true"
-      EMAIL_USE_SSL: "false"
-      EMAIL_TIMEOUT: "10"
+      EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-true}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-false}
+      EMAIL_TIMEOUT: ${EMAIL_TIMEOUT:-10}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:?Definir EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD_FILE: /run/secrets/brevo_smtp_key
-      DEFAULT_FROM_EMAIL: no-reply@animation-messe.fr
-      AM_EMAIL_FROM_NAME: Animation Messe
-      AM_EMAIL_PLANNING_FROM_EMAIL: planning-noreply@animation-messe.fr
-      AM_EMAIL_PLANNING_FROM_NAME: Animation Messe - Planning
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@animation-messe.fr}
+      AM_EMAIL_FROM_NAME: ${AM_EMAIL_FROM_NAME:-Animation Messe}
+      AM_EMAIL_PLANNING_FROM_EMAIL: ${AM_EMAIL_PLANNING_FROM_EMAIL:-planning-noreply@animation-messe.fr}
+      AM_EMAIL_PLANNING_FROM_NAME: ${AM_EMAIL_PLANNING_FROM_NAME:-Animation Messe - Planning}
     secrets:
       - brevo_smtp_key
 

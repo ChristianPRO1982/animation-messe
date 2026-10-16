@@ -1,6 +1,32 @@
 # animation-messe
 Site web en django permettant de gérer l'animation des messes
 
+## Configuration d'environnement
+
+Les modèles `.env.dev.example` et `.env.prod.example` sont versionnés, sans
+secret réel. La configuration de chaque machine reste dans `.env.dev` en
+développement ou `.env.prod` en production ; ces deux fichiers sont ignorés
+par Git et exclus des images Docker.
+
+Pour une nouvelle installation locale :
+
+```bash
+cp .env.dev.example .env.dev
+```
+
+Adapter notamment les accès PostgreSQL et les secrets de développement. Ne pas
+écraser un `.env.dev` déjà configuré. Les paramètres email sont également dans
+ce fichier ; la clé SMTP Brevo reste dans un fichier extérieur au dépôt.
+Voir le [guide Brevo](docs/app_email/brevo.md).
+
+```bash
+docker compose --env-file .env.dev -f compose.yaml -f compose.dev.yaml up -d --build
+```
+
+Ajouter `-f compose.email.yaml` à cette commande pour monter le secret et
+utiliser le backend Brevo. Sans cette surcharge, aucun fichier secret Brevo
+n'est nécessaire au démarrage.
+
 ## Commandes Django locales
 
 Les conteneurs Docker utilisent `.env.dev` avec `DB_HOST=postgres`.

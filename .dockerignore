@@ -17,6 +17,8 @@ media
 chris
 node_modules
 .env
+.env.dev
+.env.prod
 .env.local
 .env.email.local
 .env.production.local

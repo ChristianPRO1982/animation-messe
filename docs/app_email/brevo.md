@@ -28,20 +28,23 @@ DEV habituel conserve sa configuration et ne nécessite aucun secret Brevo.
    au propriétaire. Ne jamais la placer dans un `.env`, un script, une commande
    versionnée, un ticket ou le chat. Le fichier doit être lisible par le
    processus du conteneur.
-2. Créer `.env.email.local` à partir de `.env.email.local.example` et remplacer
-   uniquement le chemin du secret par son chemin absolu sur l'hôte. Conserver
-   `AM_EMAIL_ENABLED=false` pendant la préparation. Le fichier local est exclu
-   de Git et du contexte de construction Docker.
+2. Utiliser le fichier local `.env.dev`, créé depuis `.env.dev.example` pour
+   une nouvelle installation seulement. Il regroupe les paramètres Django,
+   PostgreSQL et email. Renseigner `BREVO_SMTP_SECRET_FILE` avec le chemin absolu
+   du secret sur l'hôte et conserver `AM_EMAIL_ENABLED=false` pendant la
+   préparation. Ne pas écraser un fichier déjà configuré. `.env.dev` est exclu
+   de Git et du contexte de construction Docker ; aucun second `.env` email
+   n'est nécessaire.
 3. Démarrer les services avec les surcharges DEV et email :
 
 ```bash
-docker compose --env-file .env.dev --env-file .env.email.local -f compose.yaml -f compose.dev.yaml -f compose.email.yaml up -d --build
+docker compose --env-file .env.dev -f compose.yaml -f compose.dev.yaml -f compose.email.yaml up -d --build
 ```
 
 4. Appliquer les migrations :
 
 ```bash
-docker compose --env-file .env.dev --env-file .env.email.local -f compose.yaml -f compose.dev.yaml -f compose.email.yaml exec web python manage.py migrate
+docker compose --env-file .env.dev -f compose.yaml -f compose.dev.yaml -f compose.email.yaml exec web python manage.py migrate
 ```
 
 Docker monte le secret en lecture seule sur `/run/secrets/brevo_smtp_key`.
@@ -82,7 +85,7 @@ Ils n'envoient aucun e-mail réel et n'ont pas besoin de la clé Brevo.
 Pour un essai réel, choisir explicitement une adresse destinataire autorisée,
 puis :
 
-1. Mettre `AM_EMAIL_ENABLED=true` dans le fichier local et recréer le service
+1. Mettre `AM_EMAIL_ENABLED=true` dans `.env.dev` et recréer le service
    `web` avec la même commande Compose `up -d`. Un simple `restart` ne recharge
    pas les variables d'environnement.
 2. Activer l'autorisation administrateur dans les paramètres du site.
