@@ -89,13 +89,15 @@ secret = "SECRET_FROM_SERVER_FILE"
 canonical = f"{app_id}\n{return_url}\n{ts}\n{nonce}"
 sig = hmac.new(secret.encode(), canonical.encode(), hashlib.sha256).hexdigest()
 
-url = "https://carthographie.fr/provision/start?" + urlencode({
-    "app_id": app_id,
-    "return_url": return_url,
-    "ts": ts,
-    "nonce": nonce,
-    "sig": sig,
-})
+url = "https://carthographie.fr/provision/start?" + urlencode(
+    {
+        "app_id": app_id,
+        "return_url": return_url,
+        "ts": ts,
+        "nonce": nonce,
+        "sig": sig,
+    }
+)
 ```
 
 ## Comportement attendu
