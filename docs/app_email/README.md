@@ -11,6 +11,11 @@ service d'envoi, rendu des templates, configuration et consultation Django
 Admin. Aucun déclencheur métier n'est encore branché automatiquement dans
 `app_group`, `app_planning` ou `app_celebration`.
 
+Deux limites techniques restent présentes : l'absence d'atomicité entre SMTP
+et PostgreSQL, et la sérialisation des envois autorisés par le verrou global.
+Leurs conséquences et les précautions associées sont détaillées dans les
+[limites connues de la V1](models.md#101-limites-connues-de-la-v1).
+
 Les e-mails ne sont pas limités à l'administration du site. Ils couvrent aussi
 les interactions ordinaires entre les groupes, les membres, le planning et les
 célébrations : invitation d'un Membre AM, envoi d'un planning personnel,

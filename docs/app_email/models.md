@@ -538,6 +538,44 @@ Le service métier peut choisir :
 La règle par défaut est de ne pas annuler l'opération métier principale pour un
 échec d'e-mail.
 
+## 10.1. Limites connues de la V1
+
+Ces deux limites restent présentes dans l'implémentation. Elles ne bloquent
+pas un essai local contrôlé, mais doivent être prises en compte avant de
+brancher les flux métier ou d'augmenter les volumes.
+
+### Absence d'atomicité entre SMTP et PostgreSQL
+
+L'acceptation du message par SMTP et la sauvegarde du statut `sent` sont deux
+opérations distinctes. Si SMTP accepte le message mais que la sauvegarde ou le
+commit échoue, la trace peut rester `pending` alors que le message est déjà
+parti. Un nouvel appel sur cette notification peut alors produire un doublon.
+Le verrou et la clé d'idempotence protègent les appels concurrents ordinaires,
+mais ne garantissent donc pas un envoi exactement une fois face à cette panne.
+
+En cas de résultat ambigu, ne pas réessayer automatiquement et ne pas déduire
+de `pending` que le message n'a pas été envoyé. Vérifier les événements du
+fournisseur et la trace locale avant de décider d'un éventuel renvoi volontaire.
+Conserver les appels après le commit métier, selon le guide d'utilisation.
+Une future stratégie de reprise devra traiter explicitement ce cas ; ajouter
+un worker ou une file d'attente ne suffit pas, à lui seul, à le résoudre.
+
+### Sérialisation des envois autorisés
+
+Le verrou de la ligne globale `EmailSettings` est conservé pendant le rendu,
+l'appel SMTP et la mise à jour de la notification. Les envois autorisés
+partageant cette base sont donc traités un par un, même pour des notifications
+différentes. Une désactivation administrative attend aussi la fin de l'envoi
+déjà engagé ; elle ne l'annule pas rétroactivement.
+
+Ce choix garantit un ordre cohérent entre les bascules administratives et le
+classement des blocages. En contrepartie, un SMTP lent peut faire attendre les
+autres envois et l'administration. Le délai SMTP configuré ne constitue pas
+une borne globale sur l'attente des verrous ou sur la durée totale du traitement.
+Ce compromis est retenu pour la V1 à faible volume. Avant des envois en masse,
+mesurer les délais et revoir la stratégie de concurrence en conservant les
+garanties d'historisation ; ne pas simplement retirer le verrou global.
+
 ---
 
 # 11. Exemples de notifications métier
